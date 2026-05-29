@@ -3,7 +3,6 @@ import {
   type BaseLlmEndpoint,
   type LLMMessage,
   type LLMResponse,
-  type LLMUsage,
   type Provider,
   type ProviderCallInput,
 } from "../client";
@@ -14,10 +13,6 @@ interface LocalResponseBody {
       content?: string | null;
     };
   }>;
-  usage?: {
-    prompt_tokens?: number;
-    completion_tokens?: number;
-  };
 }
 
 export function createLocalProvider(): Provider {
@@ -33,7 +28,6 @@ export function createLocalProvider(): Provider {
       }
     },
     validateKeyFormat: () => undefined,
-    parseUsage: parseLocalUsage,
     call: callLocal,
   };
 }
@@ -70,7 +64,6 @@ async function callLocal(input: ProviderCallInput): Promise<LLMResponse> {
   return {
     content: extractLocalContent(raw),
     raw,
-    usage: parseLocalUsage(raw),
   };
 }
 
@@ -97,13 +90,4 @@ function extractLocalContent(raw: unknown): string {
     );
   }
   return content;
-}
-
-function parseLocalUsage(raw: unknown): LLMUsage {
-  const usage = (raw as LocalResponseBody).usage;
-  return {
-    inputTokens: usage?.prompt_tokens ?? 0,
-    outputTokens: usage?.completion_tokens ?? 0,
-    cachedTokens: 0,
-  };
 }

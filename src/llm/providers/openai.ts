@@ -4,7 +4,6 @@ import {
   type LLMCachedContext,
   type LLMMessage,
   type LLMResponse,
-  type LLMUsage,
   type Provider,
   type ProviderCallInput,
 } from "../client";
@@ -14,21 +13,12 @@ interface OpenAIProviderOptions {
   baseUrl?: (endpoint: BaseLlmEndpoint) => string | undefined;
 }
 
-interface OpenAIUsage {
-  prompt_tokens?: number;
-  completion_tokens?: number;
-  prompt_tokens_details?: {
-    cached_tokens?: number;
-  };
-}
-
 interface OpenAIResponseBody {
   choices?: Array<{
     message?: {
       content?: string | null;
     };
   }>;
-  usage?: OpenAIUsage;
 }
 
 export function createOpenAIProvider(
@@ -49,7 +39,6 @@ export function createOpenAIProvider(
         throw new LLMProviderError("OpenAI API key must start with sk-.", key);
       }
     },
-    parseUsage: parseOpenAIUsage,
     call: async (input) => callOpenAICompatible(input, key, options),
   };
 }
@@ -82,7 +71,6 @@ async function callOpenAICompatible(
   return {
     content,
     raw,
-    usage: parseOpenAIUsage(raw),
   };
 }
 
@@ -159,13 +147,4 @@ function extractOpenAIContent(raw: unknown, providerKey: string): string {
     );
   }
   return content;
-}
-
-function parseOpenAIUsage(raw: unknown): LLMUsage {
-  const usage = (raw as OpenAIResponseBody).usage;
-  return {
-    inputTokens: usage?.prompt_tokens ?? 0,
-    outputTokens: usage?.completion_tokens ?? 0,
-    cachedTokens: usage?.prompt_tokens_details?.cached_tokens ?? 0,
-  };
 }

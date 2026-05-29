@@ -1,6 +1,5 @@
 import {
   NotImplementedError,
-  type LLMUsage,
   type Provider,
 } from "../client";
 
@@ -13,11 +12,6 @@ export function createAzureProvider(): Provider {
         throw new NotImplementedError("Azure API key is empty.");
       }
     },
-    parseUsage: (): LLMUsage => ({
-      inputTokens: 0,
-      outputTokens: 0,
-      cachedTokens: 0,
-    }),
     call: () =>
       Promise.reject(
         new NotImplementedError(

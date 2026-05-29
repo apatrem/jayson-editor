@@ -1,12 +1,5 @@
 import { z } from "zod";
-import type { CostLedgerRow } from "../cost-ledger/db";
 import { defaultProviders } from "./providers";
-import {
-  computeLlmCostUsd,
-  Pricing,
-  type PricingRate,
-  type PricingSource,
-} from "./pricing";
 
 const providerKeys = [
   "openai",
@@ -72,21 +65,10 @@ export interface LLMRequest {
   jsonSchema?: unknown;
   temperature?: number;
   maxTokens?: number;
-  cost?: {
-    docId?: string;
-    callKind: CostLedgerRow["callKind"];
-  };
-}
-
-export interface LLMUsage {
-  inputTokens: number;
-  outputTokens: number;
-  cachedTokens: number;
 }
 
 export interface LLMResponse {
   content: string;
-  usage: LLMUsage;
   raw: unknown;
 }
 
@@ -102,9 +84,7 @@ export interface ProviderCallInput<
 export interface Provider<Endpoint extends BaseLlmEndpoint = BaseLlmEndpoint> {
   key: string;
   cacheCapability: CacheCapability;
-  defaultPricingPer1k?: PricingRate;
   call(input: ProviderCallInput<Endpoint>): Promise<LLMResponse>;
-  parseUsage(raw: unknown): LLMUsage;
   validateKeyFormat(apiKey: string): void;
   validateEndpoint?(endpoint: Endpoint): void;
 }
@@ -116,19 +96,9 @@ export interface AppConfigLlm<Endpoint extends BaseLlmEndpoint = LlmEndpoint> {
     /** Frontier model for Authored-block generation (ADR-0012). */
     codegenModel: Endpoint;
   };
-  costLimits?: {
-    fallbackPricingPer1k?: {
-      inputUsd?: number;
-      cachedInputUsd?: number;
-      outputUsd?: number;
-    };
-  };
 }
 
 export type SecretReader = (name: string) => Promise<string>;
-export interface CostLedgerSink {
-  insertRow(row: CostLedgerRow): void | Promise<void>;
-}
 
 export interface LLMClientOptions<
   Endpoint extends BaseLlmEndpoint = LlmEndpoint,
@@ -137,8 +107,6 @@ export interface LLMClientOptions<
   keychain?: SecretReader;
   providers?: Record<string, Provider<Endpoint>>;
   fetch?: typeof fetch;
-  costLedger?: CostLedgerSink;
-  now?: () => Date;
 }
 
 export class LLMProviderError extends Error {
@@ -163,15 +131,11 @@ export class LLMClient<Endpoint extends BaseLlmEndpoint = LlmEndpoint> {
   private readonly keychain: SecretReader;
   private readonly providers: Record<string, Provider<Endpoint>>;
   private readonly fetchImpl: typeof fetch;
-  private readonly costLedger: CostLedgerSink | undefined;
-  private readonly now: () => Date;
 
   constructor(options: LLMClientOptions<Endpoint>) {
     this.config = options.config;
     this.keychain = options.keychain ?? readTauriSecret;
     this.fetchImpl = options.fetch ?? globalThis.fetch.bind(globalThis);
-    this.costLedger = options.costLedger;
-    this.now = options.now ?? (() => new Date());
     this.providers = {
       ...(defaultProviders as Record<string, Provider<Endpoint>>),
       ...(options.providers ?? {}),
@@ -196,73 +160,12 @@ export class LLMClient<Endpoint extends BaseLlmEndpoint = LlmEndpoint> {
     provider.validateEndpoint?.(endpoint);
     const apiKey = await this.keychain(endpoint.keychainEntry);
     provider.validateKeyFormat(apiKey);
-    try {
-      const response = await provider.call({
-        endpoint,
-        apiKey,
-        request,
-        fetch: this.fetchImpl,
-      });
-      await this.recordCost(endpoint, provider, request, response.usage);
-      return response;
-    } catch (error) {
-      await this.recordCost(endpoint, provider, request, {
-        inputTokens: 0,
-        outputTokens: 0,
-        cachedTokens: 0,
-      });
-      throw error;
-    }
-  }
-
-  private async recordCost(
-    endpoint: Endpoint,
-    provider: Provider<Endpoint>,
-    request: LLMRequest,
-    usage: LLMUsage,
-  ): Promise<void> {
-    if (this.costLedger === undefined) {
-      return;
-    }
-    const pricing = this.resolvePricing(endpoint, provider);
-    const row: CostLedgerRow = {
-      id: globalThis.crypto.randomUUID(),
-      timestamp: this.now().toISOString(),
-      model: endpoint.model,
-      provider: endpoint.provider,
-      inputTokens: usage.inputTokens,
-      outputTokens: usage.outputTokens,
-      cachedTokens: usage.cachedTokens,
-      computedCostUsd: computeLlmCostUsd(usage, pricing.rate),
-      callKind: request.cost?.callKind ?? "generation",
-      pricingSource: pricing.source,
-      ...(request.cost?.docId === undefined ? {} : { docId: request.cost.docId }),
-    };
-    await this.costLedger.insertRow(row);
-  }
-
-  private resolvePricing(
-    endpoint: Endpoint,
-    provider: Provider<Endpoint>,
-  ): { rate: PricingRate; source: PricingSource } {
-    const lookup = Pricing[`${endpoint.provider}:${endpoint.model}`];
-    if (lookup !== undefined) {
-      return { rate: lookup, source: "lookup" };
-    }
-    if (provider.defaultPricingPer1k !== undefined) {
-      return { rate: provider.defaultPricingPer1k, source: "adapter-default" };
-    }
-    return {
-      rate: {
-        inputPer1k:
-          this.config.costLimits?.fallbackPricingPer1k?.inputUsd ?? 0.01,
-        cachedInputPer1k:
-          this.config.costLimits?.fallbackPricingPer1k?.cachedInputUsd ?? 0.001,
-        outputPer1k:
-          this.config.costLimits?.fallbackPricingPer1k?.outputUsd ?? 0.03,
-      },
-      source: "config-fallback",
-    };
+    return provider.call({
+      endpoint,
+      apiKey,
+      request,
+      fetch: this.fetchImpl,
+    });
   }
 }
 

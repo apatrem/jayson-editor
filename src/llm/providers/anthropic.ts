@@ -3,19 +3,12 @@ import {
   type LLMCachedContext,
   type LLMMessage,
   type LLMResponse,
-  type LLMUsage,
   type Provider,
   type ProviderCallInput,
 } from "../client";
 
 interface AnthropicResponseBody {
   content?: Array<{ type?: string; text?: string }>;
-  usage?: {
-    input_tokens?: number;
-    output_tokens?: number;
-    cache_read_input_tokens?: number;
-    cache_creation_input_tokens?: number;
-  };
 }
 
 export function createAnthropicProvider(): Provider {
@@ -27,7 +20,6 @@ export function createAnthropicProvider(): Provider {
         throw new LLMProviderError("Anthropic API key is empty.", "anthropic");
       }
     },
-    parseUsage: parseAnthropicUsage,
     call: callAnthropic,
   };
 }
@@ -55,7 +47,6 @@ async function callAnthropic(input: ProviderCallInput): Promise<LLMResponse> {
   return {
     content: extractAnthropicContent(raw),
     raw,
-    usage: parseAnthropicUsage(raw),
   };
 }
 
@@ -144,13 +135,3 @@ function extractAnthropicContent(raw: unknown): string {
   return content;
 }
 
-function parseAnthropicUsage(raw: unknown): LLMUsage {
-  const usage = (raw as AnthropicResponseBody).usage;
-  return {
-    inputTokens: usage?.input_tokens ?? 0,
-    outputTokens: usage?.output_tokens ?? 0,
-    cachedTokens:
-      (usage?.cache_read_input_tokens ?? 0) +
-      (usage?.cache_creation_input_tokens ?? 0),
-  };
-}

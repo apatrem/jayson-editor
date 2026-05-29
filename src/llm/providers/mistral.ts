@@ -3,7 +3,6 @@ import {
   type LLMCachedContext,
   type LLMMessage,
   type LLMResponse,
-  type LLMUsage,
   type Provider,
   type ProviderCallInput,
 } from "../client";
@@ -14,11 +13,6 @@ interface MistralResponseBody {
       content?: string | null;
     };
   }>;
-  usage?: {
-    prompt_tokens?: number;
-    completion_tokens?: number;
-    cached_tokens?: number;
-  };
 }
 
 export function createMistralProvider(): Provider {
@@ -30,7 +24,6 @@ export function createMistralProvider(): Provider {
         throw new LLMProviderError("Mistral API key is empty.", "mistral");
       }
     },
-    parseUsage: parseMistralUsage,
     call: callMistral,
   };
 }
@@ -60,7 +53,6 @@ async function callMistral(input: ProviderCallInput): Promise<LLMResponse> {
   return {
     content: extractMistralContent(raw),
     raw,
-    usage: parseMistralUsage(raw),
   };
 }
 
@@ -141,13 +133,4 @@ function extractMistralContent(raw: unknown): string {
     );
   }
   return content;
-}
-
-function parseMistralUsage(raw: unknown): LLMUsage {
-  const usage = (raw as MistralResponseBody).usage;
-  return {
-    inputTokens: usage?.prompt_tokens ?? 0,
-    outputTokens: usage?.completion_tokens ?? 0,
-    cachedTokens: usage?.cached_tokens ?? 0,
-  };
 }

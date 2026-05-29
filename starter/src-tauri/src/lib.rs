@@ -36,10 +36,6 @@ pub fn run() {
             ipc::config::read_app_config,
             ipc::config::write_app_config,
             ipc::config::get_config_dir,
-            ipc::cost::insert_cost_row,
-            ipc::cost::get_cost_summary,
-            ipc::cost::clear_cost_history,
-            ipc::cost::prune_old_rows,
             ipc::pdf::export_pdf,
         ])
         .run(tauri::generate_context!())

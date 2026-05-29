@@ -27,11 +27,6 @@ export interface GenerateAuthoredBlockParams {
   slug: string;
   /** Human-readable display name (e.g. "Competitive Matrix"). */
   displayName: string;
-  /**
-   * Optional UUID of the document for cost-ledger attribution.
-   * Omit when the doc has no stable UUID (e.g. never saved yet).
-   */
-  docId?: string;
 }
 
 /**
@@ -158,8 +153,6 @@ export function buildGenerateAuthoredBlockRequest(
         content: buildInitialUserPrompt(params),
       },
     ],
-    // exactOptionalPropertyTypes: always pass an object, never undefined.
-    cost: { ...buildCostField(params) },
   };
 }
 
@@ -176,7 +169,7 @@ export function buildGenerateAuthoredBlockRequest(
  * @param refinementInstruction  The consultant's new instruction.
  */
 export function buildRefineAuthoredBlockRequest(
-  params: GenerateAuthoredBlockParams,
+  _params: GenerateAuthoredBlockParams,
   docContext: DocumentModel,
   priorTurns: readonly AuthoredBlockConversationTurn[],
   refinementInstruction: string,
@@ -207,8 +200,6 @@ export function buildRefineAuthoredBlockRequest(
         content: refinementInstruction,
       },
     ],
-    // exactOptionalPropertyTypes: always pass an object, never undefined.
-    cost: { ...buildCostField(params) },
   };
 }
 
@@ -262,13 +253,4 @@ function buildInitialUserPrompt(params: GenerateAuthoredBlockParams): string {
     `Description:`,
     params.description,
   ].join("\n");
-}
-
-type CostField = { docId?: string; callKind: "authored-block-generation" };
-
-function buildCostField(params: GenerateAuthoredBlockParams): CostField {
-  if (params.docId !== undefined) {
-    return { docId: params.docId, callKind: "authored-block-generation" };
-  }
-  return { callKind: "authored-block-generation" };
 }

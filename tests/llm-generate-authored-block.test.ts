@@ -2,8 +2,8 @@
  * Tests for T-173: Authored-block generation pipeline.
  *
  * Covers:
- *   - buildGenerateAuthoredBlockRequest: correct structure, callKind, modelKind,
- *     cached contexts, and cost field.
+ *   - buildGenerateAuthoredBlockRequest: correct structure, modelKind, and
+ *     cached contexts.
  *   - buildRefineAuthoredBlockRequest: uses conversation history without
  *     re-sending the full initial prompt (same cached contexts; history in messages).
  *   - buildDocContext: extracts client, project, brand, and block types.
@@ -63,11 +63,6 @@ const params: GenerateAuthoredBlockParams = {
   displayName: "Competitive Matrix",
 };
 
-const paramsWithDocId: GenerateAuthoredBlockParams = {
-  ...params,
-  docId: "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
-};
-
 // ─── buildGenerateAuthoredBlockRequest ────────────────────────────────────────
 
 describe("buildGenerateAuthoredBlockRequest (T-173)", () => {
@@ -111,18 +106,6 @@ describe("buildGenerateAuthoredBlockRequest (T-173)", () => {
     expect(userMsg?.content).toContain("competitive-matrix");
     expect(userMsg?.content).toContain("Competitive Matrix");
     expect(userMsg?.content).toContain(params.description);
-  });
-
-  it("cost callKind is authored-block-generation without docId", () => {
-    const req = buildGenerateAuthoredBlockRequest(params, minDoc);
-    expect(req.cost?.callKind).toBe("authored-block-generation");
-    expect(req.cost?.docId).toBeUndefined();
-  });
-
-  it("cost includes docId when provided", () => {
-    const req = buildGenerateAuthoredBlockRequest(paramsWithDocId, minDoc);
-    expect(req.cost?.callKind).toBe("authored-block-generation");
-    expect(req.cost?.docId).toBe("aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa");
   });
 });
 
@@ -183,11 +166,6 @@ describe("buildRefineAuthoredBlockRequest (T-173)", () => {
     // full initial description repeated.
     expect(newMsg?.content).not.toContain(params.description);
     expect(newMsg?.content).toBe("Make the background blue");
-  });
-
-  it("cost callKind is authored-block-generation", () => {
-    const req = buildRefineAuthoredBlockRequest(params, minDoc, priorTurns, "Adjust colours");
-    expect(req.cost?.callKind).toBe("authored-block-generation");
   });
 });
 

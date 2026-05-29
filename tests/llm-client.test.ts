@@ -34,14 +34,12 @@ describe("LLMClient (T-60)", () => {
       Promise.resolve({
         content: "{\"ok\":true}",
         raw: { id: "call-1" },
-        usage: { inputTokens: 11, outputTokens: 7, cachedTokens: 0 },
       }),
     );
     const fakeProvider: Provider = {
       key: "openai",
       cacheCapability: "automatic",
       call: providerCall,
-      parseUsage: () => ({ inputTokens: 0, outputTokens: 0, cachedTokens: 0 }),
       validateKeyFormat: (apiKey) => {
         if (!apiKey.startsWith("sk-")) {
           throw new Error("bad key");
@@ -105,9 +103,7 @@ describe("LLMClient (T-60)", () => {
         Promise.resolve({
           content: "done",
           raw: {},
-          usage: { inputTokens: 1, outputTokens: 1, cachedTokens: 0 },
         }),
-      parseUsage: () => ({ inputTokens: 1, outputTokens: 1, cachedTokens: 0 }),
       validateKeyFormat: () => undefined,
     };
     const client = new LLMClient({
@@ -153,17 +149,12 @@ describe("LLMClient (T-60)", () => {
     }).toThrow(/baseUrl/);
   });
 
-  it("posts OpenAI-shaped JSON and parses usage including cached tokens", async () => {
+  it("posts OpenAI-shaped JSON and returns the message content", async () => {
     const fetchImpl = vi.fn<typeof fetch>(() =>
       Promise.resolve(
       new Response(
         JSON.stringify({
           choices: [{ message: { content: "{\"summary\":\"ok\"}" } }],
-          usage: {
-            prompt_tokens: 100,
-            completion_tokens: 40,
-            prompt_tokens_details: { cached_tokens: 25 },
-          },
         }),
         { status: 200, headers: { "content-type": "application/json" } },
       ),
@@ -184,7 +175,6 @@ describe("LLMClient (T-60)", () => {
 
     expect(response).toMatchObject({
       content: "{\"summary\":\"ok\"}",
-      usage: { inputTokens: 100, outputTokens: 40, cachedTokens: 25 },
     });
     const fetchCall = fetchImpl.mock.calls[0];
     expect(fetchCall?.[0]).toBe("https://api.openai.com/v1/chat/completions");
@@ -232,11 +222,6 @@ describe("LLM adapter prompt caching (T-61)", () => {
         new Response(
           JSON.stringify({
             content: [{ type: "text", text: "{\"patches\":[]}" }],
-            usage: {
-              input_tokens: 300,
-              output_tokens: 50,
-              cache_read_input_tokens: 240,
-            },
           }),
           { status: 200, headers: { "content-type": "application/json" } },
         ),
@@ -244,7 +229,7 @@ describe("LLM adapter prompt caching (T-61)", () => {
     );
     const provider = createAnthropicProvider();
 
-    const response = await provider.call({
+    await provider.call({
       apiKey: "anthropic-key",
       endpoint: {
         provider: "anthropic",
@@ -269,20 +254,14 @@ describe("LLM adapter prompt caching (T-61)", () => {
     expect(system.map((block) => block.text).join("\n")).toContain(
       "BlockPatchSchema",
     );
-    expect(response.usage.cachedTokens).toBe(240);
   });
 
-  it("keeps OpenAI automatic caching marker-free while reading cached tokens", async () => {
+  it("keeps OpenAI automatic caching marker-free", async () => {
     const fetchImpl = vi.fn<typeof fetch>(() =>
       Promise.resolve(
         new Response(
           JSON.stringify({
             choices: [{ message: { content: "{\"patches\":[]}" } }],
-            usage: {
-              prompt_tokens: 300,
-              completion_tokens: 50,
-              prompt_tokens_details: { cached_tokens: 180 },
-            },
           }),
           { status: 200, headers: { "content-type": "application/json" } },
         ),
@@ -290,7 +269,7 @@ describe("LLM adapter prompt caching (T-61)", () => {
     );
     const provider = createOpenAIProvider();
 
-    const response = await provider.call({
+    await provider.call({
       apiKey: "sk-test",
       endpoint: {
         provider: "openai",
@@ -304,16 +283,14 @@ describe("LLM adapter prompt caching (T-61)", () => {
     const bodyText = String(fetchImpl.mock.calls[0]?.[1]?.body);
     expect(bodyText).toContain("BlockPatchSchema");
     expect(bodyText).not.toContain("cache_control");
-    expect(response.usage.cachedTokens).toBe(180);
   });
 
-  it("returns zero cached tokens for local no-cache endpoints", async () => {
+  it("local no-cache endpoint posts without cache markers", async () => {
     const fetchImpl = vi.fn<typeof fetch>(() =>
       Promise.resolve(
         new Response(
           JSON.stringify({
             choices: [{ message: { content: "{\"patches\":[]}" } }],
-            usage: { prompt_tokens: 300, completion_tokens: 50 },
           }),
           { status: 200, headers: { "content-type": "application/json" } },
         ),
@@ -334,10 +311,8 @@ describe("LLM adapter prompt caching (T-61)", () => {
     });
 
     expect(provider.cacheCapability).toBe("none");
-    expect(response.usage).toEqual({
-      inputTokens: 300,
-      outputTokens: 50,
-      cachedTokens: 0,
-    });
+    expect(response.content).toBe("{\"patches\":[]}");
+    const bodyText = String(fetchImpl.mock.calls[0]?.[1]?.body);
+    expect(bodyText).not.toContain("cache_control");
   });
 });

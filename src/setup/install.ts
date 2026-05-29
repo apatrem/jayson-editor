@@ -7,7 +7,6 @@ import { join, resolve } from "node:path";
 import { pathToFileURL } from "node:url";
 import { stringify } from "yaml";
 import { z } from "zod";
-import { openCostLedger } from "../cost-ledger/db";
 import {
   EndpointSchema,
   InstallAppConfigSchema,
@@ -98,8 +97,6 @@ export async function runInstallCli(options: InstallOptions = {}): Promise<numbe
 
     mkdirSync(configDir, { recursive: true });
     writeFileSync(join(configDir, "config.yaml"), stringify(config));
-    const ledger = openCostLedger(configDir);
-    ledger.close();
     write(`Setup complete. Config written to ${join(configDir, "config.yaml")}\n`);
     return 0;
   } catch (error) {
@@ -138,12 +135,12 @@ async function buildInteractively(
   configDir: string,
 ): Promise<InstallAppConfig> {
   const defaults = identityDefaults(env);
-  write("\nStep 1 of 4 — Your identity\n");
+  write("\nStep 1 of 3 — Your identity\n");
   const name = await promptDefault(read, "Your name", defaults.name);
   const email = await promptDefault(read, "Your work email", defaults.email);
   const role = await promptRole(read);
 
-  write("\nStep 2 of 4 — Cloud-sync folders\n");
+  write("\nStep 2 of 3 — Cloud-sync folders\n");
   const cloudSyncRoot = await promptDefault(
     read,
     "Cloud-sync root",
@@ -156,13 +153,10 @@ async function buildInteractively(
       join(homedir(), "Dropbox", "Consultancy-Shared"),
   );
 
-  write("\nStep 3 of 4 — LLM models\n");
+  write("\nStep 3 of 3 — LLM models\n");
   const fast = await promptEndpoint("fast", read);
   const thinking = await promptEndpoint("thinking", read);
 
-  write("\nStep 4 of 4 — API keys and cost limits\n");
-  const cap = await promptMonthlyCap(read);
-  const costTracking = await promptDefault(read, "Enable cost tracking? [Y/n]", "Y");
   void configDir;
   return makeConfig({
     name,
@@ -172,8 +166,6 @@ async function buildInteractively(
     sharedFolder,
     fast,
     thinking,
-    costTrackingEnabled: costTracking.trim().toLowerCase() !== "n",
-    monthlyCapUsd: cap,
   });
 }
 
@@ -188,7 +180,6 @@ function buildFromFlags(args: ParsedArgs, env: NodeJS.ProcessEnv): InstallAppCon
     "fast-model",
     "thinking-provider",
     "thinking-model",
-    "monthly-cap-usd",
   ];
   for (const key of required) {
     if (!args.values.has(key)) {
@@ -217,8 +208,6 @@ function buildFromFlags(args: ParsedArgs, env: NodeJS.ProcessEnv): InstallAppCon
     sharedFolder: value(args, "shared-folder"),
     fast: endpointFromFlags(args, "fast"),
     thinking: endpointFromFlags(args, "thinking"),
-    costTrackingEnabled: !args.flags.has("disable-cost-tracking"),
-    monthlyCapUsd: Number(value(args, "monthly-cap-usd")),
   });
 }
 
@@ -230,11 +219,7 @@ function makeConfig(inputConfig: {
   sharedFolder: string;
   fast: Omit<InstallAppConfig["llm"]["fastModel"], "keychainEntry">;
   thinking: Omit<InstallAppConfig["llm"]["thinkingModel"], "keychainEntry">;
-  costTrackingEnabled: boolean;
-  monthlyCapUsd: number;
 }): InstallAppConfig {
-  const costLimit =
-    inputConfig.monthlyCapUsd === 0 ? 0 : validateMonthlyCap(inputConfig.monthlyCapUsd);
   return InstallAppConfigSchema.parse({
     user: {
       name: inputConfig.name.trim(),
@@ -250,15 +235,9 @@ function makeConfig(inputConfig: {
       fastModel: withKeychain(inputConfig.fast, "llm.fast.api-key"),
       thinkingModel: withKeychain(inputConfig.thinking, "llm.thinking.api-key"),
       // ADR-0012: authored-block-generation always uses the same frontier model
-      // as the thinking category.  A separate config entry lets costs be
-      // attributed to the correct ledger category and lets them diverge in v1.1.
+      // as the thinking category.  A separate config entry lets the two diverge
+      // in a future release.
       codegenModel: withKeychain(inputConfig.thinking, "llm.codegen.api-key"),
-    },
-    costLimits: {
-      enabled: inputConfig.costTrackingEnabled && costLimit > 0,
-      monthlyUsdSoft: costLimit,
-      monthlyUsdHard: costLimit,
-      allowAdminOverride: true,
     },
     editor: {
       reviewMode: "panel",
@@ -492,25 +471,6 @@ function validatePaths(
   }
 }
 
-function validateMonthlyCap(cap: number): number {
-  if (!Number.isFinite(cap) || cap < 0 || cap >= 10000) {
-    throw new Error("Monthly cap must be >= 0 and < 10000");
-  }
-  return cap;
-}
-
-async function promptMonthlyCap(read: (prompt: string) => Promise<string>): Promise<number> {
-  const raw = await promptDefault(read, "Monthly cap USD", "50");
-  const value = Number(raw);
-  if (value === 0) {
-    const confirmed = await read("Do you really want NO limit? [y/N]: ");
-    if (confirmed.trim().toLowerCase() !== "y") {
-      return 50;
-    }
-  }
-  return validateMonthlyCap(value);
-}
-
 async function promptRole(read: (prompt: string) => Promise<string>): Promise<Role> {
   const raw = await promptDefault(read, "Role (consultant/senior/admin)", "consultant");
   return RoleSchema.parse(raw);
@@ -576,8 +536,6 @@ Paths: ${config.paths.cloudSyncRoot} / ${config.paths.sharedFolder}
 Fast model: ${config.llm.fastModel.provider} / ${config.llm.fastModel.model}
 Thinking model: ${config.llm.thinkingModel.provider} / ${config.llm.thinkingModel.model}
 Codegen model: ${config.llm.codegenModel.provider} / ${config.llm.codegenModel.model} (authored-block-generation)
-Cost tracking: ${config.costLimits.enabled ? "ENABLED" : "DISABLED"}
-Monthly cap: ${config.costLimits.monthlyUsdHard} USD
 Telemetry: NONE
 `;
 }
@@ -593,23 +551,9 @@ What is stored locally:
 - Cloud-sync and shared brand folder paths.
 - LLM provider and model preferences.
 - LLM API keys in your OS keychain, never in config.yaml.
-- Operational LLM cost rows: timestamp, model, input/output tokens,
-  computed cost, document ID, and cost aggregates by document/day/month.
 
 What is never stored:
-- Prompt contents, response contents, block IDs, comment IDs, comment text,
-  accept/reject outcomes, editing patterns, analytics, or usage telemetry.
-
-Where cost data lives:
-- A local SQLite database in the app config folder.
-- Never in the cloud-sync folder.
-- Never transmitted off this machine by the app.
-- Rows older than 13 months are pruned automatically.
-
-Controls:
-- View rows in Settings -> My LLM Spend.
-- Clear all cost history with the wipe button.
-- Disable cost tracking entirely. This also disables monthly limits.
+- Prompt contents, response contents, usage/cost data, analytics, or telemetry.
 `;
 
 if (import.meta.url === pathToFileURL(process.argv[1] ?? "").href) {
