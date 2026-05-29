@@ -23,7 +23,6 @@
     },
     {
       "kind": "ai-proposal",
-      "model": "gpt-5.5",
       "patch": {
         "op": "replace",
         "blockId": "b1-callout-01",
@@ -49,8 +48,6 @@
         },
         "reason": "Quantified urgency in the title (€40M) and added 9-month window."
       },
-      "inputTokens": 14823,
-      "outputTokens": 156,
       "createdAt": "2026-05-21T14:33:12Z"
     },
     {
@@ -62,7 +59,6 @@
     },
     {
       "kind": "ai-proposal",
-      "model": "gpt-5.5",
       "patch": {
         "op": "replace",
         "blockId": "b1-callout-01",
@@ -88,15 +84,13 @@
         },
         "reason": "Replaced '€40M' with 'significant'; kept the Q1 2027 / 9-month framing."
       },
-      "inputTokens": 14987,
-      "outputTokens": 142,
       "createdAt": "2026-05-21T14:38:10Z"
     }
   ],
 
   "_usage_notes": [
     "The thread always starts with an 'instruction' entry from the consultant.",
-    "Each AI response is an 'ai-proposal' entry containing a BlockPatch + token usage.",
+    "Each AI response is an 'ai-proposal' entry containing a BlockPatch (no model or token usage is persisted — ADR-0019).",
     "Follow-ups are 'follow-up' entries from the consultant — they queue locally until the next batch submit.",
     "The 'current proposal' is always the LAST 'ai-proposal' in the thread — that's the one Accept/Reject acts on.",
     "Comments can be in three statuses: 'open' (under review), 'applied' (consultant accepted), 'rejected'.",

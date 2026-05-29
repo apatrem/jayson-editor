@@ -29,7 +29,7 @@ function formatThreadEntry(entry: ThreadEntry): ThreadContextEntry {
       return {
         role: "assistant",
         content:
-          `Proposed patch from ${entry.model} at ${entry.createdAt}:\n` +
+          `Proposed patch at ${entry.createdAt}:\n` +
           JSON.stringify(entry.patch),
       };
     case "follow-up":

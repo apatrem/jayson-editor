@@ -203,7 +203,7 @@ function threadEntrySummary(entry: ThreadEntry): string {
     case "follow-up":
       return `${entry.author}: ${entry.text}`;
     case "ai-proposal":
-      return `${entry.model}: ${entry.patch.op}`;
+      return `Proposed: ${entry.patch.op}`;
   }
 }
 

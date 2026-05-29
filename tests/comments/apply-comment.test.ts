@@ -61,7 +61,6 @@ const comment: Comment = {
     },
     {
       kind: "ai-proposal",
-      model: "gpt-5.5",
       patch: {
         op: "replace",
         blockId: "block-a",
@@ -75,8 +74,6 @@ const comment: Comment = {
           align: "left",
         },
       },
-      inputTokens: 10,
-      outputTokens: 5,
       createdAt: "2026-05-25T12:01:00Z",
     },
   ],

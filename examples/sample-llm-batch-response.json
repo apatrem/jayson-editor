@@ -1,5 +1,5 @@
 {
-  "_comment": "Example BatchedCommentResponse — what the LLM returns for the request in sample-llm-batch-request.json. Matches BatchedCommentResponseSchema in TYPES.md §8. Demonstrates mixed success (2 ok, 1 failed) — the typical case where per-patch validation catches LLM output drift.",
+  "_comment": "Example RAW model output for the request in sample-llm-batch-request.json — the model returns ONLY { results } (no usage; provider token counts are not persisted, ADR-0019). Demonstrates mixed success (2 ok, 1 failed) — the typical case where per-patch validation catches LLM output drift.",
 
   "results": [
     {
@@ -93,13 +93,6 @@
       "_note": "The LLM produced a takeaway that exceeded the 200-char limit. The app rejects this patch and queues it for a single-comment retry with a corrective re-prompt: 'Your previous patch failed validation because the takeaway field exceeded 200 characters. Produce a shorter takeaway (≤200 chars).'"
     }
   ],
-
-  "usage": {
-    "inputTokens": 14952,
-    "outputTokens": 487,
-    "cachedTokens": 12231
-  },
-  "_usage_note": "cachedTokens is the portion of input that hit the prompt cache. Here, ~82% of input is cached (the system prompt + schema + brand + doc context). Fresh input was the comments[] array. This is the cost-saving mechanic from D-13.",
 
   "_handling_per_status": {
     "ok": "Patch is shown to the consultant in the review panel (D-25) as a proposed change. Consultant clicks Accept → patch applied to DocModel and added as 'ai-proposal' entry in the comment's thread.",

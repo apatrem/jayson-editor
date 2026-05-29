@@ -28,7 +28,7 @@ describe("threaded comment context assembly (T-66)", () => {
       "assistant",
     ]);
     expect(thread[0]?.content).toContain("Comment from Jane Smith");
-    expect(thread[1]?.content).toContain("Proposed patch from gpt-5.5");
+    expect(thread[1]?.content).toContain("Proposed patch at");
     expect(thread[2]?.content).toContain("Follow-up from Jane Smith");
     expect(thread[3]?.content).toContain(
       "Decide by Q1 2027 to secure significant first-mover tax credits",

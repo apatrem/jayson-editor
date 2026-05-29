@@ -97,9 +97,6 @@ describe("deck reuse across shared systems", () => {
         },
         {
           kind: "ai-proposal",
-          model: "test-model",
-          inputTokens: 1,
-          outputTokens: 1,
           createdAt: "2026-05-25T00:00:01Z",
           patch: {
             op: "replace",

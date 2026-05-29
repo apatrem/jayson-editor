@@ -60,7 +60,6 @@ const docWithComments: DocModel = {
         },
         {
           kind: "ai-proposal",
-          model: "gpt-5.5",
           patch: {
             op: "replace",
             blockId: "block-a",
@@ -79,8 +78,6 @@ const docWithComments: DocModel = {
               align: "left",
             },
           },
-          inputTokens: 10,
-          outputTokens: 5,
           createdAt: "2026-05-25T12:02:00Z",
         },
       ],

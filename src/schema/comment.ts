@@ -16,11 +16,10 @@ export const ThreadEntrySchema = z.discriminatedUnion("kind", [
 
   z
     .object({
+      // ADR-0019: no model/usage is persisted in documents — an ai-proposal
+      // keeps only its proposed patch (the substantive content) + timestamp.
       kind: z.literal("ai-proposal"),
-      model: z.string().min(1),
       patch: BlockPatchSchema,
-      inputTokens: z.number().int().nonnegative(),
-      outputTokens: z.number().int().nonnegative(),
       createdAt: z.string().datetime(),
     })
     .strict(),

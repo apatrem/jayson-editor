@@ -94,14 +94,7 @@ export const KEY_ORDERS: Record<string, string[]> = {
     "text",
     "createdAt",
   ],
-  ThreadEntry_aiProposal: [
-    "kind",
-    "model",
-    "patch",
-    "inputTokens",
-    "outputTokens",
-    "createdAt",
-  ],
+  ThreadEntry_aiProposal: ["kind", "patch", "createdAt"],
   ThreadEntry_followUp: ["kind", "author", "authorEmail", "text", "createdAt"],
 
   ProseMirrorDoc: ["type", "content"],

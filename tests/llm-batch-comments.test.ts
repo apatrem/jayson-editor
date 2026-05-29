@@ -26,7 +26,6 @@ const responseFixture = JSON.parse(
   readFileSync(join(repoRoot, "examples/sample-llm-batch-response.json"), "utf8"),
 ) as {
   results: unknown;
-  usage: unknown;
 };
 
 const batchInput: BatchedCommentRequest = {
@@ -76,10 +75,8 @@ describe("batched comment request builder (T-64)", () => {
       Promise.resolve({
         content: JSON.stringify({
           results: stripMetadata(responseFixture.results),
-          usage: responseFixture.usage,
         }),
         raw: {},
-        usage: { inputTokens: 14952, outputTokens: 487, cachedTokens: 12231 },
       }),
     );
     const client: BatchedCommentClient = { call };
@@ -88,7 +85,6 @@ describe("batched comment request builder (T-64)", () => {
 
     expect(call.mock.calls[0]?.[0]).toBe("fast");
     expect(response.results).toHaveLength(3);
-    expect(response.usage.cachedTokens).toBe(12231);
   });
 
   it("rejects malformed batched responses", () => {
@@ -96,7 +92,6 @@ describe("batched comment request builder (T-64)", () => {
       parseBatchedCommentResponse(
         JSON.stringify({
           results: [{ status: "ok", commentId: "c1" }],
-          usage: { inputTokens: 1, outputTokens: 1, cachedTokens: 0 },
         }),
       ),
     ).toThrow(/failed validation/);
@@ -114,7 +109,6 @@ describe("batched comment request builder (T-64)", () => {
           },
         ]),
         raw: {},
-        usage: { inputTokens: 100, outputTokens: 10, cachedTokens: 80 },
       }),
     );
     call.mockImplementationOnce(() =>
@@ -127,7 +121,6 @@ describe("batched comment request builder (T-64)", () => {
           },
         ]),
         raw: {},
-        usage: { inputTokens: 50, outputTokens: 10, cachedTokens: 40 },
       }),
     );
     const client: BatchedCommentClient = { call };
@@ -156,7 +149,6 @@ describe("batched comment request builder (T-64)", () => {
           },
         ]),
         raw: {},
-        usage: { inputTokens: 100, outputTokens: 10, cachedTokens: 80 },
       }),
     );
     const client: BatchedCommentClient = { call };
@@ -179,7 +171,6 @@ describe("batched comment request builder (T-64)", () => {
 function batchResponse(results: unknown[]): string {
   return JSON.stringify({
     results,
-    usage: { inputTokens: 1, outputTokens: 1, cachedTokens: 0 },
   });
 }
 

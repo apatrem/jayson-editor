@@ -42,13 +42,6 @@ export const BatchedCommentResponseSchema = z
           .strict(),
       ]),
     ),
-    usage: z
-      .object({
-        inputTokens: z.number().int().nonnegative(),
-        outputTokens: z.number().int().nonnegative(),
-        cachedTokens: z.number().int().nonnegative(),
-      })
-      .strict(),
   })
   .strict();
 
@@ -77,13 +70,6 @@ const RawBatchedCommentResponseSchema = z
           .strict(),
       ]),
     ),
-    usage: z
-      .object({
-        inputTokens: z.number().int().nonnegative(),
-        outputTokens: z.number().int().nonnegative(),
-        cachedTokens: z.number().int().nonnegative(),
-      })
-      .strict(),
   })
   .strict();
 
@@ -165,10 +151,7 @@ export async function runBatchedCommentRequest(
     rawResponse.results,
     options.maxPatchRetries ?? 2,
   );
-  return {
-    results,
-    usage: rawResponse.usage,
-  };
+  return { results };
 }
 
 export function parseBatchedCommentResponse(
