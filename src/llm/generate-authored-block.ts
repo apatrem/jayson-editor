@@ -6,8 +6,8 @@
  *   - Refinement iterations: same cached contexts; conversation history appended
  *     as messages so the model refines without re-running the full prompt.
  *
- * Uses the `codegen` model kind (frontier model, per ADR-0012) and the
- * `authored-block-generation` cost-ledger callKind (D-34).
+ * Uses the `codegen` model kind (frontier model, per ADR-0012). The cost ledger
+ * was removed (ADR-0019), so no usage/cost is recorded.
  *
  * Callers are responsible for:
  *   - Calling `client.call("codegen", request)` to get the raw source.

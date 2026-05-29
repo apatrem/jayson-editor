@@ -91,7 +91,7 @@ jayson-docs/
 - **Approved app/runtime dependencies:** `react`, `react-dom`, `vite`,
   `typescript`, `zod`, `yaml`, `echarts`, `mermaid`, `@tiptap/react`,
   `@tiptap/core`, `@tiptap/pm`, `@tiptap/starter-kit`, `playwright`,
-  Tauri 2.x, and a local SQLite binding for the cost ledger.
+  and Tauri 2.x.
 - **Approved setup-only dependencies:** Office/PDF extraction and static-analysis
   libraries used exclusively by `setup:*` commands, as specified in
   `docs/SETUP_PIPELINE.md`. These must never enter the editor, renderer, or
@@ -168,16 +168,13 @@ jayson-docs/
 - [ ] **Model stratification** (per D-11): default to a cheap/fast model for comment-to-AI; route to a frontier "thinking" model only when the consultant toggles it in the comment popup. Model + API key per provider configured at install time.
 - [ ] **Batched call with caching** (per D-13): one API call per batch returns N structured patches. Prompt-cache the schema + brand + doc-state context. Per-patch validation after response; retry failed patches one-at-a-time with corrective re-prompt. Full-call failure retries the batch once, then falls back to per-comment.
 - [ ] **Threaded comments** (per D-12): each comment carries a `thread[]` of typed entries (`instruction`, `ai-proposal`, `follow-up`). Follow-ups queue locally and ship in the next batch with full thread context.
-- [ ] **Operational cost ledger** (per D-34): local SQLite (`cost.db` at the app config path) recording, per API call: timestamp, model, input/output tokens, computed cost, doc ID. **No prompt/response content. No behavioral signal.** 13-month sliding-window retention. Used to enforce the monthly per-consultant limits from D-14 (80% warning, 100% hard stop, admin override).
-- [ ] **Cost ledger user controls:** `Settings → My LLM Spend` view; "Clear all cost history" wipe button (warns about quota reset); toggle to disable cost-tracking entirely (also disables monthly limits).
-- [ ] **Install-time privacy disclosure** covering what cost data is stored, where, why, and how to view/wipe it.
+- **Cost ledger / monthly cap: removed ([ADR-0019](adr/0019-drop-cost-ledger.md)).** The app does not meter or cap LLM spend; spend is governed by provider-side billing. The install-time privacy disclosure now states that no usage/cost data is stored.
 - **Acceptance:**
   - given a sample outline, the LLM produces a valid DocModel
   - a scoped patch modifies only its target block and leaves all others byte-identical
   - malformed LLM output is rejected with a clear error
   - a 20-comment batch produces 20 validated patches in a single API call (with caching) and per-patch retry recovers any individual failures
   - a follow-up on a comment includes the prior `ai-proposal` in the next batch's context
-  - cost ledger records cost rows on every call, never records prompt/response content (verified by automated test), enforces the monthly limit, and "Clear history" wipes the SQLite cleanly
 
 ### M4 — WYSIWYG editor
 - [ ] TipTap (open-source core) on ProseMirror; one custom node per block type.

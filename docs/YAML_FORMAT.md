@@ -148,8 +148,7 @@ const KEY_ORDERS: Record<string, string[]> = {
             "thread", "createdAt", "updatedAt"],
   ThreadEntry_instruction: ["kind", "author", "authorEmail", "authorRole",
                             "text", "createdAt"],
-  ThreadEntry_aiProposal: ["kind", "model", "patch",
-                           "inputTokens", "outputTokens", "createdAt"],
+  ThreadEntry_aiProposal: ["kind", "patch", "createdAt"],
   ThreadEntry_followUp: ["kind", "author", "authorEmail", "text", "createdAt"],
 };
 

@@ -42,7 +42,7 @@ The disconnect between "built modules" and "wired surface" is intentional in M7-
 | Generated-block runtime loading                 | ✓ (`src/setup/load-generated-blocks.ts`) | ✗                  | M8 T-132 (palette extension)                   |
 | Deck renderer (`src/renderer/DeckRenderer.tsx`) | ✓                                        | ✗                  | M10 (deck view)                                |
 | Comments + AI proposals (`src/comments/`)       | ✓                                        | ✗                  | M9 (review panel + AI flow)                    |
-| Cost-ledger surface (`src/cost-ledger/`)        | ✓ (TS)                                   | ✗                  | M9 (AI calls + Rust migration)                 |
+| Cost-ledger surface                             | —                                        | —                  | **Removed — ADR-0019** (no spend metering)     |
 | Reviewer mode                                   | ✓ (logic)                                | ✗                  | M11                                            |
 | Settings panel                                  | partial (autosave knob in config only)   | ✗                  | M9 (deferred-UI feature list)                  |
 | Keychain wiring (`get_secret` / `set_secret`)   | stub                                     | ✗                  | M9 (LLM keys)                                  |
@@ -582,7 +582,7 @@ The full `InstallAppConfigSchema` in `src/setup/install.ts` stays untouched; it'
 
 **Read path.** `read_app_config` IPC returns raw JSON (no Rust-side schema knowledge). The JS side parses against `M8PartialConfigSchema.safeParse(...)` and falls back to `InstallAppConfigSchema.safeParse(...)` when the M8 parse fails — so existing CLI-installed configs (full shape) keep working. On both failures, the router routes to `folder-picker` with `reason: 'first-launch'`.
 
-**Write path.** The folder picker writes only `M8PartialConfigSchema` shape; the file is YAML at `<configDir>/config.yaml` (location per `docs/SETUP_INSTALL_FLOW.md` §"Configuration file written"). The cost-ledger SQLite at `<configDir>/cost.db` stays unmodified — no M8 cost activity yet, it lands in M9. Atomicity uses the same write-then-rename pattern as `write_yaml_file`.
+**Write path.** The folder picker writes only `M8PartialConfigSchema` shape; the file is YAML at `<configDir>/config.yaml` (location per `docs/SETUP_INSTALL_FLOW.md` §"Configuration file written"). Atomicity uses the same write-then-rename pattern as `write_yaml_file`.
 
 **M8-vs-M9 migration.** When M9 lands, an idempotent migration runs on every boot:
 1. `read_app_config` returns the current JSON.

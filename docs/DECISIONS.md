@@ -115,6 +115,7 @@ Default: one API call per batch returns N structured patches in a single respons
 Expected spend with the mixed strategy: ~$120–250/month (≈ $1,500–3,000/year). Soft per-consultant monthly limits (e.g., €50/month) with 80% warning, hard stop at 100%, admin override.
 **Why:** Predictable spend; protects against runaway loops.
 **Implication:** App needs a per-consultant cost ledger — implementation rules in D-34 (carve-out from D-32's no-telemetry default).
+**Superseded (2026-05-29, ADR-0019):** the monthly cap and the per-consultant cost ledger are dropped pre-release — Jayson Docs does not meter or cap LLM spend; spend is governed by provider-side billing / account limits. The ledger design is archived for a possible future release in [docs/archive/cost-ledger.md](archive/cost-ledger.md).
 
 ---
 
@@ -254,8 +255,11 @@ These are categorically different under GDPR: the first is justified by service 
 
 **Implication:** Pilot metrics (D-33) gathered via manual + interview methods, not telemetry.
 **Roadmap:** Local opt-in behavioral telemetry + opt-in shared reports in v1.1+; central aggregate (with consent) considered for v2+.
+**Revised (2026-05-29, ADR-0019):** the operational cost-tracking carve-out is withdrawn — the cost ledger was removed. D-32 now reads simply: no telemetry **and no persisted usage/cost data** in v1.
 
 ### D-34 — Operational cost-tracking — implementation rules
+**Superseded (2026-05-29, ADR-0019):** the cost ledger was removed; these rules no longer apply. Retained for historical context.
+
 Cost data is tracked locally (per D-32 carve-out), under the following strict constraints to keep it operational rather than analytical:
 
 **What's tracked:**
@@ -408,7 +412,9 @@ ECharts SSR for PDF export (the third item in the original scan) is captured in 
 "Live models" is hand-wavy. When this becomes a v2 priority, it needs a concrete spec: what kind of interactivity (calculators? toggleable scenarios? embedded D3?), what user flows, what schema extensions.
 
 ### O-10 — RESOLVED — Cost-tracking is operational, not analytics
-**Resolution:** Carved out as a non-analytics exception. See D-32 (revised) and D-34. Per-consultant LLM spend is tracked in a local SQLite ledger under strict constraints (cost data only, no behavioral signal; 13-month retention; user-visible and user-wipeable). The legitimate-interest basis (GDPR Art. 6(1)(f)) covers it because the data is strictly necessary to enforce the monthly limits committed in D-14.
+**Superseded (2026-05-29, ADR-0019):** moot — the cost ledger was removed; the app persists no usage/cost data and does not enforce a spend cap.
+
+**Resolution (historical):** Carved out as a non-analytics exception. See D-32 (revised) and D-34. Per-consultant LLM spend is tracked in a local SQLite ledger under strict constraints (cost data only, no behavioral signal; 13-month retention; user-visible and user-wipeable). The legitimate-interest basis (GDPR Art. 6(1)(f)) covers it because the data is strictly necessary to enforce the monthly limits committed in D-14.
 
 ---
 

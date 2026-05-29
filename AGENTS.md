@@ -297,9 +297,10 @@ projections, never sources of truth.
 - **Closed block library.** 15 pre-built blocks + up to 10 AI-generated
 per-consultancy blocks gated by the human-review pipeline in
 `docs/SETUP_PIPELINE.md`. No off-catalogue block types.
-- **No telemetry.** Operational cost-tracking only, per D-32/D-34. The local
-cost ledger stores cost-computation fields exclusively — never prompt
-content, response content, or behavioral signal.
+- **No telemetry, and no persisted usage/cost data.** The app does not meter or
+cap LLM spend — the local cost ledger was removed (ADR-0019); spend is governed
+by provider-side billing. Do **not** reintroduce a cost ledger, spend cap, or any
+persisted usage/cost store.
 - **Do not build** anything in memo §10 (think-cell clone, deck editor,
 DOCX/PPTX import/export, v1 real-time collab, live-models platform).
 - **Demo Office files are reference only** — never parse or generate them

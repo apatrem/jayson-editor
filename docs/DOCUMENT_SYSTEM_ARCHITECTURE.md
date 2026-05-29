@@ -267,7 +267,6 @@ The full build/runtime stack is open source. Verified 2026-05-21.
 | Mermaid | Diagrams | MIT | Standard diagram library |
 | Playwright | HTML→PDF via headless Chromium | Apache-2.0 | **Recommended PDF path** — single engine renders HTML and prints PDF |
 | Tauri 2.x | Desktop shell | MIT / Apache-2.0 | Local files, OS keychain, installer path |
-| SQLite binding | Local cost ledger | OSS | Local-only operational cost tracking (D-34) |
 | Office/PDF extraction libs | Setup-only demo ingestion | OSS | Allowed only in `setup:*` commands, never runtime |
 | TypeScript AST/parser tooling | Generated-block linting | OSS | Dev/setup-only static checks |
 | WeasyPrint | Alternative HTML→PDF engine | BSD-3-Clause | Fallback only — see §4 Layer 5 |

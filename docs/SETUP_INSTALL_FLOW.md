@@ -66,14 +66,9 @@ npm run setup:install \
 │                                                                         │
 │ LLM API keys are stored in your OS keychain (not in any file).          │
 │                                                                         │
-│ The app ALSO tracks per-call LLM costs locally (input/output tokens,    │
-│ cost in USD, model used, doc ID). This is used to enforce a monthly     │
-│ spending cap — no behavioral data is collected.                         │
-│                                                                         │
-│ You can:                                                                │
-│   • View this cost data anytime: Settings → My LLM Spend                │
-│   • Wipe it anytime: "Clear all cost history" button                    │
-│   • Disable cost-tracking (also disables monthly limits)                │
+│ The app does NOT meter or cap LLM spend and stores no usage/cost data:   │
+│ no cost ledger, no token counts. Manage spend via your LLM provider's    │
+│ own billing dashboard and account limits (ADR-0019).                     │
 │                                                                         │
 │ Nothing is sent to consultancy-owned servers. Everything stays on your  │
 │ machine + your cloud-sync provider.                                     │
@@ -283,11 +278,8 @@ The keychain entries' names are stored in `config.yaml` so the app knows what to
 │   Fast:           anthropic / claude-haiku-4 (key tested ✓)             │
 │   Thinking:       anthropic / claude-opus-4-7 (key tested ✓)            │
 │                                                                         │
-│ Cost limit                                                              │
-│   Monthly cap:    50 USD (warn at 80%)                                  │
-│                                                                         │
 │ Privacy                                                                 │
-│   Cost tracking:  ENABLED (required for cost cap)                       │
+│   Spend metering: NONE (managed via your LLM provider's billing)        │
 │   Telemetry:      NONE                                                  │
 │                                                                         │
 │ Write this configuration? [Y/n]: _                                      │
@@ -295,10 +287,9 @@ The keychain entries' names are stored in `config.yaml` so the app knows what to
 ```
 
 **Default:** Y. On confirmation:
-1. Write `config.yaml` to OS config dir (`~/Library/Application Support/com.consultancy.docsystem/config.yaml` on macOS, `%APPDATA%\com.consultancy.docsystem\config.yaml` on Windows, `$XDG_CONFIG_HOME/docsystem/config.yaml` on Linux).
-2. Initialize the cost ledger SQLite at `<config-dir>/cost.db` with the schema (no rows).
-3. Run a final sanity check: `setup:validate` (see SETUP_PIPELINE.md §2).
-4. Print: "Setup complete. Launch the app with `open /Applications/DocumentSystem.app` (or your platform equivalent)."
+1. Write `config.yaml` to OS config dir (`~/Library/Application Support/com.consultancy.docsystem/config.yaml` on macOS, `%APPDATA%\com.consultancy.docsystem\config.yaml` on Windows, `$XDG_CONFIG_HOME/docsystem/config.yaml` on Linux). (No cost ledger is created — ADR-0019.)
+2. Run a final sanity check: `setup:validate` (see SETUP_PIPELINE.md §2).
+3. Print: "Setup complete. Launch the app with `open /Applications/DocumentSystem.app` (or your platform equivalent)."
 
 ---
 

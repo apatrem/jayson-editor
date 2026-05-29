@@ -144,9 +144,8 @@ The wizard asks for:
 - Shared brand folder.
 - Fast and thinking LLM provider/model choices.
 - API keys, stored in the OS keychain.
-- Monthly LLM cap and whether local cost tracking is enabled.
 
-The consultant must accept the privacy notice before setup writes config. The notice explains that no telemetry is collected and that the local cost ledger stores only operational spend fields.
+The consultant must accept the privacy notice before setup writes config. The notice explains that no telemetry is collected and that no usage/cost data is persisted (the cost ledger was removed — ADR-0019).
 
 For scripted rollout, read the keys interactively so they never enter shell history:
 
@@ -216,8 +215,6 @@ security delete-generic-password -s docsystem -a llm.fast.api-key || true
 security delete-generic-password -s docsystem -a llm.thinking.api-key || true
 ```
 
-The cost ledger (`cost.db`) in the same folder is **not** touched by rollback — historical spend rows are operational data, not install state. Wipe explicitly via `Settings -> My LLM Spend -> Clear all cost history` if you also want to reset spend tracking.
-
 ## First-Launch Notes (Unsigned Installers)
 
 Until T-108 (code signing) lands, installers are unsigned on macOS and Windows. The first launch will trigger OS protection prompts:
@@ -237,9 +234,6 @@ On each consultant machine:
 - `~/Consultancy-Shared/brand.yaml` validates.
 - The app opens and shows the library.
 - A sample proposal and sample deck validate and render.
-- `Settings -> My LLM Spend` opens.
-- "Clear all cost history" is visible.
-- Cost tracking can be disabled if required by the consultant.
 
 ## Troubleshooting
 
@@ -249,7 +243,6 @@ On each consultant machine:
 - **Brand block lint fails:** reject the block or regenerate after fixing the scaffold. Do not hand-edit unsafe generated code into `active/`.
 - **Path validation fails during install:** create the selected folder or choose a writable cloud-sync folder outside the app config directory.
 - **LLM endpoint check fails:** verify provider, base URL, model name, and API key.
-- **Cost ledger cannot initialize:** check app config directory permissions.
 
 ## Handoff
 

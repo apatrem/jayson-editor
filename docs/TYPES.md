@@ -314,12 +314,10 @@ export const ThreadEntrySchema = z.discriminatedUnion("kind", [
   }).strict(),
 
   // AI's proposed patch (response to the prior instruction in the thread)
+  // ADR-0019: no model/usage is persisted — only the proposed patch + timestamp.
   z.object({
     kind: z.literal("ai-proposal"),
-    model: z.string().min(1),                        // e.g. "claude-opus-4-7", "gpt-5.5"
     patch: BlockPatchSchema,
-    inputTokens: z.number().int().nonnegative(),
-    outputTokens: z.number().int().nonnegative(),
     createdAt: z.string().datetime(),
   }).strict(),
 
@@ -629,66 +627,21 @@ export const BatchedCommentResponseSchema = z.object({
       rawOutput: z.string().optional(),             // for debugging
     }).strict(),
   ])),
-  usage: z.object({
-    inputTokens: z.number().int().nonnegative(),
-    outputTokens: z.number().int().nonnegative(),
-    cachedTokens: z.number().int().nonnegative(),
-  }),
 }).strict();
+// ADR-0019: the model returns ONLY { results }. No usage is emitted or persisted
+// (the cost ledger was removed); provider token counts are not recorded.
 
 export type BatchedCommentResponse = z.infer<typeof BatchedCommentResponseSchema>;
 ```
 
 ---
 
-## 9. Cost ledger types (D-34)
+## 9. Cost ledger types — REMOVED (ADR-0019)
 
-**File:** `src/cost-ledger/types.ts`
-
-```typescript
-import { z } from "zod";
-
-/**
- * One row in the local cost ledger. Per D-34, only cost-computation fields
- * are stored — no prompt content, no response content, no behavioral signal.
- *
- * Storage: local SQLite at the app's config path (e.g.,
- * ~/Library/Application Support/com.consultancy.docsystem/cost.db on macOS).
- * Retention: 13-month sliding window — older rows auto-deleted.
- */
-export const CostLedgerRowSchema = z.object({
-  id: z.string().uuid(),                            // row PK
-  timestamp: z.string().datetime(),
-  model: z.string(),                                // e.g. "claude-opus-4-7"
-  provider: z.string(),                             // adapter key from LlmEndpointSchema; open string so historical rows survive adding new providers
-  inputTokens: z.number().int().nonnegative(),
-  outputTokens: z.number().int().nonnegative(),
-  cachedTokens: z.number().int().nonnegative(),
-  computedCostUsd: z.number().nonnegative(),        // computed at row-creation from current rates
-  docId: z.string().uuid().optional(),              // doc this call was for; null for setup calls
-  callKind: z.enum(["generation", "comment-batch", "comment-single", "setup"]),
-}).strict();
-
-export type CostLedgerRow = z.infer<typeof CostLedgerRowSchema>;
-
-/**
- * The aggregate the app shows in Settings → My LLM Spend and uses for
- * monthly-limit enforcement.
- */
-export interface CostSummary {
-  currentMonth: {
-    totalUsd: number;
-    callCount: number;
-    limitUsd: number;                               // from config, default ~€50 equivalent
-    pctOfLimit: number;                             // 0–1
-  };
-  rolling30Days: {
-    totalUsd: number;
-    callCount: number;
-  };
-  perDoc: Array<{ docId: string; totalUsd: number; callCount: number }>;
-}
-```
+The cost ledger and its types (`CostLedgerRow`, `CostSummary`) were removed — the
+app no longer meters or caps LLM spend, and no usage/cost data is persisted. See
+[ADR-0019](adr/0019-drop-cost-ledger.md). The prior design is archived in
+[docs/archive/cost-ledger.md](archive/cost-ledger.md).
 
 ---
 
@@ -873,7 +826,6 @@ function zodIssueToValidationError(issue: z.ZodIssue): ValidationError {
 | `Comment`, `ThreadEntry` | `src/schema/comment.ts` |
 | `BlockPatch` | `src/schema/block-patch.ts` |
 | `BrandTokens` | `src/schema/brand.ts` |
-| `BatchedCommentRequest`, `BatchedCommentResponse` | `src/llm/types.ts` |
-| `CostLedgerRow`, `CostSummary` | `src/cost-ledger/types.ts` |
+| `BatchedCommentRequest`, `BatchedCommentResponse` | `src/llm/batch-comments.ts` |
 | `AppConfig` | `src/config/types.ts` |
 | `validateDocModel`, `ValidationResult` | `src/schema/validate.ts` |

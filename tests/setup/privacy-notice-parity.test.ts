@@ -111,23 +111,4 @@ describe("privacy-notice.md bilingual structural parity (D-28)", () => {
     expect(Math.abs(fr.paragraphCount - en.paragraphCount)).toBeLessThanOrEqual(1);
   });
 
-  it("calls out the cost-tracking-disable consequence in both languages", () => {
-    // The "disabling cost tracking also disables the monthly cap" warning
-    // is a known UX dark-pattern risk; both languages MUST surface it.
-    const enText = english.join("\n");
-    const frText = french.join("\n");
-    expect(enText).toMatch(/disabl.*track.*cap|cap.*disabl.*track/is);
-    expect(frText).toMatch(/désactiv.*plafond|plafond.*désactiv/is);
-  });
-
-  it("lists all three platform cost-ledger paths in both languages", () => {
-    const enText = english.join("\n");
-    const frText = french.join("\n");
-    for (const text of [enText, frText]) {
-      expect(text).toContain("macOS");
-      expect(text).toContain("Windows");
-      expect(text).toContain("Linux");
-      expect(text).toContain("cost.db");
-    }
-  });
 });

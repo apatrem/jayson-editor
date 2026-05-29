@@ -96,7 +96,7 @@ MVP is running. LLM not wired. In active development.
 
 ## Stack
 
-Tauri 2 · React · TypeScript · TipTap · Zod · ECharts · Mermaid · Playwright · optional SQLite (for the cost ledger).
+Tauri 2 · React · TypeScript · TipTap · Zod · ECharts · Mermaid · Playwright.
 
 ## License
 

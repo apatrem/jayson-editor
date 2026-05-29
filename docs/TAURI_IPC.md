@@ -13,7 +13,7 @@
 1. **Every privileged operation is a command.** Filesystem reads, keychain access, PDF export, SQLite writes — all go through `invoke(...)`. The frontend never imports `node:fs`, `node:path`, or anything that bypasses the boundary.
 2. **Commands accept and return JSON-serializable types only.** Text files return strings. Binary asset reads return base64 strings when the caller immediately embeds bytes into self-contained export HTML; no raw filesystem handles ever cross the boundary.
 3. **Errors are typed.** Each command returns `Result<T, IpcError>` where `IpcError` is a tagged-union enum (NotFound, PermissionDenied, Invalid, etc.). The frontend gets a discriminated TypeScript error and can dispatch UI per case.
-4. **Side effects are explicit.** Commands that mutate state name the resource (`write_yaml_file`, `set_secret`, `insert_cost_row`). Commands that read are pure verbs (`read_yaml_file`, `get_summary`).
+4. **Side effects are explicit.** Commands that mutate state name the resource (`write_yaml_file`, `set_secret`, `move_file`). Commands that read are pure verbs (`read_yaml_file`, `read_app_config`).
 5. **The CSP and `assetProtocol.scope` in `tauri.conf.json` are part of the contract.** A command accepting a path must validate that the path is within an allowed scope; rejecting paths outside scope at the Rust layer.
 
 ## Shared types
@@ -223,50 +223,11 @@ Returns the absolute path of the app-config dir (e.g. `~/Library/Application Sup
 
 ---
 
-## §4 — Cost ledger (D-34)
+## §4 — Cost ledger — REMOVED
 
-The ledger lives in SQLite at `<config_dir>/cost.db`. Operations go through Rust so the schema is enforced (no behavioral columns can be added without changing Rust code).
-
-### `insert_cost_row(row: CostLedgerRow) -> void`
-
-**Rust:**
-
-```rust
-#[derive(Deserialize)]
-pub struct CostLedgerRowInput {
-    pub timestamp: String,           // ISO-8601
-    pub model: String,
-    pub provider: String,
-    pub input_tokens: i64,
-    pub output_tokens: i64,
-    pub cached_tokens: i64,
-    pub computed_cost_usd: f64,
-    pub doc_id: Option<String>,
-    pub call_kind: String,           // "generation" | "comment-batch" | ...
-}
-
-#[tauri::command]
-pub async fn insert_cost_row(row: CostLedgerRowInput) -> IpcResult<()> {
-    // Open SQLite, INSERT into cost_rows table.
-    // The table schema has ONLY these columns — there is no `prompt_content`
-    // or `response_content` column. This is the structural enforcement of
-    // D-32/D-34: the carve-out cannot drift into analytics without a Rust
-    // code change visible in code review.
-    // ...
-}
-```
-
-### `get_cost_summary() -> CostSummary`
-
-Returns `CostSummary` per `TYPES.md §9` — current-month total, 30-day rolling, per-doc breakdown.
-
-### `clear_cost_history() -> void`
-
-Wipes the SQLite db. Used by the user-facing "Clear all cost history" button.
-
-### `prune_old_rows(retention_days: number) -> number`
-
-Deletes rows older than `retention_days`. Returns the number deleted. Called on app launch + nightly with `retention_days = 395` (13 months) per D-34.
+The cost ledger and its IPC commands (`insert_cost_row`, `get_cost_summary`,
+`clear_cost_history`, `prune_old_rows`) were removed — the app no longer meters or
+caps LLM spend. See [ADR-0019](adr/0019-drop-cost-ledger.md).
 
 ---
 

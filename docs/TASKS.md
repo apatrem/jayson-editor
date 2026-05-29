@@ -510,6 +510,8 @@ For each block: follow `BLOCK_IMPLEMENTATION_GUIDE.md`. Each block produces 4 fi
 - **Acceptance:** Given a comment with a multi-round thread, produces the correctly-ordered `thread[]` array of `{role, content}` for the LLM request. Matches `examples/sample-llm-batch-request.json` structure.
 - **est.** 2h
 
+> **Cost ledger removed (2026-05-29, [ADR-0019](adr/0019-drop-cost-ledger.md)).** Tasks T-67–T-72 built the cost ledger, which was deleted before release — the app no longer meters or caps LLM spend. They stay `[x]` for history; do **not** rebuild the ledger from them.
+
 ### T-67 [x] · Set up SQLite for cost ledger
 - **Depends-on:** none
 - **Reads:** `docs/TYPES.md` §9 CostLedgerRow, D-34
@@ -559,7 +561,7 @@ For each block: follow `BLOCK_IMPLEMENTATION_GUIDE.md`. Each block produces 4 fi
 - **Acceptance:** All 7 steps work interactively; non-interactive mode works with all flags; API keys land in OS keychain (verified via `get_secret` IPC); `config.yaml` validates against `AppConfigSchema`; cost ledger SQLite is initialized; consultant cannot proceed past privacy notice without affirmative consent.
 - **est.** 5h (most of the design is in SETUP_INSTALL_FLOW.md)
 
-**M3 acceptance gate:** outline -> valid DocModel; scoped patch affects only target block; malformed LLM output rejected; 20-comment batch produces 20 patches (with caching); follow-up includes prior proposal in next request; cost ledger never records prompt/response content (verified by T-72); monthly limit enforced; "Clear history" wipes cleanly.
+**M3 acceptance gate:** outline -> valid DocModel; scoped patch affects only target block; malformed LLM output rejected; 20-comment batch produces 20 patches (with caching); follow-up includes prior proposal in next request. (Cost-ledger criteria removed — ADR-0019; the app no longer meters or caps spend.)
 
 ---
 
@@ -1966,6 +1968,8 @@ Decisions: ADR-0004, ADR-0005, ADR-0006, ADR-0007, ADR-0009 (identity), ADR-0010
 - **Acceptance:** install flow provisions and validates the frontier key; missing/invalid key produces a clear actionable error.
 - **est.** 3h
 
+> **Cost ledger removed ([ADR-0019](adr/0019-drop-cost-ledger.md)).** T-176/T-177 extended the cost ledger, which was deleted before release. They stay `[x]` for history; do **not** rebuild.
+
 ### T-176 [x] · Cost ledger — new `authored-block-generation` category
 - **Depends-on:** T-175
 - **Reads:** `docs/DECISIONS.md` D-34 amendment
@@ -1988,7 +1992,7 @@ Decisions: ADR-0004, ADR-0005, ADR-0006, ADR-0007, ADR-0009 (identity), ADR-0010
 - **Acceptance:** a developer reading the guide can author a Standard, Brand, or Authored block correctly without consulting the source code.
 - **est.** 2h
 
-**M9b acceptance gate:** a consultant can create an Authored block in-document, preview it, share it via the OS share-sheet; a recipient can drag the `.tsx` onto the app window and have it install (or quarantine with a clear reason); scaffold-mismatch surfaces the Regenerate flow; archive / restore / permanently-delete IPC commands work; cost ledger logs the new category; an integration test covers the full author → share → receive → render flow. **Security regression:** an Authored `.tsx` with arbitrary top-level statements, function values inside the manifest, or any AST node outside the literal-only shape is rejected at receive time — never executed (negative-path fixtures in `tests/blocks/authored/malicious-fixtures/`).
+**M9b acceptance gate:** a consultant can create an Authored block in-document, preview it, share it via the OS share-sheet; a recipient can drag the `.tsx` onto the app window and have it install (or quarantine with a clear reason); scaffold-mismatch surfaces the Regenerate flow; archive / restore / permanently-delete IPC commands work; an integration test covers the full author → share → receive → render flow. **Security regression:** an Authored `.tsx` with arbitrary top-level statements, function values inside the manifest, or any AST node outside the literal-only shape is rejected at receive time — never executed (negative-path fixtures in `tests/blocks/authored/malicious-fixtures/`).
 
 **T-178 removed** — folded into T-167 (TAURI_IPC.md update done as T-167 step 6).
 
