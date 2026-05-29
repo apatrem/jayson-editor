@@ -19,6 +19,7 @@ import { renderStaticHtmlForExport } from "../../export/render-static-html";
 import { formatErrorMessage } from "../../ipc/errors";
 import { type AuthoredReceiveResult, receiveAuthoredBlock } from "../../ipc/authored-block";
 import type { LLMRequest, LLMResponse } from "../../llm/client";
+import type { BatchedCommentClient } from "../../llm/batch-comments";
 import type { DocModel } from "../../schema/docmodel";
 import { DocModelSchema } from "../../schema/docmodel";
 import { AppErrorBoundary } from "../AppErrorBoundary";
@@ -78,6 +79,8 @@ export interface FileActionDeps {
    * on folder-picker / M8 installs, where Generate shows a "finish setup" hint.
    */
   callLlm: (request: LLMRequest) => Promise<LLMResponse>;
+  /** Comment-to-AI client (D-12/D-13); supplied when LLM is configured. */
+  commentClient: BatchedCommentClient;
 }
 
 export interface RoutesProps {
@@ -424,6 +427,9 @@ export function Routes({
                     {...(fileActions.callLlm === undefined
                       ? {}
                       : { callLlm: fileActions.callLlm })}
+                    {...(fileActions.commentClient === undefined
+                      ? {}
+                      : { commentClient: fileActions.commentClient })}
                     onDocumentChange={(doc) => {
                       setDocContent((current) =>
                         current !== null ? { ...current, doc, dirty: true } : current,

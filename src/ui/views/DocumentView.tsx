@@ -61,6 +61,8 @@ import { buildAuthoredRenderer } from "../../blocks/authored/template-expander";
 import type { AuthoredBlockManifest } from "../../blocks/authored/defineAuthoredBlock";
 import { lintAuthoredBlock, type AuthoredBlockLintResult } from "../../ipc/authored-block";
 import type { LLMRequest, LLMResponse } from "../../llm/client";
+import type { BatchedCommentClient } from "../../llm/batch-comments";
+import { CommentReviewSurface } from "../../comments/CommentReviewSurface";
 
 export interface EditorSurfaceProps {
   initialContent: JSONContent;
@@ -106,6 +108,11 @@ export interface DocumentViewProps {
    * an LLMClient is available; also used in tests to assert prompt structure.
    */
   callLlm?: (request: LLMRequest) => Promise<LLMResponse>;
+  /**
+   * Comment-to-AI client. Present when LLM is configured; absent → the review
+   * panel still accepts/rejects existing proposals but "Send to AI" is disabled.
+   */
+  commentClient?: BatchedCommentClient;
   /**
    * Injectable advisory lint function for the preview pipeline.
    * Defaults to the real `lintAuthoredBlock` IPC command.
@@ -172,6 +179,7 @@ export const DocumentView: FC<DocumentViewProps> = ({
   EditorComponent = DefaultEditorSurface,
   onCreateAuthoredBlock,
   callLlm,
+  commentClient,
   lintForPreview = defaultLintForPreview,
 }) => {
   const generatedBlocks = useBrandBlocksFromRegistry();
@@ -205,6 +213,7 @@ export const DocumentView: FC<DocumentViewProps> = ({
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [editor, setEditor] = useState<TipTapEditor | null>(null);
   const [authoringContext, setAuthoringContext] = useState<DocumentModel | null>(null);
+  const [reviewOpen, setReviewOpen] = useState(false);
   // ── Selection-driven structured-block panel (P0c) ────────────────────────
   // Tracks which atom block is currently node-selected so DocumentView can
   // mount the matching side panel. Cleared whenever the selection moves off a
@@ -557,6 +566,14 @@ export const DocumentView: FC<DocumentViewProps> = ({
           >
             Document settings
           </button>
+          <button
+            type="button"
+            aria-pressed={reviewOpen}
+            onClick={() => setReviewOpen((open) => !open)}
+            style={styles.viewToggleButton}
+          >
+            Review comments ({(currentDoc.current ?? doc).comments.length})
+          </button>
           <span aria-label="Autosave status" style={saveStatusStyle(saveState)}>
             {SAVE_STATE_LABEL[saveState]}
           </span>
@@ -645,6 +662,14 @@ export const DocumentView: FC<DocumentViewProps> = ({
           </div>
         </section>
         </div>
+        {reviewOpen ? (
+          <CommentReviewSurface
+            doc={currentDoc.current ?? doc}
+            {...(commentClient === undefined ? {} : { commentClient })}
+            onDocChange={applyDocChange}
+            onClose={() => setReviewOpen(false)}
+          />
+        ) : null}
       </div>
       {paletteOpen ? (
         <>

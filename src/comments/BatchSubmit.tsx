@@ -19,6 +19,9 @@ export interface BuildProcessAllBatchInput {
 
 export interface BatchSubmitProps extends BuildProcessAllBatchInput {
   onSubmit: (batch: BatchedComment[]) => Promise<BatchedCommentResponse>;
+  /** Per-comment "use the thinking model" selection (D-11, ephemeral). */
+  thinkingCommentIds?: Set<string>;
+  onToggleThinking?: (commentId: string) => void;
 }
 
 export function buildProcessAllBatch(
@@ -35,6 +38,8 @@ export const BatchSubmit: FC<BatchSubmitProps> = ({
   followUpAuthor,
   createdAt,
   onSubmit,
+  thinkingCommentIds,
+  onToggleThinking,
 }) => {
   const openComments = comments.filter((comment) => comment.status === "open");
   const [running, setRunning] = useState(false);
@@ -82,6 +87,14 @@ export const BatchSubmit: FC<BatchSubmitProps> = ({
       <ul style={styles.list}>
         {openComments.map((comment) => (
           <li key={comment.id}>
+            <label>
+              <input
+                type="checkbox"
+                checked={thinkingCommentIds?.has(comment.id) ?? false}
+                onChange={() => onToggleThinking?.(comment.id)}
+              />{" "}
+              thinking
+            </label>{" "}
             {comment.id}: {statuses[comment.id] ?? "idle"}
           </li>
         ))}

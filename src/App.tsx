@@ -135,10 +135,12 @@ export default function App({
   // Thread the codegen call into the document view via fileActions, unless a
   // test already supplied its own callLlm.
   const mergedFileActions = useMemo<Partial<FileActionDeps> | undefined>(() => {
-    const callLlm = runtime?.callForCodegen;
-    if (callLlm === undefined) return fileActions;
-    if (fileActions?.callLlm !== undefined) return fileActions;
-    return { ...(fileActions ?? {}), callLlm };
+    if (runtime === null) return fileActions;
+    const base = fileActions ?? {};
+    const additions: Partial<FileActionDeps> = {};
+    if (base.callLlm === undefined) additions.callLlm = runtime.callForCodegen;
+    if (base.commentClient === undefined) additions.commentClient = runtime.commentClient;
+    return Object.keys(additions).length === 0 ? fileActions : { ...base, ...additions };
   }, [fileActions, runtime]);
 
   return (
