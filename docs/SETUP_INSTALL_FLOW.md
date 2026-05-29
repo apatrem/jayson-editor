@@ -318,12 +318,6 @@ llm:
     model: "claude-opus-4-7"
     keychainEntry: "llm.thinking.api-key"
 
-costLimits:
-  enabled: true
-  monthlyUsdSoft: 50
-  monthlyUsdHard: 50
-  allowAdminOverride: true
-
 editor:
   reviewMode: "panel"
   autosaveDebounceMs: 2000
@@ -364,7 +358,6 @@ npm run setup:install \
   --fast-model claude-haiku-4 \
   --thinking-provider anthropic \
   --thinking-model claude-opus-4-7 \
-  --monthly-cap-usd 50 \
   --accept-privacy-notice
 ```
 
@@ -389,7 +382,7 @@ Running `setup:install` on a machine with an existing config:
 1. Detects the existing config.
 2. Shows: "Existing config detected. Update [u] / Reset and start over [r] / Cancel [c]?"
 3. **Update mode:** loads the existing config as defaults; consultant edits the steps they want; only changed values are written.
-4. **Reset mode:** clears the existing config + wipes the cost ledger (warns first); starts fresh.
+4. **Reset mode:** clears the existing config (warns first); starts fresh.
 5. **Cancel mode:** exits without changes.
 
 ---

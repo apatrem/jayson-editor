@@ -145,6 +145,8 @@ that prevents recurrence is linked in each entry.
 4. A smoke test (integration-level, not the existing unit test) SHOULD verify that opening the app on a clock-jumped session (e.g., system date set 14 months forward) deletes the expected rows.
    **No marker change:** T-111 stays `[x]` — the notice text is correct and the prune mechanism is implemented. T-67 (cost-ledger init) stays `[x]` — schema and CRUD are correct. The gap is in the app-shell wiring layer, which has no dedicated task yet.
 
+   **Resolved (2026-05-29, [ADR-0019](docs/adr/0019-drop-cost-ledger.md)):** moot — the cost ledger was removed before release (the app does not meter or cap LLM spend, and the privacy notice no longer promises a 13-month prune). `src/cost-ledger/` and the prune mechanism are deleted; there is nothing left to wire on app startup.
+
 ### [drift-2026-05-25d] T-02 starter scaffold missing icons/ — tightened spec never propagated to starter/
 
 **Detected at:** 2026-05-25T20:00:00Z (first-time `npm run tauri:dev` attempt from a fresh clone)

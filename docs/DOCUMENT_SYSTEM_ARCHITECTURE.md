@@ -330,7 +330,7 @@ Comment {
 
 ThreadEntry =
   | { kind: "instruction", author, authorEmail, authorRole, text, createdAt }
-  | { kind: "ai-proposal", model, patch: BlockPatch, inputTokens, outputTokens, createdAt }
+  | { kind: "ai-proposal", patch: BlockPatch, createdAt }   // no model/usage persisted — ADR-0019
   | { kind: "follow-up", author, authorEmail, text, createdAt }
 }
 ```

@@ -205,7 +205,7 @@ Pick the right combination in your chat app before launching `/loop`:
 | Tier                              | Use for                                                                                                                            | Claude Code                                    | Cursor (Composer) | Codex / ChatGPT    |
 | --------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------- | ----------------- | ------------------ |
 | **Default** (~90% of tasks)       | Mechanical block work, schema, renderers, mapping                                                                                  | Sonnet 4.6 + **high**                          | Auto              | GPT-5.5 High       |
-| **Escalation** (~10%, hard tasks) | Setup AI pipeline (T-41–T-49), watchdog (T-46b), cost ledger (T-67, T-72), perf benchmarks (T-89c, T-89d), retry of any `[?]` task | Opus 4.7 + **high** (xhigh after failed retry) | GPT-5.5 xHigh     | GPT-5.5 xHigh      |
+| **Escalation** (~10%, hard tasks) | Setup AI pipeline (T-41–T-49), watchdog (T-46b), perf benchmarks (T-89c, T-89d), retry of any `[?]` task | Opus 4.7 + **high** (xhigh after failed retry) | GPT-5.5 xHigh     | GPT-5.5 xHigh      |
 | **Avoid**                         | This protocol is too detailed for these                                                                                            | Sonnet medium · Haiku                          | Composer 1        | GPT-4o · GPT-5 low |
 
 

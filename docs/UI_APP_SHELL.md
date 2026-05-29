@@ -548,7 +548,7 @@ M8 does NOT add: per-doc tabs (route shape supports them but UX is single-doc), 
 
 ## D-101 — Partial config schema for M8
 
-**The problem.** `InstallAppConfigSchema` in `src/setup/install.ts:32-59` requires the full identity + LLM keys + paths shape (`user`, `paths`, `llm`, `costLimits`, `editor`). M8 ships only `paths.cloudSyncRoot`. The other fields land in M9 (identity, keychain) and beyond. The schema needs a defined relationship with the M8-era partial state.
+**The problem.** `InstallAppConfigSchema` in `src/setup/install.ts:32-59` requires the full identity + LLM keys + paths shape (`user`, `paths`, `llm`, `editor`). M8 ships only `paths.cloudSyncRoot`. The other fields land in M9 (identity, keychain) and beyond. The schema needs a defined relationship with the M8-era partial state.
 
 **Decision: option (a) — introduce `M8PartialConfigSchema` requiring only `paths.cloudSyncRoot`; widen to `InstallAppConfigSchema` in M9.**
 

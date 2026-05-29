@@ -164,7 +164,6 @@ npm run setup:install -- \
   --fast-model claude-haiku-4 \
   --thinking-provider anthropic \
   --thinking-model claude-opus-4-7 \
-  --monthly-cap-usd 50 \
   --accept-privacy-notice
 
 unset FAST_API_KEY THINKING_API_KEY

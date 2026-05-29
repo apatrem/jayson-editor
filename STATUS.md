@@ -14,7 +14,7 @@
 
 All Phase 10 (M9b) tasks are done. The gate criteria (from TASKS.md):
 
-> A consultant can create an Authored block in-document, preview it, share it via the OS share-sheet; a recipient can drag the `.tsx` onto the app window and have it install (or quarantine with a clear reason); scaffold-mismatch surfaces the Regenerate flow; archive / restore / permanently-delete IPC commands work; cost ledger logs the new category; an integration test covers the full author → share → receive → render flow.
+> A consultant can create an Authored block in-document, preview it, share it via the OS share-sheet; a recipient can drag the `.tsx` onto the app window and have it install (or quarantine with a clear reason); scaffold-mismatch surfaces the Regenerate flow; archive / restore / permanently-delete IPC commands work; an integration test covers the full author → share → receive → render flow.
 > **Security regression:** an Authored `.tsx` with arbitrary top-level statements, function values inside the manifest, or any AST node outside the literal-only shape is rejected at receive time — never executed.
 
 Please run the acceptance test and either:

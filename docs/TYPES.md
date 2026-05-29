@@ -706,21 +706,7 @@ export const AppConfigSchema = z.object({
     thinkingModel: LlmEndpointSchema,
   }),
 
-  costLimits: z.object({
-    enabled: z.boolean().default(true),
-    monthlyUsdSoft: z.number().positive().default(50),  // warning at 80%
-    monthlyUsdHard: z.number().positive().default(50),  // hard stop
-    allowAdminOverride: z.boolean().default(true),
-    // Used by the cost-ledger (T-68) when a `${provider}:${model}` lookup
-    // misses both the pricing table and the adapter's default. Keeps cost
-    // tracking honest for unknown models on openai-compatible / local
-    // endpoints without forcing a code change. Conservative defaults.
-    fallbackPricingPer1k: z.object({
-      inputUsd: z.number().nonnegative().default(0.01),
-      cachedInputUsd: z.number().nonnegative().default(0.001),
-      outputUsd: z.number().nonnegative().default(0.03),
-    }).default({}),
-  }),
+  // costLimits removed — ADR-0019: the app does not meter or cap LLM spend.
 
   editor: z.object({
     reviewMode: z.enum(["panel", "inline", "diff"]).default("panel"),
