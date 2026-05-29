@@ -76,4 +76,13 @@ describe("loadRuntimeConfig", () => {
       expect(result.detail).toContain("disk fail");
     }
   });
+
+  it("treats a non-IPC rejection (no Tauri bridge) as not-configured, not invalid", async () => {
+    const result = await loadRuntimeConfig(() =>
+      Promise.reject(new Error("window.__TAURI_INTERNALS__ is undefined")),
+    );
+    // A browser / test env with no Tauri bridge is "LLM unavailable here", not a
+    // corrupt config — degrade silently rather than surfacing a false error.
+    expect(result).toEqual({ llmAvailable: false, reason: "not-configured" });
+  });
 });

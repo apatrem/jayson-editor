@@ -41,7 +41,6 @@ describe("outline-driven document generation (T-62)", () => {
       Promise.resolve({
         content: JSON.stringify(sampleDoc),
         raw: {},
-        usage: { inputTokens: 100, outputTokens: 200, cachedTokens: 20 },
       }),
     );
     const client: GenerateDocClient = { call };
@@ -63,7 +62,6 @@ describe("outline-driven document generation (T-62)", () => {
         Promise.resolve({
           content: "not-json",
           raw: {},
-          usage: { inputTokens: 1, outputTokens: 1, cachedTokens: 0 },
         }),
     };
 
@@ -78,7 +76,6 @@ describe("outline-driven document generation (T-62)", () => {
         Promise.resolve({
           content: JSON.stringify({ kind: "document", schemaVersion: "1.0.0" }),
           raw: {},
-          usage: { inputTokens: 10, outputTokens: 10, cachedTokens: 0 },
         }),
     };
 

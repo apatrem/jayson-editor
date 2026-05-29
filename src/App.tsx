@@ -55,6 +55,7 @@ export default function App({
     InstalledAuthoredBlock[]
   >([]);
   const [runtime, setRuntime] = useState<RuntimeLlm | null>(null);
+  const [llmConfigError, setLlmConfigError] = useState<string | null>(null);
 
   useEffect(() => {
     readAppConfig()
@@ -90,10 +91,11 @@ export default function App({
         if (rc.llmAvailable) {
           setRuntime(createRuntimeLlm(rc.config));
         } else if (rc.reason === "invalid") {
-          console.error(
-            "LLM config present but invalid — AI features disabled:",
-            rc.detail,
-          );
+          const message =
+            "LLM configuration couldn't be read — AI features are disabled. " +
+            "Re-run setup to fix it.";
+          console.error(message, rc.detail);
+          setLlmConfigError(message);
         }
       })
       .catch((e: unknown) => {
@@ -142,6 +144,22 @@ export default function App({
   return (
     <BrandBlocksContext.Provider value={generatedBlocks}>
       <AuthoredManifestsContext.Provider value={authoredManifests}>
+        {llmConfigError !== null ? (
+          <p
+            role="alert"
+            style={{
+              margin: "0.75rem 1rem",
+              padding: "0.625rem 0.875rem",
+              border: "1px solid #FECACA",
+              borderRadius: "0.5rem",
+              background: "#FEF2F2",
+              color: "#B91C1C",
+              fontSize: "0.875rem",
+            }}
+          >
+            {llmConfigError}
+          </p>
+        ) : null}
         <Routes
           bootStrategy={resolvedBootStrategy}
           {...(initialDocContent !== undefined ? { initialDocContent } : {})}

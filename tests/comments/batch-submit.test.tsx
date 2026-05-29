@@ -77,7 +77,6 @@ describe("BatchSubmit", () => {
                 error: "No valid patch",
               },
             ],
-            usage: { inputTokens: 10, outputTokens: 5, cachedTokens: 0 },
           });
         }}
       />,

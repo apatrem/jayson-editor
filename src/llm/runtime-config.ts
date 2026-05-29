@@ -21,14 +21,18 @@ export async function loadRuntimeConfig(
   try {
     raw = await read();
   } catch (error) {
-    if (isIpcError(error) && error.kind === "not-found") {
-      return { llmAvailable: false, reason: "not-configured" };
+    if (isIpcError(error)) {
+      // A real error from the config IPC. "not-found" = no config yet (benign);
+      // any other kind (io / invalid / permission / internal) is a genuine
+      // backend failure the caller should surface.
+      return error.kind === "not-found"
+        ? { llmAvailable: false, reason: "not-configured" }
+        : { llmAvailable: false, reason: "invalid", detail: formatErrorMessage(error) };
     }
-    return {
-      llmAvailable: false,
-      reason: "invalid",
-      detail: formatErrorMessage(error),
-    };
+    // Not an IpcError → the Tauri bridge isn't present (a plain browser / test
+    // environment, or first launch before the shell wires IPC). LLM features are
+    // simply unavailable here — not a corrupt config — so degrade silently.
+    return { llmAvailable: false, reason: "not-configured" };
   }
 
   const classified = classifyAppConfig(raw);
