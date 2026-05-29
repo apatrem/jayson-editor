@@ -1,7 +1,6 @@
 import { invoke } from "@tauri-apps/api/core";
 import { isIpcError } from "../../ipc/errors";
-import { M8PartialConfigSchema } from "../../schema/app-config";
-import { InstallAppConfigSchema } from "../../schema/install-config";
+import { classifyAppConfig } from "../../config/classify";
 import type { Route } from "./types";
 
 export interface BootStrategy {
@@ -9,11 +8,8 @@ export interface BootStrategy {
 }
 
 function parseConfig(raw: unknown): { paths: { cloudSyncRoot: string } } | null {
-  const m8 = M8PartialConfigSchema.safeParse(raw);
-  if (m8.success) return m8.data;
-  const full = InstallAppConfigSchema.safeParse(raw);
-  if (full.success) return full.data;
-  return null;
+  const classified = classifyAppConfig(raw);
+  return classified.kind === "invalid" ? null : classified.config;
 }
 
 export function createIpcBootStrategy(): BootStrategy {
