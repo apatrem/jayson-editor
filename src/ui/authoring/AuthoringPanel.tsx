@@ -21,6 +21,7 @@ import {
 } from "react";
 import type { DocumentModel } from "../../renderer/DocumentRenderer";
 import { withRenderWatchdog } from "../../block-primitives/RenderWatchdog";
+import { FINISH_SETUP_HINT, FinishSetupHint } from "../FinishSetupHint";
 
 // ─── Preview sandbox ──────────────────────────────────────────────────────────
 
@@ -66,6 +67,13 @@ export interface AuthoringPanelProps {
   previewNode?: ReactNode;
   /** True while a generation request is in flight. */
   generating?: boolean;
+  /**
+   * Whether the LLM runtime is configured. When false (a folder-picker / M8
+   * install with no `llm` block or keys), Generate is disabled with a
+   * "finish setup" hint rather than silently doing nothing (ADR-0019).
+   * Defaults to true.
+   */
+  llmAvailable?: boolean;
 }
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -101,6 +109,7 @@ export const AuthoringPanel: FC<AuthoringPanelProps> = ({
   onGenerate,
   previewNode,
   generating = false,
+  llmAvailable = true,
 }) => {
   const [description, setDescription] = useState("");
   const [slug, setSlug] = useState("");
@@ -130,7 +139,7 @@ export const AuthoringPanel: FC<AuthoringPanelProps> = ({
     });
   };
 
-  const canGenerate = description.trim().length > 0 && !generating;
+  const canGenerate = description.trim().length > 0 && !generating && llmAvailable;
 
   return (
     <aside
@@ -222,6 +231,7 @@ export const AuthoringPanel: FC<AuthoringPanelProps> = ({
 
       {/* ── Footer ── */}
       <footer style={styles.footer}>
+        {!llmAvailable ? <FinishSetupHint /> : null}
         <button
           type="button"
           style={styles.cancelButton}
@@ -233,6 +243,7 @@ export const AuthoringPanel: FC<AuthoringPanelProps> = ({
           type="button"
           style={styles.generateButton}
           disabled={!canGenerate}
+          title={llmAvailable ? undefined : FINISH_SETUP_HINT}
           onClick={handleGenerate}
         >
           {generating ? "Generating…" : "Generate"}

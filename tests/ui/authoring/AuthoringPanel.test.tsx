@@ -247,6 +247,45 @@ describe("AuthoringPanel", () => {
       expect(btn.hasAttribute("disabled")).toBe(true);
     });
   });
+
+  describe("LLM availability (ADR-0019)", () => {
+    it("disables Generate and shows a finish-setup hint when llmAvailable is false", () => {
+      render(
+        <AuthoringPanel
+          docContext={minDoc}
+          onClose={vi.fn()}
+          onGenerate={vi.fn()}
+          llmAvailable={false}
+        />,
+      );
+      // Even with a description, Generate stays disabled when LLM isn't set up.
+      fireEvent.change(screen.getByLabelText(/describe the block/i), {
+        target: { value: "A competitive landscape matrix" },
+      });
+      const btn = screen.getByRole("button", { name: /^generate$/i });
+      expect(btn.hasAttribute("disabled")).toBe(true);
+      expect(btn.getAttribute("title")).toMatch(/finish llm setup/i);
+      expect(screen.getByText(/finish llm setup to enable/i)).toBeTruthy();
+    });
+
+    it("shows no hint and allows Generate when llmAvailable is true", () => {
+      render(
+        <AuthoringPanel
+          docContext={minDoc}
+          onClose={vi.fn()}
+          onGenerate={vi.fn()}
+          llmAvailable={true}
+        />,
+      );
+      fireEvent.change(screen.getByLabelText(/describe the block/i), {
+        target: { value: "A competitive landscape matrix" },
+      });
+      expect(screen.queryByText(/finish llm setup to enable/i)).toBeNull();
+      expect(
+        screen.getByRole("button", { name: /^generate$/i }).hasAttribute("disabled"),
+      ).toBe(false);
+    });
+  });
 });
 
 // ─── DocumentView integration ─────────────────────────────────────────────────
@@ -291,5 +330,44 @@ describe("DocumentView — opens AuthoringPanel on Create", () => {
     expect(
       screen.queryByRole("dialog", { name: /create new authored block/i }),
     ).toBeNull();
+  });
+
+  it("enables Generate (no finish-setup hint) when a callLlm is supplied", () => {
+    render(
+      <DocumentView
+        path="/doc.yaml"
+        initialDoc={minDoc}
+        EditorComponent={FakeEditor}
+        callLlm={() => Promise.resolve({ content: "// block", raw: {} })}
+      />,
+    );
+    fireEvent.click(screen.getByRole("button", { name: "Insert block" }));
+    fireEvent.click(
+      screen.getByRole("button", { name: /create new authored block/i }),
+    );
+    fireEvent.change(screen.getByLabelText(/describe the block/i), {
+      target: { value: "A competitive landscape matrix" },
+    });
+    expect(screen.queryByText(/finish llm setup to enable/i)).toBeNull();
+    expect(
+      screen.getByRole("button", { name: /^generate$/i }).hasAttribute("disabled"),
+    ).toBe(false);
+  });
+
+  it("disables Generate with a finish-setup hint when no callLlm is supplied", () => {
+    render(
+      <DocumentView path="/doc.yaml" initialDoc={minDoc} EditorComponent={FakeEditor} />,
+    );
+    fireEvent.click(screen.getByRole("button", { name: "Insert block" }));
+    fireEvent.click(
+      screen.getByRole("button", { name: /create new authored block/i }),
+    );
+    fireEvent.change(screen.getByLabelText(/describe the block/i), {
+      target: { value: "A competitive landscape matrix" },
+    });
+    expect(screen.getByText(/finish llm setup to enable/i)).toBeTruthy();
+    expect(
+      screen.getByRole("button", { name: /^generate$/i }).hasAttribute("disabled"),
+    ).toBe(true);
   });
 });

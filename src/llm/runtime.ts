@@ -15,8 +15,12 @@ import type { InstallAppConfig } from "../schema/install-config";
  * available (see `loadRuntimeConfig`).
  */
 export interface RuntimeLlm {
-  /** Authored-block generation always uses the frontier codegen model (ADR-0012). */
-  callForCodegen(request: LLMRequest): Promise<LLMResponse>;
+  /**
+   * Authored-block generation always uses the frontier codegen model (ADR-0012).
+   * Declared as an arrow-fn property (not a method) so callers can pass it
+   * unbound without tripping `@typescript-eslint/unbound-method`.
+   */
+  callForCodegen: (request: LLMRequest) => Promise<LLMResponse>;
   /** Comment-to-AI: routes each batch to the chosen model kind (fast/thinking, D-11). */
   commentClient: BatchedCommentClient;
 }

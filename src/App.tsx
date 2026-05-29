@@ -11,6 +11,8 @@ import {
   type InstalledAuthoredBlock,
 } from "./blocks/runtime-registry";
 import type { BlockPaletteItem } from "./editor/BlockPalette";
+import { loadRuntimeConfig, type RuntimeConfig } from "./llm/runtime-config";
+import { createRuntimeLlm, type RuntimeLlm } from "./llm/runtime";
 
 export { DEFAULT_DOCUMENT_VIEW_RENDER_BUDGET_MS } from "./ui/router/Routes";
 
@@ -33,6 +35,8 @@ export interface AppProps {
   loadAuthoredManifestSet?: (
     cloudSyncRoot: string,
   ) => Promise<InstalledAuthoredBlock[]>;
+  /** Injectable for tests; defaults to reading config.yaml and classifying it. */
+  loadRuntime?: () => Promise<RuntimeConfig>;
 }
 
 export default function App({
@@ -44,11 +48,13 @@ export default function App({
   readAppConfig = readAppConfigDefault,
   loadGeneratedBlocks = loadBrandBlockPaletteItems,
   loadAuthoredManifestSet = loadAuthoredManifests,
+  loadRuntime = loadRuntimeConfig,
 }: AppProps) {
   const [generatedBlocks, setGeneratedBlocks] = useState<BlockPaletteItem[]>([]);
   const [authoredManifests, setAuthoredManifests] = useState<
     InstalledAuthoredBlock[]
   >([]);
+  const [runtime, setRuntime] = useState<RuntimeLlm | null>(null);
 
   useEffect(() => {
     readAppConfig()
@@ -72,6 +78,31 @@ export default function App({
         );
       });
   }, [readAppConfig, loadAuthoredManifestSet]);
+
+  // Initialize the runtime LLM facade when a full config (with an `llm` block)
+  // is present. Folder-picker / M8 installs leave it null → AI features show a
+  // "finish setup" hint; a corrupt config is surfaced, not silently masked.
+  useEffect(() => {
+    let cancelled = false;
+    void loadRuntime()
+      .then((rc) => {
+        if (cancelled) return;
+        if (rc.llmAvailable) {
+          setRuntime(createRuntimeLlm(rc.config));
+        } else if (rc.reason === "invalid") {
+          console.error(
+            "LLM config present but invalid — AI features disabled:",
+            rc.detail,
+          );
+        }
+      })
+      .catch((e: unknown) => {
+        console.error("LLM runtime init failed — AI features disabled:", e);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [loadRuntime]);
 
   const resolvedBootStrategy = useMemo((): BootStrategy => {
     if (bootStrategy !== undefined) return bootStrategy;
@@ -99,13 +130,22 @@ export default function App({
     };
   }, [initialDocument]);
 
+  // Thread the codegen call into the document view via fileActions, unless a
+  // test already supplied its own callLlm.
+  const mergedFileActions = useMemo<Partial<FileActionDeps> | undefined>(() => {
+    const callLlm = runtime?.callForCodegen;
+    if (callLlm === undefined) return fileActions;
+    if (fileActions?.callLlm !== undefined) return fileActions;
+    return { ...(fileActions ?? {}), callLlm };
+  }, [fileActions, runtime]);
+
   return (
     <BrandBlocksContext.Provider value={generatedBlocks}>
       <AuthoredManifestsContext.Provider value={authoredManifests}>
         <Routes
           bootStrategy={resolvedBootStrategy}
           {...(initialDocContent !== undefined ? { initialDocContent } : {})}
-          {...(fileActions !== undefined ? { fileActions } : {})}
+          {...(mergedFileActions !== undefined ? { fileActions: mergedFileActions } : {})}
           {...(DocumentViewComponent !== undefined ? { DocumentViewComponent } : {})}
           {...(documentWatchdogBudgetMs !== undefined ? { documentWatchdogBudgetMs } : {})}
         />

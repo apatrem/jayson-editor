@@ -18,6 +18,7 @@ import { parseDocModelYaml, serializeDocModel } from "../../docmodel/serialize";
 import { renderStaticHtmlForExport } from "../../export/render-static-html";
 import { formatErrorMessage } from "../../ipc/errors";
 import { type AuthoredReceiveResult, receiveAuthoredBlock } from "../../ipc/authored-block";
+import type { LLMRequest, LLMResponse } from "../../llm/client";
 import type { DocModel } from "../../schema/docmodel";
 import { DocModelSchema } from "../../schema/docmodel";
 import { AppErrorBoundary } from "../AppErrorBoundary";
@@ -71,6 +72,12 @@ export interface FileActionDeps {
    * Injectable for testing; default reads cloudSyncRoot from app config.
    */
   importAuthoredBlock: (path: string) => Promise<AuthoredReceiveResult>;
+  /**
+   * T-173 — runtime LLM call for authored-block generation (codegen model).
+   * Supplied by App when a full config with an `llm` block is present; absent
+   * on folder-picker / M8 installs, where Generate shows a "finish setup" hint.
+   */
+  callLlm: (request: LLMRequest) => Promise<LLMResponse>;
 }
 
 export interface RoutesProps {
@@ -414,6 +421,9 @@ export function Routes({
                     {...(fileActions.writeYamlFile === undefined
                       ? {}
                       : { writeYamlFile: fileActions.writeYamlFile })}
+                    {...(fileActions.callLlm === undefined
+                      ? {}
+                      : { callLlm: fileActions.callLlm })}
                     onDocumentChange={(doc) => {
                       setDocContent((current) =>
                         current !== null ? { ...current, doc, dirty: true } : current,

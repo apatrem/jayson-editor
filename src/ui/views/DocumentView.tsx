@@ -701,6 +701,7 @@ export const DocumentView: FC<DocumentViewProps> = ({
               lastGenerateParams.current = null;
             }}
             {...(callLlm !== undefined ? { onGenerate: handleGenerate } : {})}
+            llmAvailable={callLlm !== undefined}
             previewNode={previewNode}
             generating={generating}
           />
