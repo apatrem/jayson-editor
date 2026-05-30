@@ -16,8 +16,12 @@ export function getCommentSelection(editor: Editor): CommentSelection | null {
     return null;
   }
 
-  const blockId = findEnclosingBlockId(editor.state.selection.$from);
-  if (blockId === null) {
+  // Anchor the comment to a single block. A selection that spans two blocks would
+  // store quotedText/range covering both while blockId points only at the first —
+  // an invalid comment. Reject unless both ends resolve to the same blockId.
+  const { $from, $to } = editor.state.selection;
+  const blockId = findEnclosingBlockId($from);
+  if (blockId === null || blockId !== findEnclosingBlockId($to)) {
     return null;
   }
 
@@ -27,7 +31,7 @@ export function getCommentSelection(editor: Editor): CommentSelection | null {
 function findEnclosingBlockId($pos: Editor["state"]["selection"]["$from"]): string | null {
   for (let depth = $pos.depth; depth >= 0; depth -= 1) {
     const node = $pos.node(depth);
-    const blockId = node.attrs.blockId;
+    const blockId: unknown = node.attrs.blockId;
     if (typeof blockId === "string" && blockId.length > 0) {
       return blockId;
     }

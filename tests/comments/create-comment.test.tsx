@@ -62,6 +62,7 @@ describe("CreateComment", () => {
   it("submits a new comment from a highlighted range", () => {
     let created: Comment | undefined;
     let markedCommentId: string | undefined;
+    let markedSelection: CommentSelection | undefined;
 
     render(
       <CreateComment
@@ -69,8 +70,10 @@ describe("CreateComment", () => {
         author={author}
         generateId={() => "comment-1"}
         now={() => new Date("2026-05-25T12:00:00Z")}
-        onApplyMark={(commentId) => {
+        onApplyMark={(commentId, sel) => {
           markedCommentId = commentId;
+          markedSelection = sel;
+          return true;
         }}
         onCreate={(comment) => {
           created = comment;
@@ -84,6 +87,8 @@ describe("CreateComment", () => {
     fireEvent.click(screen.getByRole("button", { name: "Create comment" }));
 
     expect(markedCommentId).toBe("comment-1");
+    // The captured selection (not the editor's live selection) is handed to the mark.
+    expect(markedSelection).toBe(selection);
     expect(created?.thread).toEqual([
       {
         kind: "instruction",
@@ -94,6 +99,32 @@ describe("CreateComment", () => {
         createdAt: "2026-05-25T12:00:00.000Z",
       },
     ]);
+  });
+
+  it("does not create the comment when the highlight fails to apply", () => {
+    let created: Comment | undefined;
+
+    render(
+      <CreateComment
+        selection={selection}
+        author={author}
+        onApplyMark={() => false}
+        onCreate={(comment) => {
+          created = comment;
+        }}
+      />,
+    );
+
+    fireEvent.change(screen.getByLabelText("AI instruction"), {
+      target: { value: "Shorten this sentence." },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "Create comment" }));
+
+    // No orphan comment when the mark couldn't land; the user is told to retry.
+    expect(created).toBeUndefined();
+    expect(screen.getByRole("alert").textContent).toContain(
+      "Couldn't highlight",
+    );
   });
 
   it("does not render when there is no highlighted range", () => {

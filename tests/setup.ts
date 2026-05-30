@@ -20,12 +20,22 @@
  * not implement (ResizeObserver).
  */
 
-import { afterEach } from "vitest";
+import { afterEach, vi } from "vitest";
 import { cleanup } from "@testing-library/react";
 
 afterEach(() => {
   cleanup();
 });
+
+// The comment-selection bubble renders a TipTap BubbleMenu (tippy), which cannot
+// mount in happy-dom (`tippy is not a function`) and crashes any test whose real
+// editor dispatches a transaction. It carries no logic worth asserting through a
+// render, so stub it to a no-op everywhere. The bubble → draft → mark → comment
+// authoring flow is exercised by injecting a test double through DocumentView's
+// `CommentBubbleComponent` prop (see DocumentView-comment-authoring.test.tsx).
+vi.mock("../src/comments/CommentSelectionBubble", () => ({
+  CommentSelectionBubble: () => null,
+}));
 
 // happy-dom has no layout engine; ECharts / SVG sizing code calls getBBox().
 if (

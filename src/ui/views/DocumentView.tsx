@@ -69,7 +69,10 @@ import {
   type CommentAuthor,
   type CommentSelection,
 } from "../../comments/CreateComment";
-import { CommentSelectionBubble } from "../../comments/CommentSelectionBubble";
+import {
+  CommentSelectionBubble,
+  type CommentSelectionBubbleProps,
+} from "../../comments/CommentSelectionBubble";
 
 export interface EditorSurfaceProps {
   initialContent: JSONContent;
@@ -122,6 +125,13 @@ export interface DocumentViewProps {
   commentClient?: BatchedCommentClient;
   /** Author identity for new comments and follow-ups (from install config when wired). */
   commentAuthor?: CommentAuthor;
+  /**
+   * The floating selection bubble that opens the create-comment draft. Defaults
+   * to the real `CommentSelectionBubble` (a TipTap `BubbleMenu`, tippy-positioned).
+   * Injectable so tests can exercise the bubble → draft → mark → comment wiring
+   * without mounting tippy in happy-dom.
+   */
+  CommentBubbleComponent?: FC<CommentSelectionBubbleProps>;
   /**
    * Injectable advisory lint function for the preview pipeline.
    * Defaults to the real `lintAuthoredBlock` IPC command.
@@ -190,6 +200,7 @@ export const DocumentView: FC<DocumentViewProps> = ({
   callLlm,
   commentClient,
   commentAuthor = DEFAULT_COMMENT_AUTHOR,
+  CommentBubbleComponent = CommentSelectionBubble,
   lintForPreview = defaultLintForPreview,
 }) => {
   const generatedBlocks = useBrandBlocksFromRegistry();
@@ -676,9 +687,8 @@ export const DocumentView: FC<DocumentViewProps> = ({
         </div>
         {editor !== null &&
         editor.view !== undefined &&
-        commentDraftSelection === null &&
-        import.meta.env.VITEST !== "true" ? (
-          <CommentSelectionBubble
+        commentDraftSelection === null ? (
+          <CommentBubbleComponent
             editor={editor}
             onAddComment={setCommentDraftSelection}
           />
@@ -687,10 +697,17 @@ export const DocumentView: FC<DocumentViewProps> = ({
           <CreateComment
             selection={commentDraftSelection}
             author={commentAuthor}
-            onApplyMark={(commentId) => {
-              editor
-                ?.chain()
+            onApplyMark={(commentId, selection) => {
+              if (editor === null) {
+                return false;
+              }
+              // Re-select the captured range before marking: focus may have moved
+              // to the popup, leaving the editor's live selection stale. Marking
+              // the captured from/to keeps the highlight on the intended text.
+              return editor
+                .chain()
                 .focus()
+                .setTextSelection({ from: selection.from, to: selection.to })
                 .applyCommentMark(commentId)
                 .run();
             }}

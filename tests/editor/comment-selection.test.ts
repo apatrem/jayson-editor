@@ -42,6 +42,38 @@ describe("getCommentSelection", () => {
     }
   });
 
+  it("returns null when the selection spans two blocks", () => {
+    const editor = makeEditor({
+      type: "doc",
+      content: [
+        {
+          type: "section",
+          attrs: { sectionId: "s1", title: "S" },
+          content: [
+            {
+              type: "heading",
+              attrs: { blockId: "h1", level: 2, numbered: true, note: "" },
+              content: [{ type: "text", text: "Hello" }],
+            },
+            {
+              type: "heading",
+              attrs: { blockId: "h2", level: 2, numbered: true, note: "" },
+              content: [{ type: "text", text: "World" }],
+            },
+          ],
+        },
+      ],
+    });
+    try {
+      // from inside "Hello" (block h1) to inside "World" (block h2): a single
+      // comment can't faithfully anchor to both, so the selection is rejected.
+      editor.commands.setTextSelection({ from: 4, to: 11 });
+      expect(getCommentSelection(editor)).toBeNull();
+    } finally {
+      editor.destroy();
+    }
+  });
+
   it("returns null for an empty selection", () => {
     const editor = makeEditor();
     try {
