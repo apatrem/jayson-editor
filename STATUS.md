@@ -64,7 +64,7 @@ Total tasks: 206   Done: 203 (99%)   Blocked [!]: 2   Skipped: 1
 
 T-180: multi-section document editing (section node + mapping)
 T-179: BLOCK_IMPLEMENTATION_GUIDE §8 — defineAuthoredBlock pattern (ADR-0013)
-T-177: My LLM Spend per-category breakdown — authored-block-generation bucket
+T-177: superseded — cost ledger removed (ADR-0019; no My LLM Spend view)
 T-166: scaffold-mismatch detection + Regenerate against current scaffold UX
 T-174: share flow — sender stamp + OS share-sheet IPC (ADR-0005)
 

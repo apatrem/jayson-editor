@@ -1,4 +1,4 @@
-import { useState, type CSSProperties, type FC } from "react";
+import { useMemo, useState, type CSSProperties, type FC } from "react";
 import type { DocumentModel } from "../renderer/DocumentRenderer";
 import {
   runBatchedCommentRequest,
@@ -12,6 +12,14 @@ import { FinishSetupHint } from "../ui/FinishSetupHint";
 import { ReviewPanel } from "./ReviewPanel";
 import { BatchSubmit } from "./BatchSubmit";
 import { appendAiProposals } from "./append-proposals";
+import { latestAiProposal } from "./ProposalCard";
+import type { CommentAuthor } from "./CreateComment";
+
+const DEFAULT_COMMENT_AUTHOR: CommentAuthor = {
+  name: "You",
+  email: "you@local",
+  role: "consultant",
+};
 
 export interface CommentReviewSurfaceProps {
   doc: DocumentModel;
@@ -23,6 +31,8 @@ export interface CommentReviewSurfaceProps {
   /** Apply a doc mutation (accept/reject patch, or written proposals). */
   onDocChange: (doc: DocumentModel) => void;
   onClose?: (() => void) | undefined;
+  /** Author identity for queued follow-ups (D-12). */
+  commentAuthor?: CommentAuthor | undefined;
   /** Injectable clock for tests. */
   now?: (() => string) | undefined;
 }
@@ -38,10 +48,18 @@ export const CommentReviewSurface: FC<CommentReviewSurfaceProps> = ({
   commentClient,
   onDocChange,
   onClose,
+  commentAuthor = DEFAULT_COMMENT_AUTHOR,
   now = () => new Date().toISOString(),
 }) => {
   const [thinkingIds, setThinkingIds] = useState<Set<string>>(() => new Set());
+  const [followUps, setFollowUps] = useState<Record<string, string>>({});
   const [submitError, setSubmitError] = useState<string | null>(null);
+  const [reviewPanelEpoch, setReviewPanelEpoch] = useState(0);
+
+  const commentsWithProposals = useMemo(
+    () => doc.comments.filter((comment) => latestAiProposal(comment) !== null),
+    [doc.comments],
+  );
 
   const toggleThinking = (commentId: string): void => {
     setThinkingIds((current) => {
@@ -61,6 +79,9 @@ export const CommentReviewSurface: FC<CommentReviewSurfaceProps> = ({
     if (commentClient === undefined) {
       throw new Error("LLM is not configured.");
     }
+    if (batch.length === 0) {
+      return { results: [] };
+    }
     // D-11: fast by default; comments toggled to "thinking" run as a second
     // batch on the frontier model — at most two batches total.
     const groups: Array<["fast" | "thinking", BatchedComment[]]> = [];
@@ -79,14 +100,27 @@ export const CommentReviewSurface: FC<CommentReviewSurfaceProps> = ({
     }
     const merged: BatchedCommentResponse = { results };
     onDocChange(appendAiProposals(doc, merged, now()));
+    setFollowUps((current) => {
+      const next = { ...current };
+      for (const result of merged.results) {
+        if (result.status === "ok") {
+          delete next[result.commentId];
+        }
+      }
+      return next;
+    });
+    setReviewPanelEpoch((epoch) => epoch + 1);
     return merged;
   };
 
   return (
     <aside aria-label="Comment review" style={styles.surface}>
       <ReviewPanel
+        key={reviewPanelEpoch}
         doc={doc}
-        comments={doc.comments}
+        comments={commentsWithProposals}
+        onFollowUpQueueChange={setFollowUps}
+        initialFollowUps={followUps}
         // acceptCommentProposal returns the wider DocModel union; this view only
         // ever holds a document-kind doc, so narrow before applying.
         onDocChange={(updated) => {
@@ -103,6 +137,9 @@ export const CommentReviewSurface: FC<CommentReviewSurfaceProps> = ({
         <>
           <BatchSubmit
             comments={doc.comments}
+            followUps={followUps}
+            followUpAuthor={commentAuthor}
+            createdAt={now()}
             onSubmit={(batch) =>
               handleSubmit(batch).catch((error: unknown) => {
                 setSubmitError(formatErrorMessage(error));

@@ -7,6 +7,7 @@ import type {
 } from "../llm/batch-comments";
 import type { Comment } from "../schema/comment";
 import type { CommentAuthor } from "./CreateComment";
+import { latestAiProposal } from "./ProposalCard";
 
 export type BatchSubmitStatus = "idle" | "pending" | "done" | "failed";
 
@@ -24,11 +25,26 @@ export interface BatchSubmitProps extends BuildProcessAllBatchInput {
   onToggleThinking?: (commentId: string) => void;
 }
 
+/**
+ * Open comments eligible for "Process all": no AI proposal yet, or a follow-up
+ * was queued since the last proposal (avoids duplicate ai-proposal entries).
+ */
+export function isCommentEligibleForBatchSubmit(
+  comment: Comment,
+  followUps: Record<string, string> | undefined,
+): boolean {
+  if (comment.status !== "open") {
+    return false;
+  }
+  const hasQueuedFollowUp = (followUps?.[comment.id]?.trim()?.length ?? 0) > 0;
+  return latestAiProposal(comment) === null || hasQueuedFollowUp;
+}
+
 export function buildProcessAllBatch(
   input: BuildProcessAllBatchInput,
 ): BatchedComment[] {
   return input.comments
-    .filter((comment) => comment.status === "open")
+    .filter((comment) => isCommentEligibleForBatchSubmit(comment, input.followUps))
     .map((comment) => commentToBatchedComment(withQueuedFollowUp(comment, input)));
 }
 
@@ -42,6 +58,9 @@ export const BatchSubmit: FC<BatchSubmitProps> = ({
   onToggleThinking,
 }) => {
   const openComments = comments.filter((comment) => comment.status === "open");
+  const eligibleComments = openComments.filter((comment) =>
+    isCommentEligibleForBatchSubmit(comment, followUps),
+  );
   const [running, setRunning] = useState(false);
   const [statuses, setStatuses] = useState<Record<string, BatchSubmitStatus>>(
     () => Object.fromEntries(openComments.map((comment) => [comment.id, "idle"])),
@@ -54,6 +73,9 @@ export const BatchSubmit: FC<BatchSubmitProps> = ({
       followUpAuthor,
       createdAt,
     });
+    if (batch.length === 0) {
+      return;
+    }
     setRunning(true);
     setStatuses(Object.fromEntries(batch.map((entry) => [entry.commentId, "pending"])));
     try {
@@ -77,7 +99,7 @@ export const BatchSubmit: FC<BatchSubmitProps> = ({
     <section aria-label="Batch submit" style={styles.shell}>
       <button
         type="button"
-        disabled={running || openComments.length === 0}
+        disabled={running || eligibleComments.length === 0}
         onClick={() => {
           void processAll();
         }}

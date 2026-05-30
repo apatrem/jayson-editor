@@ -3,6 +3,7 @@ import { afterEach, describe, expect, it } from "vitest";
 import {
   BatchSubmit,
   buildProcessAllBatch,
+  isCommentEligibleForBatchSubmit,
 } from "../../src/comments/BatchSubmit";
 import type { Comment } from "../../src/schema/comment";
 
@@ -27,6 +28,30 @@ function comment(id: string): Comment {
     updatedAt: "2026-05-25T12:00:00Z",
   };
 }
+
+describe("isCommentEligibleForBatchSubmit", () => {
+  it("includes open comments with no ai-proposal", () => {
+    expect(isCommentEligibleForBatchSubmit(comment("comment-a"), undefined)).toBe(true);
+  });
+
+  it("excludes open comments that already have a proposal unless a follow-up is queued", () => {
+    const withProposal: Comment = {
+      ...comment("comment-a"),
+      thread: [
+        ...comment("comment-a").thread,
+        {
+          kind: "ai-proposal",
+          patch: { op: "remove", blockId: "block-comment-a" },
+          createdAt: "2026-05-25T12:01:00Z",
+        },
+      ],
+    };
+    expect(isCommentEligibleForBatchSubmit(withProposal, undefined)).toBe(false);
+    expect(
+      isCommentEligibleForBatchSubmit(withProposal, { "comment-a": "Try again." }),
+    ).toBe(true);
+  });
+});
 
 describe("buildProcessAllBatch", () => {
   it("includes queued follow-ups in the batched thread context", () => {
