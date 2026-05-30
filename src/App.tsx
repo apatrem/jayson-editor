@@ -13,6 +13,8 @@ import {
 import type { BlockPaletteItem } from "./editor/BlockPalette";
 import { loadRuntimeConfig, type RuntimeConfig } from "./llm/runtime-config";
 import { createRuntimeLlm, type RuntimeLlm } from "./llm/runtime";
+import { commentAuthorFromInstallConfig } from "./config/comment-author";
+import type { CommentAuthor } from "./comments/CreateComment";
 
 export { DEFAULT_DOCUMENT_VIEW_RENDER_BUDGET_MS } from "./ui/router/Routes";
 
@@ -56,6 +58,9 @@ export default function App({
   >([]);
   const [runtime, setRuntime] = useState<RuntimeLlm | null>(null);
   const [llmConfigError, setLlmConfigError] = useState<string | null>(null);
+  const [commentAuthor, setCommentAuthor] = useState<CommentAuthor | undefined>(
+    undefined,
+  );
 
   useEffect(() => {
     readAppConfig()
@@ -90,6 +95,7 @@ export default function App({
         if (cancelled) return;
         if (rc.llmAvailable) {
           setRuntime(createRuntimeLlm(rc.config));
+          setCommentAuthor(commentAuthorFromInstallConfig(rc.config));
         } else if (rc.reason === "invalid") {
           const message =
             "LLM configuration couldn't be read — AI features are disabled. " +
@@ -143,6 +149,15 @@ export default function App({
     return Object.keys(additions).length === 0 ? fileActions : { ...base, ...additions };
   }, [fileActions, runtime]);
 
+  const mergedFileActionsWithAuthor = useMemo<
+    Partial<FileActionDeps> | undefined
+  >(() => {
+    if (commentAuthor === undefined) return mergedFileActions;
+    const base = mergedFileActions ?? {};
+    if (base.commentAuthor !== undefined) return mergedFileActions;
+    return { ...base, commentAuthor };
+  }, [mergedFileActions, commentAuthor]);
+
   return (
     <BrandBlocksContext.Provider value={generatedBlocks}>
       <AuthoredManifestsContext.Provider value={authoredManifests}>
@@ -165,7 +180,9 @@ export default function App({
         <Routes
           bootStrategy={resolvedBootStrategy}
           {...(initialDocContent !== undefined ? { initialDocContent } : {})}
-          {...(mergedFileActions !== undefined ? { fileActions: mergedFileActions } : {})}
+          {...(mergedFileActionsWithAuthor !== undefined
+            ? { fileActions: mergedFileActionsWithAuthor }
+            : {})}
           {...(DocumentViewComponent !== undefined ? { DocumentViewComponent } : {})}
           {...(documentWatchdogBudgetMs !== undefined ? { documentWatchdogBudgetMs } : {})}
         />

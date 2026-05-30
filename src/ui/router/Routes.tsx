@@ -20,6 +20,7 @@ import { formatErrorMessage } from "../../ipc/errors";
 import { type AuthoredReceiveResult, receiveAuthoredBlock } from "../../ipc/authored-block";
 import type { LLMRequest, LLMResponse } from "../../llm/client";
 import type { BatchedCommentClient } from "../../llm/batch-comments";
+import type { CommentAuthor } from "../../comments/CreateComment";
 import type { DocModel } from "../../schema/docmodel";
 import { DocModelSchema } from "../../schema/docmodel";
 import { AppErrorBoundary } from "../AppErrorBoundary";
@@ -81,6 +82,8 @@ export interface FileActionDeps {
   callLlm: (request: LLMRequest) => Promise<LLMResponse>;
   /** Comment-to-AI client (D-12/D-13); supplied when LLM is configured. */
   commentClient: BatchedCommentClient;
+  /** Comment author identity from install config (attribution + follow-ups). */
+  commentAuthor: CommentAuthor;
 }
 
 export interface RoutesProps {
@@ -430,6 +433,9 @@ export function Routes({
                     {...(fileActions.commentClient === undefined
                       ? {}
                       : { commentClient: fileActions.commentClient })}
+                    {...(fileActions.commentAuthor === undefined
+                      ? {}
+                      : { commentAuthor: fileActions.commentAuthor })}
                     onDocumentChange={(doc) => {
                       setDocContent((current) =>
                         current !== null ? { ...current, doc, dirty: true } : current,

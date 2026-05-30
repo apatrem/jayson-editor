@@ -14,12 +14,7 @@ import { BatchSubmit } from "./BatchSubmit";
 import { appendAiProposals } from "./append-proposals";
 import { latestAiProposal } from "./ProposalCard";
 import type { CommentAuthor } from "./CreateComment";
-
-const DEFAULT_COMMENT_AUTHOR: CommentAuthor = {
-  name: "You",
-  email: "you@local",
-  role: "consultant",
-};
+import { DEFAULT_COMMENT_AUTHOR } from "./CreateComment";
 
 export interface CommentReviewSurfaceProps {
   doc: DocumentModel;

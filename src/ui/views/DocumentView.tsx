@@ -63,6 +63,13 @@ import { lintAuthoredBlock, type AuthoredBlockLintResult } from "../../ipc/autho
 import type { LLMRequest, LLMResponse } from "../../llm/client";
 import type { BatchedCommentClient } from "../../llm/batch-comments";
 import { CommentReviewSurface } from "../../comments/CommentReviewSurface";
+import {
+  CreateComment,
+  DEFAULT_COMMENT_AUTHOR,
+  type CommentAuthor,
+  type CommentSelection,
+} from "../../comments/CreateComment";
+import { CommentSelectionBubble } from "../../comments/CommentSelectionBubble";
 
 export interface EditorSurfaceProps {
   initialContent: JSONContent;
@@ -113,6 +120,8 @@ export interface DocumentViewProps {
    * panel still accepts/rejects existing proposals but "Send to AI" is disabled.
    */
   commentClient?: BatchedCommentClient;
+  /** Author identity for new comments and follow-ups (from install config when wired). */
+  commentAuthor?: CommentAuthor;
   /**
    * Injectable advisory lint function for the preview pipeline.
    * Defaults to the real `lintAuthoredBlock` IPC command.
@@ -180,6 +189,7 @@ export const DocumentView: FC<DocumentViewProps> = ({
   onCreateAuthoredBlock,
   callLlm,
   commentClient,
+  commentAuthor = DEFAULT_COMMENT_AUTHOR,
   lintForPreview = defaultLintForPreview,
 }) => {
   const generatedBlocks = useBrandBlocksFromRegistry();
@@ -214,6 +224,8 @@ export const DocumentView: FC<DocumentViewProps> = ({
   const [editor, setEditor] = useState<TipTapEditor | null>(null);
   const [authoringContext, setAuthoringContext] = useState<DocumentModel | null>(null);
   const [reviewOpen, setReviewOpen] = useState(false);
+  const [commentDraftSelection, setCommentDraftSelection] =
+    useState<CommentSelection | null>(null);
   // ── Selection-driven structured-block panel (P0c) ────────────────────────
   // Tracks which atom block is currently node-selected so DocumentView can
   // mount the matching side panel. Cleared whenever the selection moves off a
@@ -662,9 +674,46 @@ export const DocumentView: FC<DocumentViewProps> = ({
           </div>
         </section>
         </div>
+        {editor !== null &&
+        editor.view !== undefined &&
+        commentDraftSelection === null &&
+        import.meta.env.VITEST !== "true" ? (
+          <CommentSelectionBubble
+            editor={editor}
+            onAddComment={setCommentDraftSelection}
+          />
+        ) : null}
+        {commentDraftSelection !== null ? (
+          <CreateComment
+            selection={commentDraftSelection}
+            author={commentAuthor}
+            onApplyMark={(commentId) => {
+              editor
+                ?.chain()
+                .focus()
+                .applyCommentMark(commentId)
+                .run();
+            }}
+            onCreate={(comment) => {
+              const base = currentDoc.current ?? doc;
+              if (base === null) {
+                return;
+              }
+              applyDocChange({
+                ...base,
+                comments: [...base.comments, comment],
+              });
+              setCommentDraftSelection(null);
+            }}
+            onCancel={() => {
+              setCommentDraftSelection(null);
+            }}
+          />
+        ) : null}
         {reviewOpen ? (
           <CommentReviewSurface
             doc={currentDoc.current ?? doc}
+            commentAuthor={commentAuthor}
             {...(commentClient === undefined ? {} : { commentClient })}
             onDocChange={applyDocChange}
             onClose={() => setReviewOpen(false)}

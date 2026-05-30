@@ -15,6 +15,12 @@ export interface CommentAuthor {
   role: "consultant" | "reviewer";
 }
 
+export const DEFAULT_COMMENT_AUTHOR: CommentAuthor = {
+  name: "You",
+  email: "you@local",
+  role: "consultant",
+};
+
 export interface CreateOpenCommentInput {
   id: string;
   selection: CommentSelection;
