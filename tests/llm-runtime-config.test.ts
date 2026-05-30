@@ -85,4 +85,48 @@ describe("loadRuntimeConfig", () => {
     // corrupt config — degrade silently rather than surfacing a false error.
     expect(result).toEqual({ llmAvailable: false, reason: "not-configured" });
   });
+
+  it("short-circuits to available with devApiKey when dev env is injected", async () => {
+    const result = await loadRuntimeConfig(
+      () => Promise.reject(new Error("should not read IPC")),
+      () => ({
+        config: {
+          user: {
+            name: "Dev User",
+            email: "dev@example.com",
+            role: "consultant",
+            initials: "DV",
+          },
+          paths: { cloudSyncRoot: "/dev/cloud", sharedFolder: "/dev/shared" },
+          llm: {
+            fastModel: {
+              provider: "openai-compatible",
+              model: "lightning/llama-3.1-70b",
+              keychainEntry: "dev.llm.api-key",
+              baseUrl: "https://api.lightning.ai/v1",
+            },
+            thinkingModel: {
+              provider: "openai-compatible",
+              model: "lightning/llama-3.1-70b",
+              keychainEntry: "dev.llm.api-key",
+              baseUrl: "https://api.lightning.ai/v1",
+            },
+            codegenModel: {
+              provider: "openai-compatible",
+              model: "lightning/llama-3.1-70b",
+              keychainEntry: "dev.llm.api-key",
+              baseUrl: "https://api.lightning.ai/v1",
+            },
+          },
+          editor: { reviewMode: "panel", autosaveDebounceMs: 2000 },
+        },
+        apiKey: "sk-dev",
+      }),
+    );
+    expect(result.llmAvailable).toBe(true);
+    if (result.llmAvailable) {
+      expect(result.devApiKey).toBe("sk-dev");
+      expect(result.config.llm.fastModel.provider).toBe("openai-compatible");
+    }
+  });
 });

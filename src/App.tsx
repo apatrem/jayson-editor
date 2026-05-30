@@ -94,7 +94,15 @@ export default function App({
       .then((rc) => {
         if (cancelled) return;
         if (rc.llmAvailable) {
-          setRuntime(createRuntimeLlm(rc.config));
+          const devApiKey = rc.devApiKey;
+          setRuntime(
+            createRuntimeLlm(
+              rc.config,
+              devApiKey !== undefined
+                ? { keychain: () => Promise.resolve(devApiKey) }
+                : {},
+            ),
+          );
           setCommentAuthor(commentAuthorFromInstallConfig(rc.config));
         } else if (rc.reason === "invalid") {
           const message =

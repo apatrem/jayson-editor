@@ -2,6 +2,7 @@ import { invoke } from "@tauri-apps/api/core";
 import { formatErrorMessage, isIpcError } from "../ipc/errors";
 import { classifyAppConfig } from "../config/classify";
 import type { InstallAppConfig } from "../schema/install-config";
+import { readDevLlmConfig } from "./dev-config";
 
 /**
  * Whether the LLM runtime can be initialized. `available` carries the full
@@ -11,12 +12,18 @@ import type { InstallAppConfig } from "../schema/install-config";
  * surface it rather than silently treat it as "not set up").
  */
 export type RuntimeConfig =
-  | { llmAvailable: true; config: InstallAppConfig }
+  | { llmAvailable: true; config: InstallAppConfig; devApiKey?: string }
   | { llmAvailable: false; reason: "not-configured" | "invalid"; detail?: string };
 
 export async function loadRuntimeConfig(
   read: () => Promise<unknown> = readAppConfig,
+  readDevConfig: typeof readDevLlmConfig = readDevLlmConfig,
 ): Promise<RuntimeConfig> {
+  const dev = readDevConfig();
+  if (dev !== null) {
+    return { llmAvailable: true, config: dev.config, devApiKey: dev.apiKey };
+  }
+
   let raw: unknown;
   try {
     raw = await read();

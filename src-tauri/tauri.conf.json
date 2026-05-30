@@ -28,7 +28,7 @@
     ],
 
     "security": {
-      "csp": "default-src 'self'; img-src 'self' asset: data:; style-src 'self' 'unsafe-inline'; font-src 'self' data: https://fonts.gstatic.com; connect-src 'self' ipc: https://api.anthropic.com https://api.openai.com; script-src 'self'",
+      "csp": "default-src 'self'; img-src 'self' asset: data:; style-src 'self' 'unsafe-inline'; font-src 'self' data: https://fonts.gstatic.com; connect-src 'self' ipc: https://api.anthropic.com https://api.openai.com https://api.lightning.ai; script-src 'self'",
       "assetProtocol": {
         "enable": true,
         "scope": [

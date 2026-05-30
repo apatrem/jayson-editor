@@ -14,6 +14,10 @@ dist/
 build/
 target/
 
+# Local dev secrets (see .env.example)
+.env
+.env.local
+
 # Setup pipeline verify artifacts (T-45 tsc check)
 generated-blocks/pending/.tsc-verify-*/
 
