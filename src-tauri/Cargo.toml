@@ -30,6 +30,10 @@ log = "0.4"
 env_logger = "0.11"
 uuid = { version = "1.23.1", features = ["v4"] }
 tauri-plugin-shell = "2.3.5"
+# Native HTTP from the Rust side for LLM calls. The webview's fetch triggers a
+# CORS preflight that some OpenAI-compatible gateways (e.g. Lightning) answer
+# with 401; routing through Rust avoids preflight/CORS entirely.
+tauri-plugin-http = "2"
 base64 = "0.22.1"
 serde_yaml = "0.9"
 # Authored-block AST lint (T-163, ADR-0014).  Scoped to src-tauri/src/lint/ only.

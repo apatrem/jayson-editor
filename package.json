@@ -26,6 +26,7 @@
     "@tauri-apps/api": "2.0.3",
     "@tauri-apps/plugin-dialog": "2.0.1",
     "@tauri-apps/plugin-fs": "2.0.3",
+    "@tauri-apps/plugin-http": "2.5.9",
     "@tauri-apps/plugin-shell": "2.3.5",
     "@tauri-apps/plugin-store": "2.1.0",
     "@tiptap/core": "2.8.0",

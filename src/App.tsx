@@ -13,6 +13,8 @@ import {
 import type { BlockPaletteItem } from "./editor/BlockPalette";
 import { loadRuntimeConfig, type RuntimeConfig } from "./llm/runtime-config";
 import { createRuntimeLlm, type RuntimeLlm } from "./llm/runtime";
+import { getRuntimeFetch } from "./llm/tauri-fetch";
+import type { LLMClientOptions } from "./llm/client";
 import { commentAuthorFromInstallConfig } from "./config/comment-author";
 import type { CommentAuthor } from "./comments/CreateComment";
 
@@ -91,18 +93,26 @@ export default function App({
   useEffect(() => {
     let cancelled = false;
     void loadRuntime()
-      .then((rc) => {
+      .then(async (rc) => {
         if (cancelled) return;
         if (rc.llmAvailable) {
+          const overrides: Omit<LLMClientOptions, "config"> = {};
           const devApiKey = rc.devApiKey;
-          setRuntime(
-            createRuntimeLlm(
-              rc.config,
-              devApiKey !== undefined
-                ? { keychain: () => Promise.resolve(devApiKey) }
-                : {},
-            ),
-          );
+          if (devApiKey !== undefined) {
+            overrides.keychain = () => Promise.resolve(devApiKey);
+          }
+          // In the Tauri webview, route scoped LLM endpoints through native
+          // HTTP so CORS-preflight failures from gateways like Lightning are avoided.
+          const runtimeFetch = await getRuntimeFetch([
+            rc.config.llm.fastModel,
+            rc.config.llm.thinkingModel,
+            rc.config.llm.codegenModel,
+          ]);
+          if (cancelled) return;
+          if (runtimeFetch !== undefined) {
+            overrides.fetch = runtimeFetch;
+          }
+          setRuntime(createRuntimeLlm(rc.config, overrides));
           setCommentAuthor(commentAuthorFromInstallConfig(rc.config));
         } else if (rc.reason === "invalid") {
           const message =

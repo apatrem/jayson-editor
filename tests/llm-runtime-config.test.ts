@@ -9,6 +9,11 @@ function rejectIpc(kind: string, message: string): Promise<never> {
   return Promise.reject({ kind, message });
 }
 
+// Disable the DEV `VITE_LLM_*` short-circuit so these tests exercise the IPC
+// classification path deterministically — independent of any real `.env.local`
+// a developer may have on disk (Vite/vitest would otherwise inline those vars).
+const noDevConfig = (): null => null;
+
 const fullConfig = {
   user: {
     name: "Alice",
@@ -39,7 +44,10 @@ const fullConfig = {
 
 describe("loadRuntimeConfig", () => {
   it("returns available with the config for a full config", async () => {
-    const result = await loadRuntimeConfig(() => Promise.resolve(fullConfig));
+    const result = await loadRuntimeConfig(
+      () => Promise.resolve(fullConfig),
+      noDevConfig,
+    );
     expect(result.llmAvailable).toBe(true);
     if (result.llmAvailable) {
       expect(result.config.llm.fastModel.provider).toBe("anthropic");
@@ -47,29 +55,35 @@ describe("loadRuntimeConfig", () => {
   });
 
   it("returns not-configured (silent) for a partial folder-picker config", async () => {
-    const result = await loadRuntimeConfig(() =>
-      Promise.resolve({ paths: { cloudSyncRoot: "/cloud" } }),
+    const result = await loadRuntimeConfig(
+      () => Promise.resolve({ paths: { cloudSyncRoot: "/cloud" } }),
+      noDevConfig,
     );
     expect(result).toEqual({ llmAvailable: false, reason: "not-configured" });
   });
 
   it("returns not-configured when no config exists yet (IPC not-found)", async () => {
-    const result = await loadRuntimeConfig(() =>
-      rejectIpc("not-found", "missing"),
+    const result = await loadRuntimeConfig(
+      () => rejectIpc("not-found", "missing"),
+      noDevConfig,
     );
     expect(result).toEqual({ llmAvailable: false, reason: "not-configured" });
   });
 
   it("flags a corrupt config as invalid — not silently not-configured", async () => {
-    const result = await loadRuntimeConfig(() =>
-      Promise.resolve({ totally: "wrong" }),
+    const result = await loadRuntimeConfig(
+      () => Promise.resolve({ totally: "wrong" }),
+      noDevConfig,
     );
     expect(result.llmAvailable).toBe(false);
     if (!result.llmAvailable) expect(result.reason).toBe("invalid");
   });
 
   it("surfaces an IO error as invalid with detail", async () => {
-    const result = await loadRuntimeConfig(() => rejectIpc("io", "disk fail"));
+    const result = await loadRuntimeConfig(
+      () => rejectIpc("io", "disk fail"),
+      noDevConfig,
+    );
     expect(result.llmAvailable).toBe(false);
     if (!result.llmAvailable) {
       expect(result.reason).toBe("invalid");
@@ -78,8 +92,9 @@ describe("loadRuntimeConfig", () => {
   });
 
   it("treats a non-IPC rejection (no Tauri bridge) as not-configured, not invalid", async () => {
-    const result = await loadRuntimeConfig(() =>
-      Promise.reject(new Error("window.__TAURI_INTERNALS__ is undefined")),
+    const result = await loadRuntimeConfig(
+      () => Promise.reject(new Error("window.__TAURI_INTERNALS__ is undefined")),
+      noDevConfig,
     );
     // A browser / test env with no Tauri bridge is "LLM unavailable here", not a
     // corrupt config — degrade silently rather than surfacing a false error.
