@@ -137,6 +137,8 @@ function headingTextStart(editor: CoreEditor): number {
 }
 
 describe("DocumentView comment authoring", () => {
+  const writeYamlFile = vi.fn(() => Promise.resolve());
+
   afterEach(() => {
     cleanup();
     capturedEditor = null;
@@ -153,7 +155,7 @@ describe("DocumentView comment authoring", () => {
       <DocumentView
         path="/Users/me/Documents/proposal.yaml"
         initialDoc={doc}
-        autosaveDebounceMs={1}
+        writeYamlFile={writeYamlFile}
         onDocumentChange={onDocumentChange}
         CommentBubbleComponent={TestBubble}
       />,
