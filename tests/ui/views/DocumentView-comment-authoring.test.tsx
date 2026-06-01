@@ -60,10 +60,23 @@ const doc: Extract<DocModel, { kind: "document" }> = {
 // exposes so the authoring wiring is exercisable. It captures the live editor so the
 // test can drive a real selection.
 let capturedEditor: CoreEditor | null = null;
-const TestBubble: FC<CommentSelectionBubbleProps> = ({ editor, onAddComment }) => {
+const bubbleLifecycle = { mounts: 0, unmounts: 0, lastEnabled: undefined as boolean | undefined };
+
+const TestBubble: FC<CommentSelectionBubbleProps> = ({
+  editor,
+  onAddComment,
+  enabled,
+}) => {
+  bubbleLifecycle.lastEnabled = enabled;
   useEffect(() => {
     capturedEditor = editor as unknown as CoreEditor;
   }, [editor]);
+  useEffect(() => {
+    bubbleLifecycle.mounts += 1;
+    return () => {
+      bubbleLifecycle.unmounts += 1;
+    };
+  }, []);
   return (
     <button
       type="button"
@@ -96,6 +109,9 @@ describe("DocumentView comment authoring", () => {
   afterEach(() => {
     cleanup();
     capturedEditor = null;
+    bubbleLifecycle.mounts = 0;
+    bubbleLifecycle.unmounts = 0;
+    bubbleLifecycle.lastEnabled = undefined;
     vi.restoreAllMocks();
   });
 
@@ -158,5 +174,37 @@ describe("DocumentView comment authoring", () => {
     if (firstEntry?.kind === "instruction") {
       expect(firstEntry.text).toBe("Tighten this heading.");
     }
+  });
+
+  it("keeps the bubble mounted when a draft opens — it is hidden via `enabled`, not unmounted", async () => {
+    render(
+      <DocumentView
+        path="/Users/me/Documents/proposal.yaml"
+        initialDoc={doc}
+        CommentBubbleComponent={TestBubble}
+      />,
+    );
+
+    await screen.findByText("open-comment-draft");
+    await waitFor(() => {
+      expect(capturedEditor).not.toBeNull();
+    });
+    expect(bubbleLifecycle.mounts).toBe(1);
+    expect(bubbleLifecycle.unmounts).toBe(0);
+    expect(bubbleLifecycle.lastEnabled).toBe(true);
+
+    const editor = capturedEditor!;
+    const from = proseTextStart(editor);
+    editor.commands.setTextSelection({ from, to: from + 5 });
+    fireEvent.click(screen.getByText("open-comment-draft"));
+    await screen.findByLabelText("AI instruction");
+
+    // Regression: opening the draft must NOT unmount the bubble. The real
+    // BubbleMenu relocates its node out of React's tree, so an unmount here
+    // crashes the document view ("Document failed to render"). The bubble is
+    // suppressed by flipping `enabled` to false instead.
+    expect(bubbleLifecycle.unmounts).toBe(0);
+    expect(bubbleLifecycle.mounts).toBe(1);
+    expect(bubbleLifecycle.lastEnabled).toBe(false);
   });
 });

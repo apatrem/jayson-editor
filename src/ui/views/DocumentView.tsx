@@ -685,11 +685,14 @@ export const DocumentView: FC<DocumentViewProps> = ({
           </div>
         </section>
         </div>
-        {editor !== null &&
-        editor.view !== undefined &&
-        commentDraftSelection === null ? (
+        {editor !== null && editor.view !== undefined ? (
+          // Mount once and toggle visibility via `enabled` — never gate the mount
+          // on `commentDraftSelection`. Unmounting the BubbleMenu crashes React
+          // (tippy moves the menu node out of the React tree); see
+          // CommentSelectionBubble for the full rationale.
           <CommentBubbleComponent
             editor={editor}
+            enabled={commentDraftSelection === null}
             onAddComment={setCommentDraftSelection}
           />
         ) : null}
