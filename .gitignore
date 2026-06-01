@@ -17,6 +17,8 @@ target/
 # Local dev secrets (see .env.example)
 .env
 .env.local
+# Contains a real dev key, not a placeholder — keep it local, never commit
+.env.local.example
 
 # Setup pipeline verify artifacts (T-45 tsc check)
 generated-blocks/pending/.tsc-verify-*/
