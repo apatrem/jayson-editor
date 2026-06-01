@@ -1,5 +1,6 @@
 import type { Editor } from "@tiptap/core";
 import type { CommentSelection } from "../comments/CreateComment";
+import { COMMENT_MARK_NAME } from "../comments/CommentMark";
 
 /**
  * Resolve the current text selection into comment anchor data for CreateComment.
@@ -22,6 +23,15 @@ export function getCommentSelection(editor: Editor): CommentSelection | null {
   const { $from, $to } = editor.state.selection;
   const blockId = findEnclosingBlockId($from);
   if (blockId === null || blockId !== findEnclosingBlockId($to)) {
+    return null;
+  }
+
+  // The highlight is an inline mark, so only offer a comment where the mark can
+  // attach. Plain-text blocks like headings declare `marks: ""` and reject it —
+  // and even serialize to a bare `{ text }`, so the highlight couldn't round-trip
+  // anyway. Returning null here hides the bubble (shouldShow keys off this) and
+  // blocks creation, instead of failing after the user writes an instruction.
+  if (!editor.can().setMark(COMMENT_MARK_NAME)) {
     return null;
   }
 

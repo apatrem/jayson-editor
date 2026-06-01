@@ -54,6 +54,27 @@ const doc: Extract<DocModel, { kind: "document" }> = {
   comments: [],
 };
 
+// Same document but with a heading block — headings declare `marks: ""`, so a
+// comment highlight can't attach and the bubble must not offer to comment there.
+const headingDoc: Extract<DocModel, { kind: "document" }> = {
+  ...doc,
+  sections: [
+    {
+      id: "section-1",
+      title: "Overview",
+      blocks: [
+        {
+          id: "heading-1",
+          type: "heading",
+          level: 1,
+          text: "Original heading",
+          numbered: false,
+        },
+      ],
+    },
+  ],
+};
+
 // Test double for the floating bubble: same bubble → draft path as the real
 // CommentSelectionBubble, minus the TipTap BubbleMenu (tippy) which can't mount in
 // happy-dom. This is the CommentBubbleComponent injection seam the production code
@@ -103,6 +124,16 @@ function proseTextStart(editor: CoreEditor): number {
   // marks attach to prose text; heading nodes restrict marks, so prose is the
   // realistic comment target.)
   return paragraphPos + 1;
+}
+
+function headingTextStart(editor: CoreEditor): number {
+  let headingPos = -1;
+  editor.state.doc.descendants((node, pos) => {
+    if (headingPos === -1 && node.type.name === "heading") {
+      headingPos = pos;
+    }
+  });
+  return headingPos + 1;
 }
 
 describe("DocumentView comment authoring", () => {
@@ -206,5 +237,30 @@ describe("DocumentView comment authoring", () => {
     expect(bubbleLifecycle.unmounts).toBe(0);
     expect(bubbleLifecycle.mounts).toBe(1);
     expect(bubbleLifecycle.lastEnabled).toBe(false);
+  });
+
+  it("does not offer a comment on a heading selection (the mark can't attach)", async () => {
+    render(
+      <DocumentView
+        path="/Users/me/Documents/proposal.yaml"
+        initialDoc={headingDoc}
+        CommentBubbleComponent={TestBubble}
+      />,
+    );
+
+    await screen.findByText("open-comment-draft");
+    await waitFor(() => {
+      expect(capturedEditor).not.toBeNull();
+    });
+    const editor = capturedEditor!;
+
+    const from = headingTextStart(editor);
+    editor.commands.setTextSelection({ from, to: from + 5 });
+
+    // getCommentSelection rejects the heading selection, so the affordance is a
+    // no-op (the real bubble's shouldShow keys off the same check and stays hidden).
+    expect(getCommentSelection(editor)).toBeNull();
+    fireEvent.click(screen.getByText("open-comment-draft"));
+    expect(screen.queryByLabelText("AI instruction")).toBeNull();
   });
 });

@@ -30,12 +30,13 @@ export const CommentSelectionBubble: FC<CommentSelectionBubbleProps> = ({
   return (
     <BubbleMenu
       editor={editor}
-      shouldShow={({ editor: ed, state }) => {
+      shouldShow={({ editor: ed }) => {
         if (!enabledRef.current || !ed.isEditable) {
           return false;
         }
-        const { from, to, empty } = state.selection;
-        return !empty && to > from;
+        // Single source of truth: show the bubble only where a comment can
+        // actually be created (non-empty, single block, mark can attach).
+        return getCommentSelection(ed) !== null;
       }}
       tippyOptions={{ duration: 100 }}
     >
