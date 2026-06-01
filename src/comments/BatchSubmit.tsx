@@ -65,6 +65,10 @@ export const BatchSubmit: FC<BatchSubmitProps> = ({
   const [statuses, setStatuses] = useState<Record<string, BatchSubmitStatus>>(
     () => Object.fromEntries(openComments.map((comment) => [comment.id, "idle"])),
   );
+  // Per-comment reason for a `failed` result — the AI's explanation (e.g. "this
+  // reads as a question, not an edit instruction") or a submit error. Surfaced
+  // so a failure is actionable instead of an opaque "failed".
+  const [reasons, setReasons] = useState<Record<string, string>>({});
 
   const processAll = async () => {
     const batch = buildProcessAllBatch({
@@ -78,18 +82,23 @@ export const BatchSubmit: FC<BatchSubmitProps> = ({
     }
     setRunning(true);
     setStatuses(Object.fromEntries(batch.map((entry) => [entry.commentId, "pending"])));
+    setReasons({});
     try {
       const response = await onSubmit(batch);
-      setStatuses(
-        Object.fromEntries(
-          response.results.map((result) => [
-            result.commentId,
-            result.status === "ok" ? "done" : "failed",
-          ]),
-        ),
-      );
-    } catch {
+      const nextStatuses: Record<string, BatchSubmitStatus> = {};
+      const nextReasons: Record<string, string> = {};
+      for (const result of response.results) {
+        nextStatuses[result.commentId] = result.status === "ok" ? "done" : "failed";
+        if (result.status === "failed") {
+          nextReasons[result.commentId] = result.error;
+        }
+      }
+      setStatuses(nextStatuses);
+      setReasons(nextReasons);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
       setStatuses(Object.fromEntries(batch.map((entry) => [entry.commentId, "failed"])));
+      setReasons(Object.fromEntries(batch.map((entry) => [entry.commentId, message])));
     } finally {
       setRunning(false);
     }
@@ -107,19 +116,28 @@ export const BatchSubmit: FC<BatchSubmitProps> = ({
         Process all
       </button>
       <ul style={styles.list}>
-        {openComments.map((comment) => (
-          <li key={comment.id}>
-            <label>
-              <input
-                type="checkbox"
-                checked={thinkingCommentIds?.has(comment.id) ?? false}
-                onChange={() => onToggleThinking?.(comment.id)}
-              />{" "}
-              thinking
-            </label>{" "}
-            {comment.id}: {statuses[comment.id] ?? "idle"}
-          </li>
-        ))}
+        {openComments.map((comment) => {
+          const status = statuses[comment.id] ?? "idle";
+          const reason = reasons[comment.id];
+          return (
+            <li key={comment.id}>
+              <label>
+                <input
+                  type="checkbox"
+                  checked={thinkingCommentIds?.has(comment.id) ?? false}
+                  onChange={() => onToggleThinking?.(comment.id)}
+                />{" "}
+                thinking
+              </label>{" "}
+              {comment.id}: {status}
+              {status === "failed" && reason !== undefined ? (
+                <p role="note" style={styles.reason}>
+                  {reason}
+                </p>
+              ) : null}
+            </li>
+          );
+        })}
       </ul>
     </section>
   );
@@ -162,5 +180,10 @@ const styles: Record<string, CSSProperties> = {
   list: {
     margin: 0,
     paddingInlineStart: "1.25rem",
+  },
+  reason: {
+    margin: "0.125rem 0 0 0",
+    fontSize: "0.8125rem",
+    color: "#B45309",
   },
 };

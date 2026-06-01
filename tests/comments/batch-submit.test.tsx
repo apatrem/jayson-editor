@@ -115,4 +115,47 @@ describe("BatchSubmit", () => {
     });
     expect(submittedIds).toEqual([["comment-a", "comment-b"]]);
   });
+
+  it("surfaces the AI's reason for a failed comment", async () => {
+    render(
+      <BatchSubmit
+        comments={[comment("comment-a")]}
+        onSubmit={() =>
+          Promise.resolve({
+            results: [
+              {
+                status: "failed",
+                commentId: "comment-a",
+                error: "This reads as a question, not an edit instruction.",
+              },
+            ],
+          })
+        }
+      />,
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: "Process all" }));
+
+    await waitFor(() => {
+      expect(
+        screen.getByText("This reads as a question, not an edit instruction."),
+      ).toBeTruthy();
+    });
+  });
+
+  it("surfaces a submit error per comment when the whole batch throws", async () => {
+    render(
+      <BatchSubmit
+        comments={[comment("comment-a")]}
+        onSubmit={() => Promise.reject(new Error("Batched response was not valid JSON"))}
+      />,
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: "Process all" }));
+
+    await waitFor(() => {
+      expect(screen.getByText("comment-a: failed")).toBeTruthy();
+      expect(screen.getByText("Batched response was not valid JSON")).toBeTruthy();
+    });
+  });
 });

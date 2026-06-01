@@ -144,13 +144,26 @@ export async function runBatchedCommentRequest(
 ): Promise<BatchedCommentResponse> {
   const batch = buildBatchedCommentRequest(input);
   const response = await client.call(batch.model, toLLMRequest(batch));
-  const rawResponse = parseRawBatchedCommentResponse(response.content);
+  let rawResponse: RawBatchedCommentResponse;
+  try {
+    rawResponse = parseRawBatchedCommentResponse(response.content);
+  } catch (error) {
+    // Only on failure: surface what the model actually returned so an
+    // unparseable envelope is diagnosable (the thrown message also reaches the
+    // review UI via the submit handler).
+    logCommentBatchDiagnostic("unparseable model output", response.content);
+    throw error;
+  }
   const results = await validateAndRetryResults(
     client,
     batch,
     rawResponse.results,
     options.maxPatchRetries ?? 2,
   );
+  const failures = results.filter((result) => result.status === "failed");
+  if (failures.length > 0) {
+    logCommentBatchDiagnostic("failed results", failures);
+  }
   return { results };
 }
 
@@ -348,4 +361,21 @@ function stableRawOutput(value: unknown): string {
     return value;
   }
   return JSON.stringify(value);
+}
+
+/**
+ * DEV-only diagnostic for the comment-to-AI batch. The per-comment `failed`
+ * status carries `error`/`rawOutput`, but those aren't surfaced in the review
+ * UI — so when a real provider returns output that doesn't match the strict
+ * BatchedCommentResponse/BlockPatch shape, the only visible signal is "failed".
+ * This logs the raw model output and any failures to the console in dev (never
+ * in production or under vitest).
+ */
+function logCommentBatchDiagnostic(label: string, payload: unknown): void {
+  const env = import.meta.env;
+  if (!env.DEV || env.VITEST) {
+    return;
+  }
+  // eslint-disable-next-line no-console
+  console.warn(`[comment-batch] ${label}:`, payload);
 }
