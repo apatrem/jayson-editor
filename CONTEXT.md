@@ -68,6 +68,26 @@ _Avoid_: "preview pane", "editor pane" (there is one surface, not two)
 An on-demand, read-only, paginated (A4) Projection of the DocModel that shows real page breaks. Toggled from the editing surface and reused as the PDF print path. A Projection, never canonical.
 _Avoid_: "preview" (ambiguous), "print mode"
 
+**Page flow**:
+How [[page-view]] arranges its pages on screen. One of two values, toggled by the consultant: **Continuous** — the freely-scrolling vertical stack of pages (scroll anywhere); **Full-page** — one page (or one [[page-spread]]) scaled to fit the viewport, navigated page-by-page. Orthogonal to Page spread. A view preference, never part of the DocModel.
+_Avoid_: "scroll mode", "fit mode", "zoom"
+
+**Page spread**:
+How many A4 pages sit side-by-side in Page view, toggled by the consultant: **Single** (one) or **Spread** (two, side-by-side, like an open book). Orthogonal to [[page-flow]] — the four combinations are all valid. A [[local-setting]], never part of the DocModel.
+_Avoid_: "two-up", "double page", "columns"
+
+**Page zoom**:
+The on-screen scale of [[page-view]] sheets — a granular control (50 / 75 / 90 / 100 %, or **Fit**). "Fit" resolves against [[page-flow]]: fit-to-width in Continuous, fit-to-height in Full-page. A [[local-setting]], never part of the DocModel.
+_Avoid_: "scale", "magnification"
+
+**Local setting**:
+A machine-local, app-wide UI preference — e.g. [[page-flow]], [[page-spread]], [[page-zoom]], review mode. Persisted in the browser's localStorage under a `docsystem.*` key. Shared across all documents on that machine, never written to the DocModel or its YAML, so it never shows in a doc diff and never syncs between machines. Distinct from **Document settings** (below), which edits canonical in-doc metadata/layout. The set grows over time; each new preference is one more `docsystem.*` key, not a new store.
+_Avoid_: "user setting", "config", "preference" (unqualified), conflating with "Document settings"
+
+**Document settings**:
+The in-app dialog that edits a document's curated `meta` fields and its `meta.layout` overrides (block spacing, heading-numbering format). Everything it writes is **canonical** — it lives in the DocModel and serializes to YAML. The opposite of a [[local-setting]]: per-document, in the doc, travels with the file.
+_Avoid_: conflating with "[[local-setting]]"; "preferences"
+
 **Closed editor schema**:
 The exact set of node and mark types the TipTap editor registers at mount. A security boundary: asserted to equal Standard block types ∪ the Installed manifest set, and nothing else. Authored blocks widen it only because their manifests passed the receive-time gate.
 _Avoid_: "the schema" (ambiguous with the DocModel's Zod schema), "allowed nodes"
