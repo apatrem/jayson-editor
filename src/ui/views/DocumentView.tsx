@@ -144,6 +144,12 @@ export interface DocumentViewProps {
    * Tests inject a stub that returns `{ ok: true, violations: [], extractedManifest: {...} }`.
    */
   lintForPreview?: (source: string) => Promise<AuthoredBlockLintResult>;
+  /**
+   * Whether the document has unsaved changes — shown as a dot next to the file
+   * name in the header (moved here from the app chrome so the name shares the
+   * Edit/Page-view toolbar line). Supplied by Routes; absent in unit tests.
+   */
+  dirty?: boolean;
 }
 
 const DEFAULT_AUTOSAVE_DEBOUNCE_MS = 2000;
@@ -208,6 +214,7 @@ export const DocumentView: FC<DocumentViewProps> = ({
   commentAuthor = DEFAULT_COMMENT_AUTHOR,
   CommentBubbleComponent = CommentSelectionBubble,
   lintForPreview = defaultLintForPreview,
+  dirty = false,
 }) => {
   const generatedBlocks = useBrandBlocksFromRegistry();
   const installedAuthored = useAuthoredManifestsFromRegistry();
@@ -576,6 +583,16 @@ export const DocumentView: FC<DocumentViewProps> = ({
   return (
     <main aria-label="Document view" style={styles.shell}>
       <header style={styles.header}>
+        <div style={styles.docTitle}>
+          <span style={styles.docName} title={baseName(path)}>
+            {baseName(path)}
+          </span>
+          {dirty ? (
+            <span aria-label="Unsaved changes" style={styles.dirtyDot}>
+              ●
+            </span>
+          ) : null}
+        </div>
         <div style={styles.headerActions}>
           <div role="group" aria-label="View mode" style={styles.viewToggle}>
             <button
@@ -1032,6 +1049,12 @@ function parentPath(path: string): string {
   return index <= 0 ? "/" : path.slice(0, index);
 }
 
+/** File name (last path segment) for the header title. */
+function baseName(path: string): string {
+  const index = path.lastIndexOf("/");
+  return index < 0 ? path : path.slice(index + 1);
+}
+
 /** A segmented-control button, matching the Edit/Page-view toggle styling. */
 const SegButton: FC<{ label: string; active: boolean; onClick: () => void }> = ({
   label,
@@ -1147,25 +1170,53 @@ const styles = {
     alignItems: "center",
     display: "flex",
     gap: "1rem",
-    justifyContent: "flex-end",
+    justifyContent: "space-between",
+  },
+  // Document name + dirty dot, anchored left on the toolbar line (issue: reclaim
+  // the vertical space the standalone filename row used to take). Shrinks first
+  // (ellipsis) so it never pushes the controls.
+  docTitle: {
+    alignItems: "center",
+    display: "flex",
+    gap: "0.4rem",
+    minWidth: 0,
+    overflow: "hidden",
+  },
+  docName: {
+    fontSize: "0.9375rem",
+    fontWeight: 600,
+    color: "#0F172A",
+    overflow: "hidden",
+    textOverflow: "ellipsis",
+    whiteSpace: "nowrap",
+  },
+  dirtyDot: {
+    color: "#E8A33D",
+    fontSize: "0.75rem",
+    lineHeight: 1,
+    flexShrink: 0,
   },
   headerActions: {
     alignItems: "center",
     display: "flex",
     gap: "0.75rem",
+    flexShrink: 0,
   },
   // Fixed-width slot holding the mode-specific controls, right-aligned, so the
   // Edit/Page-view toggle to its left keeps the same x in both modes (issue #4).
+  // flexShrink:0 + nowrap labels keep the buttons on one line.
   modeControls: {
     display: "flex",
     alignItems: "center",
     justifyContent: "flex-end",
     gap: "0.75rem",
-    width: "34rem",
+    width: "35rem",
+    flexShrink: 0,
   },
   zoomLabel: {
     display: "inline-flex",
     alignItems: "center",
+    flexShrink: 0,
   },
   zoomSelect: {
     border: "1px solid #D6DEE8",
@@ -1182,6 +1233,8 @@ const styles = {
     fontWeight: 600,
     borderRadius: "999px",
     padding: "0.2rem 0.6rem",
+    whiteSpace: "nowrap",
+    flexShrink: 0,
   },
   viewToggle: {
     display: "inline-flex",
@@ -1189,6 +1242,7 @@ const styles = {
     borderRadius: "0.5rem",
     overflow: "hidden",
     background: "#FFFFFF",
+    flexShrink: 0,
   },
   viewToggleButton: {
     appearance: "none",
@@ -1199,6 +1253,7 @@ const styles = {
     fontSize: "0.8125rem",
     fontWeight: 600,
     padding: "0.35rem 0.75rem",
+    whiteSpace: "nowrap",
   },
   viewToggleButtonActive: {
     background: "#0B3D91",

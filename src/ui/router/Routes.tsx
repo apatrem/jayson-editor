@@ -397,14 +397,6 @@ export function Routes({
         />
       ) : docContent !== null ? (
         <main aria-label="Document shell" style={styles.documentShell}>
-          <header style={styles.documentHeader}>
-            <span style={styles.documentName}>{basename(docContent.path)}</span>
-            {docContent.dirty ? (
-              <span aria-label="Unsaved changes" style={styles.dirtyDot}>
-                ●
-              </span>
-            ) : null}
-          </header>
           <section
             aria-label="Loaded document"
             data-document-path={docContent.path}
@@ -421,6 +413,7 @@ export function Routes({
                   <WatchdoggedDocumentView
                     path={docContent.path}
                     initialDoc={docContent.doc}
+                    dirty={docContent.dirty}
                     {...(fileActions.readYamlFile === undefined
                       ? {}
                       : { readYamlFile: fileActions.readYamlFile })}
@@ -565,27 +558,8 @@ const styles = {
   },
   documentShell: {
     display: "grid",
-    gridTemplateRows: "auto minmax(0, 1fr)",
+    gridTemplateRows: "minmax(0, 1fr)",
     minHeight: "100vh",
-  },
-  documentHeader: {
-    alignItems: "center",
-    background: "#FFFFFF",
-    borderBottom: "1px solid #E2E8F0",
-    display: "flex",
-    gap: "0.5rem",
-    justifyContent: "flex-start",
-    padding: "0.625rem 1rem",
-  },
-  documentName: {
-    fontSize: "0.9375rem",
-    fontWeight: 600,
-    color: "#0F172A",
-  },
-  dirtyDot: {
-    color: "#E8A33D",
-    fontSize: "0.75rem",
-    lineHeight: 1,
   },
   documentPlaceholder: {
     padding: 0,

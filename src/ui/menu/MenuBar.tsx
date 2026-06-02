@@ -30,5 +30,9 @@ const styles: Record<string, CSSProperties> = {
     fontSize: "0.8125rem",
     color: "#16A34A",
     fontWeight: 500,
+    // Take the leftover width and wrap within it, so a long hint never pushes
+    // the file buttons (which are flexShrink: 0).
+    flex: "1 1 auto",
+    minWidth: 0,
   },
 };

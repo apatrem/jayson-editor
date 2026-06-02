@@ -62,6 +62,9 @@ const styles: Record<string, CSSProperties> = {
     alignItems: "center",
     display: "flex",
     gap: "0.5rem",
+    // Never let the status message (or anything else) squeeze the file buttons:
+    // they keep their size and the message wraps in the remaining space instead.
+    flexShrink: 0,
   },
   button: {
     appearance: "none",
@@ -74,6 +77,7 @@ const styles: Record<string, CSSProperties> = {
     fontWeight: 500,
     lineHeight: 1.2,
     cursor: "pointer",
+    whiteSpace: "nowrap",
   },
   buttonPrimary: {
     border: "1px solid #0B3D91",
