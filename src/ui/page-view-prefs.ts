@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useState } from "react";
 
 /**
  * Page-view display preferences (ADR-0020). These are Local settings —
@@ -101,11 +101,9 @@ export function createMemoryPageViewPrefsStore(
 export function usePageViewPrefs(
   store: PageViewPrefsStore = browserPageViewPrefsStore,
 ): readonly [PageViewPrefs, <K extends keyof PageViewPrefs>(key: K, value: PageViewPrefs[K]) => void] {
-  const [prefs, setPrefs] = useState<PageViewPrefs>(DEFAULT_PAGE_VIEW_PREFS);
-
-  useEffect(() => {
-    setPrefs(store.read());
-  }, [store]);
+  // Lazy init reads persisted prefs on the first render, so Page view never
+  // flashes the defaults for a frame before the stored values load.
+  const [prefs, setPrefs] = useState<PageViewPrefs>(() => store.read());
 
   const setPref = useCallback(
     <K extends keyof PageViewPrefs>(key: K, value: PageViewPrefs[K]) => {

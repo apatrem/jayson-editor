@@ -14,7 +14,10 @@
 .page-view-canvas {
   background: #e2e8f0;
   width: 100%;
-  padding: 1.5rem;
+  /* In px (not rem) so it stays equal to CANVAS_PADDING_PX in PageView.tsx,
+     which the fit-zoom calc subtracts — a rem would drift if the root font
+     size ever changed. */
+  padding: 24px;
   /* `zoom` reflows the page box (unlike transform: scale, which would leave the
      pre-scale layout box and create gaps). Driven by --page-zoom from JS. */
 }

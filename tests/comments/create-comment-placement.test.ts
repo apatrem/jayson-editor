@@ -31,4 +31,15 @@ describe("computePopupPlacement", () => {
     // below (768) + height (200) overflows 800 → place above: 700 - 200 - 8
     expect(top).toBe(492);
   });
+
+  it("clamps within the viewport when neither below nor above fits", () => {
+    // Tall popup in a short viewport: below overflows and above is < margin.
+    const shortViewport = { width: 1000, height: 300 };
+    const tallPopup = { width: 352, height: 280 };
+    const anchor = { left: 100, top: 140, bottom: 160 };
+    const { top } = computePopupPlacement(anchor, tallPopup, shortViewport);
+    // below (168) + 280 overflows; above (140 - 280 - 8) < margin →
+    // max(8, 300 - 280 - 8) = 12
+    expect(top).toBe(12);
+  });
 });

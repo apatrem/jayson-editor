@@ -1161,6 +1161,12 @@ function saveStatusStyle(state: SaveState): CSSProperties {
 const styles = {
   shell: {
     display: "grid",
+    // Constrain the single column to the available width. Without this the
+    // implicit `auto` track grows to a child's max-content — e.g. an unscaled
+    // two-page spread — so the Page-view canvas measures the overflowing width
+    // and "Fit" can't scale down. minmax(0,1fr) also keeps the edit row from
+    // overflowing when the comments panel opens on a narrow window.
+    gridTemplateColumns: "minmax(0, 1fr)",
     gap: "1rem",
     minHeight: "100%",
     padding: "1rem",

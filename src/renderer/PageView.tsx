@@ -39,7 +39,7 @@ function pageSizePx(brand: BrandTokens): { width: number; height: number } {
   return { width: w, height: h };
 }
 
-const CANVAS_PADDING_PX = 24; // keep in sync with .page-view-canvas padding
+const CANVAS_PADDING_PX = 24; // must equal .page-view-canvas padding (24px) in page-view.css
 const SPREAD_GAP_PX = 24;
 
 /**
