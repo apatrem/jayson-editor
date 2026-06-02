@@ -95,12 +95,15 @@ export const PageView: FC<PageViewProps> = ({
     };
   }, [doc, brand, docFolderPath]);
 
-  // "Fit" zoom: scale a sheet (or spread) to the canvas. Continuous fits width;
-  // Full-page fits the whole page (min of width/height) so one page is visible.
+  // "Fit" zoom: scale a sheet (or spread) to the canvas. Continuous fits the
+  // available width; Full-page fits the available viewport HEIGHT so one page
+  // is visible at a time and you scroll page-by-page. Full-page deliberately
+  // does NOT use a fixed-height scroll container (that overshot the chrome and
+  // left a stray scrollbar) — the page just scales to one viewport-height.
   useLayoutEffect(() => {
     if (zoom !== "fit") return undefined;
     const canvas = canvasRef.current;
-    if (canvas === null || typeof ResizeObserver === "undefined") return undefined;
+    if (canvas === null || typeof window === "undefined") return undefined;
 
     const recompute = (): void => {
       const page = pageSizePx(brand);
@@ -108,22 +111,39 @@ export const PageView: FC<PageViewProps> = ({
       const columns = spread === "spread" ? 2 : 1;
       const contentW = page.width * columns + (columns - 1) * SPREAD_GAP_PX;
       const widthZoom = contentW > 0 ? availW / contentW : 1;
+      let next: number;
       if (flow === "full-page") {
-        const availH = canvas.clientHeight - CANVAS_PADDING_PX * 2;
+        // Viewport height below the chrome (canvas's absolute top is the chrome
+        // height; scroll-independent), minus the canvas's own vertical padding.
+        const chromeTop = canvas.getBoundingClientRect().top + window.scrollY;
+        const availH = window.innerHeight - chromeTop - CANVAS_PADDING_PX * 2;
         const heightZoom = page.height > 0 ? availH / page.height : 1;
-        setFitZoom(clampZoom(Math.min(widthZoom, heightZoom)));
+        next = clampZoom(Math.min(widthZoom, heightZoom));
       } else {
-        setFitZoom(clampZoom(widthZoom));
+        next = clampZoom(widthZoom);
       }
+      // Only update on a meaningful change. The page zoom feeds back into content
+      // size (and thus geometry the ResizeObserver watches); without this guard,
+      // sub-pixel float drift could re-render in a loop.
+      setFitZoom((prev) => (Math.abs(prev - next) < 0.005 ? prev : next));
     };
 
     recompute();
-    const ro = new ResizeObserver(recompute);
-    ro.observe(canvas);
-    return () => ro.disconnect();
+    const ro =
+      typeof ResizeObserver === "undefined" ? null : new ResizeObserver(recompute);
+    ro?.observe(canvas);
+    window.addEventListener("resize", recompute);
+    return () => {
+      ro?.disconnect();
+      window.removeEventListener("resize", recompute);
+    };
   }, [zoom, flow, spread, brand, status]);
 
   const effectiveZoom = zoom === "fit" ? fitZoom : zoom / 100;
+  // Keep pages at 1× while paged.js is chunking — a CSS `zoom` other than 1
+  // scales the boxes paged.js measures and breaks (or stalls) pagination. Apply
+  // the real zoom only once the layout is final.
+  const appliedZoom = status === "ready" ? effectiveZoom : 1;
 
   return (
     <div
@@ -132,7 +152,7 @@ export const PageView: FC<PageViewProps> = ({
       className="page-view-canvas"
       data-flow={flow}
       data-spread={spread}
-      style={{ ["--page-zoom" as string]: String(effectiveZoom) } as CSSProperties}
+      style={{ ["--page-zoom" as string]: String(appliedZoom) } as CSSProperties}
     >
       {status === "rendering" ? <p style={styles.note}>Paginating…</p> : null}
       {status === "failed" ? (
