@@ -1,0 +1,54 @@
+/*
+ * In-app Page view "interface" styles (issue #5). paged.js renders the document
+ * into `.pagedjs_pages > .pagedjs_page` boxes sized from the @page rule; on its
+ * own that's an unstyled white box on a white app background. These rules frame
+ * each page as a realistic A4 sheet on a gray canvas, with the running header /
+ * footer sitting in the page margins (paged.js margin boxes), and wire the
+ * flow / spread / zoom view preferences (ADR-0020).
+ *
+ * Everything is scoped under `.page-view-canvas` so it never leaks into the
+ * editing surface or the PDF export HTML (which uses the same page CSS but not
+ * this interface layer).
+ */
+
+.page-view-canvas {
+  background: #e2e8f0;
+  width: 100%;
+  padding: 1.5rem;
+  /* `zoom` reflows the page box (unlike transform: scale, which would leave the
+     pre-scale layout box and create gaps). Driven by --page-zoom from JS. */
+}
+
+/* Full-page flow: one page/spread fills the viewport; page through by scroll-
+   snapping. Continuous flow leaves the canvas to grow and scroll with the app. */
+.page-view-canvas[data-flow="full-page"] {
+  height: calc(100vh - 8rem);
+  overflow-y: auto;
+  scroll-snap-type: y mandatory;
+}
+
+.page-view-canvas .pagedjs_pages {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.5rem;
+  width: 100%;
+}
+
+/* Spread: two pages side-by-side. Grid keeps each sheet at its natural (zoomed)
+   size and centers the pair; it wraps to pairs of rows for longer documents. */
+.page-view-canvas[data-spread="spread"] .pagedjs_pages {
+  display: grid;
+  grid-template-columns: repeat(2, max-content);
+  justify-content: center;
+  align-items: start;
+}
+
+.page-view-canvas .pagedjs_page {
+  zoom: var(--page-zoom, 1);
+  background: #ffffff;
+  box-shadow:
+    0 1px 3px rgba(15, 23, 42, 0.18),
+    0 12px 32px rgba(15, 23, 42, 0.12);
+  scroll-snap-align: center;
+}

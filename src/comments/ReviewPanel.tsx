@@ -352,6 +352,9 @@ const styles: Record<string, CSSProperties> = {
     maxHeight: "100%",
     overflow: "auto",
     padding: "1rem",
+    // Consistent panel typography across the app (sections + document settings
+    // use 12–13px). Descendants inherit unless they set their own size.
+    fontSize: "0.8125rem",
   },
   header: {
     alignItems: "center",
@@ -360,7 +363,8 @@ const styles: Record<string, CSSProperties> = {
     gap: "0.75rem",
   },
   title: {
-    fontSize: "1rem",
+    fontSize: "0.8125rem",
+    fontWeight: 700,
     margin: 0,
   },
   list: {

@@ -162,6 +162,11 @@ const styles: Record<string, CSSProperties> = {
     display: "grid",
     gap: "0.75rem",
     alignContent: "start",
+    // Match the section sidebar + document-settings panels (13px content /
+    // 12px secondary) so panel typography is consistent across the app. Most
+    // descendants inherit this; the few explicit sizes are aligned in place.
+    fontSize: "0.8125rem",
+    color: "#1e293b",
   },
   error: {
     color: "#B91C1C",

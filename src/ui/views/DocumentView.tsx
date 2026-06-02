@@ -36,6 +36,11 @@ import {
 } from "../../editor/mapping";
 import type { DocumentModel } from "../../renderer/DocumentRenderer";
 import { PageView } from "../../renderer/PageView";
+import {
+  usePageViewPrefs,
+  PAGE_ZOOM_OPTIONS,
+  type PageZoom,
+} from "../page-view-prefs";
 import { DocModelSchema } from "../../schema/docmodel";
 import type { Meta } from "../../schema/meta";
 import { DocumentSettingsDialog } from "./DocumentSettingsDialog";
@@ -66,6 +71,7 @@ import { CommentReviewSurface } from "../../comments/CommentReviewSurface";
 import {
   CreateComment,
   DEFAULT_COMMENT_AUTHOR,
+  type CommentAnchorRect,
   type CommentAuthor,
   type CommentSelection,
 } from "../../comments/CreateComment";
@@ -231,6 +237,9 @@ export const DocumentView: FC<DocumentViewProps> = ({
   // "edit" = continuous WYSIWYG surface; "page" = on-demand read-only A4
   // pagination (paged.js) showing real page breaks (ADR-0017).
   const [viewMode, setViewMode] = useState<"edit" | "page">("edit");
+  // Page-view display preferences — Local settings, app-wide, persisted in
+  // localStorage, never in the DocModel (ADR-0020).
+  const [pagePrefs, setPagePref] = usePageViewPrefs();
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [editor, setEditor] = useState<TipTapEditor | null>(null);
   const [authoringContext, setAuthoringContext] = useState<DocumentModel | null>(null);
@@ -462,6 +471,17 @@ export const DocumentView: FC<DocumentViewProps> = ({
     };
   }, [editor]);
 
+  // Viewport rect of the highlighted selection, computed once when the comment
+  // draft opens, so the CreateComment popup floats beside the text instead of
+  // pushing document content (issue #8). Stable while the draft is open.
+  const commentAnchor = useMemo<CommentAnchorRect | null>(
+    () =>
+      commentDraftSelection === null
+        ? null
+        : selectionAnchorRect(editor, commentDraftSelection),
+    [commentDraftSelection, editor],
+  );
+
   // ── Generation handler (T-173) ─────────────────────────────────────────────
   const handleGenerate = (panelParams: AuthoringPanelGenerateParams): void => {
     const context = authoringContext ?? currentDoc.current;
@@ -581,25 +601,75 @@ export const DocumentView: FC<DocumentViewProps> = ({
               Page view
             </button>
           </div>
-          <button
-            type="button"
-            aria-label="Document settings"
-            onClick={() => setSettingsOpen(true)}
-            style={styles.viewToggleButton}
-          >
-            Document settings
-          </button>
-          <button
-            type="button"
-            aria-pressed={reviewOpen}
-            onClick={() => setReviewOpen((open) => !open)}
-            style={styles.viewToggleButton}
-          >
-            Review comments ({(currentDoc.current ?? doc).comments.length})
-          </button>
-          <span aria-label="Autosave status" style={saveStatusStyle(saveState)}>
-            {SAVE_STATE_LABEL[saveState]}
-          </span>
+          {/* Fixed-width slot so the Edit/Page-view toggle keeps the same x
+              position across modes (issue #4). Edit shows editing controls;
+              Page view replaces them with the flow/spread/zoom view prefs —
+              Document settings + Review comments are hidden (read-only mode). */}
+          <div style={styles.modeControls}>
+            {viewMode === "edit" ? (
+              <>
+                <button
+                  type="button"
+                  aria-label="Document settings"
+                  onClick={() => setSettingsOpen(true)}
+                  style={styles.viewToggleButton}
+                >
+                  Document settings
+                </button>
+                <button
+                  type="button"
+                  aria-pressed={reviewOpen}
+                  onClick={() => setReviewOpen((open) => !open)}
+                  style={styles.viewToggleButton}
+                >
+                  Review comments ({(currentDoc.current ?? doc).comments.length})
+                </button>
+              </>
+            ) : (
+              <>
+                <div role="group" aria-label="Page flow" style={styles.viewToggle}>
+                  <SegButton
+                    label="Continuous"
+                    active={pagePrefs.flow === "continuous"}
+                    onClick={() => setPagePref("flow", "continuous")}
+                  />
+                  <SegButton
+                    label="Full page"
+                    active={pagePrefs.flow === "full-page"}
+                    onClick={() => setPagePref("flow", "full-page")}
+                  />
+                </div>
+                <div role="group" aria-label="Page spread" style={styles.viewToggle}>
+                  <SegButton
+                    label="1 page"
+                    active={pagePrefs.spread === "single"}
+                    onClick={() => setPagePref("spread", "single")}
+                  />
+                  <SegButton
+                    label="2 pages"
+                    active={pagePrefs.spread === "spread"}
+                    onClick={() => setPagePref("spread", "spread")}
+                  />
+                </div>
+                <label aria-label="Page zoom" style={styles.zoomLabel}>
+                  <select
+                    value={String(pagePrefs.zoom)}
+                    onChange={(e) => setPagePref("zoom", parseZoomValue(e.target.value))}
+                    style={styles.zoomSelect}
+                  >
+                    {PAGE_ZOOM_OPTIONS.map((option) => (
+                      <option key={String(option)} value={String(option)}>
+                        {option === "fit" ? "Fit" : `${option}%`}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+              </>
+            )}
+            <span aria-label="Autosave status" style={saveStatusStyle(saveState)}>
+              {SAVE_STATE_LABEL[saveState]}
+            </span>
+          </div>
         </div>
       </header>
       {settingsOpen ? (
@@ -615,6 +685,9 @@ export const DocumentView: FC<DocumentViewProps> = ({
           doc={currentDoc.current ?? doc}
           brand={defaultBrand}
           docFolderPath={parentPath(path)}
+          flow={pagePrefs.flow}
+          spread={pagePrefs.spread}
+          zoom={pagePrefs.zoom}
         />
       ) : null}
       <div
@@ -700,6 +773,7 @@ export const DocumentView: FC<DocumentViewProps> = ({
           <CreateComment
             selection={commentDraftSelection}
             author={commentAuthor}
+            anchor={commentAnchor}
             onApplyMark={(commentId, selection) => {
               if (editor === null) {
                 return false;
@@ -958,6 +1032,58 @@ function parentPath(path: string): string {
   return index <= 0 ? "/" : path.slice(0, index);
 }
 
+/** A segmented-control button, matching the Edit/Page-view toggle styling. */
+const SegButton: FC<{ label: string; active: boolean; onClick: () => void }> = ({
+  label,
+  active,
+  onClick,
+}) => (
+  <button
+    type="button"
+    aria-pressed={active}
+    onClick={onClick}
+    style={{
+      ...styles.viewToggleButton,
+      ...(active ? styles.viewToggleButtonActive : {}),
+    }}
+  >
+    {label}
+  </button>
+);
+
+function parseZoomValue(value: string): PageZoom {
+  if (value === "fit") return "fit";
+  const n = Number(value);
+  return n === 50 || n === 75 || n === 90 || n === 100 ? (n as PageZoom) : "fit";
+}
+
+/**
+ * Viewport rect of the selection range, from the live editor geometry. Uses
+ * document positions (not the live selection) so it resolves even after focus
+ * moves to the popup. Returns null when the editor view isn't available (tests
+ * with a mock editor) — the popup then falls back to in-flow rendering.
+ */
+function selectionAnchorRect(
+  editor: TipTapEditor | null,
+  selection: CommentSelection,
+): CommentAnchorRect | null {
+  const view = editor?.view;
+  if (view === undefined || typeof view.coordsAtPos !== "function") {
+    return null;
+  }
+  try {
+    const start = view.coordsAtPos(selection.from);
+    const end = view.coordsAtPos(selection.to);
+    return {
+      left: Math.min(start.left, end.left),
+      top: Math.min(start.top, end.top),
+      bottom: Math.max(start.bottom, end.bottom),
+    };
+  } catch {
+    return null;
+  }
+}
+
 async function defaultReadYamlFile(path: string): Promise<string> {
   return invoke<string>("read_yaml_file", { path });
 }
@@ -1028,6 +1154,29 @@ const styles = {
     display: "flex",
     gap: "0.75rem",
   },
+  // Fixed-width slot holding the mode-specific controls, right-aligned, so the
+  // Edit/Page-view toggle to its left keeps the same x in both modes (issue #4).
+  modeControls: {
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "flex-end",
+    gap: "0.75rem",
+    width: "34rem",
+  },
+  zoomLabel: {
+    display: "inline-flex",
+    alignItems: "center",
+  },
+  zoomSelect: {
+    border: "1px solid #D6DEE8",
+    borderRadius: "0.5rem",
+    background: "#FFFFFF",
+    color: "#475569",
+    fontSize: "0.8125rem",
+    fontWeight: 600,
+    padding: "0.3rem 0.4rem",
+    cursor: "pointer",
+  },
   saveStatus: {
     fontSize: "0.75rem",
     fontWeight: 600,
@@ -1062,12 +1211,16 @@ const styles = {
     padding: "1.5rem 2rem",
     flex: "1 1 auto",
   },
-  // Single WYSIWYG surface — a centered document card.
+  // Single WYSIWYG surface — a left-anchored document card. NOT centered: the
+  // comments panel is a flex sibling, so centering (margin:0 auto) would slide
+  // the card left when the panel opens. Left-anchoring pins its left edge just
+  // right of the section sidebar, so toggling comments never moves it (the card
+  // stays ≤60rem; the freed/used space is to its right). See issue #6.
   editorPane: {
     minWidth: 0,
     width: "100%",
     maxWidth: "60rem",
-    margin: "0 auto",
+    margin: 0,
     display: "flex",
     flexDirection: "column",
     border: "1px solid #E2E8F0",

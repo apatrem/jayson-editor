@@ -258,6 +258,11 @@ export const Timeline: FC<TimelineProps> = ({ block }) => {
   const containerStyle: CSSProperties = {
     display: "flex",
     flexDirection: isHorizontal ? "row" : "column",
+    // Fit-to-width then wrap (issue #1): a horizontal timeline must never exceed
+    // the page column (print can't scroll). Phases shrink to share the width;
+    // when too many to stay legible, they wrap onto another row instead of
+    // bleeding off the right edge.
+    flexWrap: isHorizontal ? "wrap" : undefined,
     alignItems: isHorizontal ? "flex-start" : "stretch",
     gap: brand.spacing.unit * 2,
     fontFamily: brand.typography.fonts.body.family,
@@ -266,7 +271,9 @@ export const Timeline: FC<TimelineProps> = ({ block }) => {
 
   const phaseStyle: CSSProperties = {
     flex: isHorizontal ? "1 1 0" : undefined,
-    minWidth: isHorizontal ? 120 : undefined,
+    // Legibility floor, not a hard width: low enough that a typical 4–5 phase
+    // timeline fits one A4 row, high enough that wrapped phases stay readable.
+    minWidth: isHorizontal ? 100 : undefined,
     padding: brand.spacing.unit * 2,
     borderLeft: isHorizontal ? undefined : `3px solid ${accent}`,
     borderTop: isHorizontal ? `3px solid ${accent}` : undefined,

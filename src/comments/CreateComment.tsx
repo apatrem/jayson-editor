@@ -1,6 +1,18 @@
 import type { CSSProperties, FC, FormEvent } from "react";
-import { useState } from "react";
+import { useLayoutEffect, useRef, useState } from "react";
 import { CommentSchema, type Comment } from "../schema/comment";
+
+/**
+ * Viewport-relative rect of the highlighted selection, used to anchor the popup
+ * next to the text instead of pushing document content aside (issue #8). All
+ * fields are client (viewport) coordinates, as returned by
+ * `editor.view.coordsAtPos`.
+ */
+export interface CommentAnchorRect {
+  left: number;
+  top: number;
+  bottom: number;
+}
 
 export interface CommentSelection {
   blockId: string;
@@ -46,6 +58,12 @@ export interface CreateCommentProps {
   onCancel?: () => void;
   generateId?: () => string;
   now?: () => Date;
+  /**
+   * When provided, the popup floats as a fixed overlay anchored beside the
+   * highlighted text (viewport coords) instead of sitting in document flow.
+   * Null/undefined keeps the original in-flow rendering (tests, fallback).
+   */
+  anchor?: CommentAnchorRect | null;
 }
 
 export function createOpenComment(input: CreateOpenCommentInput): Comment {
@@ -89,13 +107,46 @@ export const CreateComment: FC<CreateCommentProps> = ({
   onCancel,
   generateId = () => crypto.randomUUID(),
   now = () => new Date(),
+  anchor,
 }) => {
   const [instruction, setInstruction] = useState("");
   const [markError, setMarkError] = useState<string | null>(null);
+  const formRef = useRef<HTMLFormElement | null>(null);
+  // Resolved fixed-position coords once the popup has been measured against the
+  // viewport (null until measured, or when not anchored).
+  const [placement, setPlacement] = useState<{ left: number; top: number } | null>(
+    null,
+  );
+
+  useLayoutEffect(() => {
+    if (anchor === null || anchor === undefined) {
+      setPlacement(null);
+      return;
+    }
+    const el = formRef.current;
+    if (el === null || typeof window === "undefined") {
+      return;
+    }
+    setPlacement(computePopupPlacement(anchor, el.getBoundingClientRect()));
+  }, [anchor, selection]);
 
   if (selection === null) {
     return null;
   }
+
+  const isFloating = anchor !== null && anchor !== undefined;
+  const floatingStyle: CSSProperties = isFloating
+    ? {
+        position: "fixed",
+        left: placement?.left ?? anchor.left,
+        top: placement?.top ?? anchor.bottom + POPUP_GAP,
+        zIndex: 50,
+        margin: 0,
+        // Hide the first paint until measured so it doesn't flash at the
+        // pre-clamp position.
+        visibility: placement === null ? "hidden" : "visible",
+      }
+    : {};
 
   const trimmedInstruction = instruction.trim();
 
@@ -130,10 +181,11 @@ export const CreateComment: FC<CreateCommentProps> = ({
 
   return (
     <form
+      ref={formRef}
       aria-label="Create AI comment"
       role="dialog"
       onSubmit={handleSubmit}
-      style={styles.popup}
+      style={{ ...styles.popup, ...floatingStyle }}
     >
       <p style={styles.quote}>Comment on &quot;{selection.quotedText}&quot;</p>
       <label style={styles.label}>
@@ -168,6 +220,37 @@ export const CreateComment: FC<CreateCommentProps> = ({
     </form>
   );
 };
+
+const POPUP_GAP = 8;
+const VIEWPORT_MARGIN = 8;
+
+/**
+ * Clamp the anchored popup inside the viewport: align it to the selection's
+ * left edge and prefer placing it just below the selection, flipping above when
+ * it would overflow the bottom. Pure given the viewport size so it's testable.
+ */
+export function computePopupPlacement(
+  anchor: CommentAnchorRect,
+  rect: { width: number; height: number },
+  viewport: { width: number; height: number } = {
+    width: window.innerWidth,
+    height: window.innerHeight,
+  },
+): { left: number; top: number } {
+  const maxLeft = viewport.width - rect.width - VIEWPORT_MARGIN;
+  const left = Math.max(VIEWPORT_MARGIN, Math.min(anchor.left, maxLeft));
+
+  const below = anchor.bottom + POPUP_GAP;
+  let top = below;
+  if (below + rect.height > viewport.height - VIEWPORT_MARGIN) {
+    const above = anchor.top - rect.height - POPUP_GAP;
+    top =
+      above >= VIEWPORT_MARGIN
+        ? above
+        : Math.max(VIEWPORT_MARGIN, viewport.height - rect.height - VIEWPORT_MARGIN);
+  }
+  return { left, top };
+}
 
 const styles: Record<string, CSSProperties> = {
   popup: {

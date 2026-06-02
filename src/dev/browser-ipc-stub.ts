@@ -25,16 +25,21 @@ const ipcError = (kind: IpcError["kind"], message: string): IpcError => ({
   message,
 });
 
-const templateModules: Record<string, string> = import.meta.glob(
-  "/templates/**/*.yaml",
+const bundledDocs: Record<string, string> = import.meta.glob(
+  ["/templates/**/*.yaml", "/documents/**/*.yaml"],
   { query: "?raw", import: "default", eager: true },
 );
 
-function findBundledTemplate(path: string): string | null {
-  const idx = path.lastIndexOf("/templates/");
-  if (idx < 0) return null;
-  const relative = path.slice(idx);
-  return templateModules[relative] ?? null;
+function findBundledDoc(path: string): string | null {
+  for (const marker of ["/templates/", "/documents/"]) {
+    const idx = path.lastIndexOf(marker);
+    if (idx >= 0) {
+      const relative = path.slice(idx);
+      const found = bundledDocs[relative];
+      if (found !== undefined) return found;
+    }
+  }
+  return null;
 }
 
 const writtenFiles = new Map<string, string>();
@@ -55,7 +60,7 @@ const handlers: Record<string, Handler> = {
     const path = String(args["path"] ?? "");
     const cached = writtenFiles.get(path);
     if (cached !== undefined) return Promise.resolve(cached);
-    const bundled = findBundledTemplate(path);
+    const bundled = findBundledDoc(path);
     if (bundled !== null) return Promise.resolve(bundled);
     // IPC contract: reject with the JSON shape, not an Error instance.
     // eslint-disable-next-line @typescript-eslint/prefer-promise-reject-errors
@@ -144,6 +149,6 @@ export function installBrowserIpcStub(): void {
   console.info(
     "[browser-ipc-stub] Installed. Use ?doc=<path> to open a fixture, " +
       `e.g. ?doc=/templates/commercial-proposal.yaml. ` +
-      `Bundled templates: ${Object.keys(templateModules).join(", ")}`,
+      `Bundled docs: ${Object.keys(bundledDocs).join(", ")}`,
   );
 }
