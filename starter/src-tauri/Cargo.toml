@@ -1,5 +1,5 @@
 [package]
-name = "jayson-docs"
+name = "jayson-editor"
 version = "0.1.0"
 description = "Consultancy document system — Tauri shell"
 authors = ["Consultancy"]
@@ -10,7 +10,7 @@ rust-version = "1.88"
 
 [lib]
 # Tauri 2.x ships a library crate.
-name = "jayson_docs_lib"
+name = "jayson_editor_lib"
 crate-type = ["staticlib", "cdylib", "rlib"]
 
 [build-dependencies]

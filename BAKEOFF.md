@@ -12,9 +12,9 @@ This document drives the **v2 bake-off**, which validates a spec that incorporat
 
 | Driver | Branch | Worktree (default) | Start tag |
 |---|---|---|---|
-| Claude Code | `bakeoff/claude-v2` | `../jayson-docs-claude-v2` | `bakeoff-start-v2` |
-| Cursor | `bakeoff/cursor-v2` | `../jayson-docs-cursor-v2` | `bakeoff-start-v2` |
-| Codex (GPT-5) | `bakeoff/gpt5-v2` | `../jayson-docs-gpt5-v2` | `bakeoff-start-v2` |
+| Claude Code | `bakeoff/claude-v2` | `../jayson-editor-claude-v2` | `bakeoff-start-v2` |
+| Cursor | `bakeoff/cursor-v2` | `../jayson-editor-cursor-v2` | `bakeoff-start-v2` |
+| Codex (GPT-5) | `bakeoff/gpt5-v2` | `../jayson-editor-gpt5-v2` | `bakeoff-start-v2` |
 
 The v1 branches (`bakeoff/claude`, `bakeoff/cursor`, `bakeoff/gpt5`) and v1 tag (`bakeoff-start`) are **frozen** as the comparison baseline — do not delete them until after v2 validates and you cherry-pick a v2 winner onto main.
 
@@ -48,7 +48,7 @@ The v1 bake-off ran the same 3 drivers against an earlier loop spec. All three c
 | 6 | `Inputs:` overloaded task-IDs + file paths + prose; dep-eligibility parsing was fragile | Split into `Depends-on:` (T-NN only) and `Reads:` (everything else) |
 | 7 | Two parallel specs (`next-task.md` and `next-task-bakeoff.md`) would drift over time | Bake-off variant kept temporarily for v2 validation; after v2 passes, deleted and methodology lives in this file as a patches recipe (see §Patches recipe below) |
 | 8 | BLOCKERS.md was mutated without explicit staging (same failure mode as STATUS.md) | Generalized rule: all loop-managed files (`docs/TASKS.md`, `STATUS.md`, `BLOCKERS.md`) staged together; hook enforces |
-| 9 | No naming convention for re-running the methodology | Flat suffix: `bakeoff/<driver>-vN`, worktrees `../jayson-docs-<driver>-vN`, tag `bakeoff-start-vN`; `--version vN` flag on setup script |
+| 9 | No naming convention for re-running the methodology | Flat suffix: `bakeoff/<driver>-vN`, worktrees `../jayson-editor-<driver>-vN`, tag `bakeoff-start-vN`; `--version vN` flag on setup script |
 | 10 | Comparison rubric was qualitative-only — same fuzzy "looks better" verdict every time | Binary checklist (`scripts/verify-bakeoff-v2.sh`) gates pass/fail; qualitative narrative supplements |
 
 v1 winner was Claude Code with Sonnet 4.6 high (cleanest protocol adherence). The v2 re-run validates that the 10 fixes close the failure modes the other two drivers hit in v1.
@@ -76,13 +76,13 @@ By default this produces a directory layout like:
 
 ```
 ~/Documents/
-  ├── jayson-docs/               ← primary worktree (main); compare from here
-  ├── jayson-docs-claude/        ← v1 worktree, FROZEN (do not touch)
-  ├── jayson-docs-cursor/        ← v1 worktree, FROZEN
-  ├── jayson-docs-gpt5/          ← v1 worktree, FROZEN
-  ├── jayson-docs-claude-v2/     ← v2 worktree on bakeoff/claude-v2
-  ├── jayson-docs-cursor-v2/     ← v2 worktree on bakeoff/cursor-v2
-  └── jayson-docs-gpt5-v2/       ← v2 worktree on bakeoff/gpt5-v2
+  ├── jayson-editor/               ← primary worktree (main); compare from here
+  ├── jayson-editor-claude/        ← v1 worktree, FROZEN (do not touch)
+  ├── jayson-editor-cursor/        ← v1 worktree, FROZEN
+  ├── jayson-editor-gpt5/          ← v1 worktree, FROZEN
+  ├── jayson-editor-claude-v2/     ← v2 worktree on bakeoff/claude-v2
+  ├── jayson-editor-cursor-v2/     ← v2 worktree on bakeoff/cursor-v2
+  └── jayson-editor-gpt5-v2/       ← v2 worktree on bakeoff/gpt5-v2
 ```
 
 All directories share the same `.git`. Commits made in any worktree are visible to all the others. **Each app opens a different folder**, so they can't fight over which branch is checked out.
@@ -145,7 +145,7 @@ Skip this step and the driver sections below will reference a file that doesn't 
 **Open Claude Code in the dedicated worktree:**
 
 ```
-~/Documents/jayson-docs-claude-v2/
+~/Documents/jayson-editor-claude-v2/
 ```
 
 (The worktree is already on `bakeoff/claude-v2` — no `git checkout` needed.)
@@ -172,7 +172,7 @@ In Claude Code:
 **Open Cursor in the dedicated worktree:**
 
 ```
-~/Documents/jayson-docs-cursor-v2/
+~/Documents/jayson-editor-cursor-v2/
 ```
 
 (The worktree is already on `bakeoff/cursor-v2` — no `git checkout` needed.)
@@ -201,7 +201,7 @@ In Cursor:
 **Open Codex desktop in the dedicated worktree:**
 
 ```
-~/Documents/jayson-docs-gpt5-v2/
+~/Documents/jayson-editor-gpt5-v2/
 ```
 
 (The worktree is already on `bakeoff/gpt5-v2` — no `git checkout` needed.)
@@ -224,13 +224,13 @@ In Codex desktop:
 
 With worktrees enabled (default), launch the three apps simultaneously:
 
-1. **Window 1:** open Claude Code on `~/Documents/jayson-docs-claude-v2/`, configure model, run `/next-task-bakeoff`.
-2. **Window 2:** open Cursor on `~/Documents/jayson-docs-cursor-v2/`, paste system prompt, send "Begin."
-3. **Window 3:** open Codex on `~/Documents/jayson-docs-gpt5-v2/`, paste system instruction, send "Begin."
+1. **Window 1:** open Claude Code on `~/Documents/jayson-editor-claude-v2/`, configure model, run `/next-task-bakeoff`.
+2. **Window 2:** open Cursor on `~/Documents/jayson-editor-cursor-v2/`, paste system prompt, send "Begin."
+3. **Window 3:** open Codex on `~/Documents/jayson-editor-gpt5-v2/`, paste system instruction, send "Begin."
 
-All three commit to their own branches independently. The shared `.git` (back at `~/Documents/jayson-docs/`) sees all three branches diverge in real time. When all finish, run the comparison commands from `~/Documents/jayson-docs/` on `main`.
+All three commit to their own branches independently. The shared `.git` (back at `~/Documents/jayson-editor/`) sees all three branches diverge in real time. When all finish, run the comparison commands from `~/Documents/jayson-editor/` on `main`.
 
-**Don't make manual git changes in the main worktree while the bake-off is running** — leave it alone until all three drivers finish. If you need to inspect mid-run, use `git -C ~/Documents/jayson-docs-claude-v2/ log --oneline` etc. from any terminal.
+**Don't make manual git changes in the main worktree while the bake-off is running** — leave it alone until all three drivers finish. If you need to inspect mid-run, use `git -C ~/Documents/jayson-editor-claude-v2/ log --oneline` etc. from any terminal.
 
 ---
 
@@ -307,7 +307,7 @@ Once `verify-bakeoff-v2.sh` passes, score each branch on five qualitative dimens
 
 ## Comparison commands
 
-Run these from the primary worktree (`~/Documents/jayson-docs/`) after all v2 drivers finish.
+Run these from the primary worktree (`~/Documents/jayson-editor/`) after all v2 drivers finish.
 
 ```bash
 # Step 0 — the gate: binary checklist
@@ -383,16 +383,16 @@ Suppose `bakeoff/claude-v2` won:
 
 ```bash
 # All commands run from the main worktree
-cd ~/Documents/jayson-docs
+cd ~/Documents/jayson-editor
 git checkout main
 
 # 1. Remove ALL worktrees first (v1 + v2)
-git worktree remove ~/Documents/jayson-docs-claude        2>/dev/null || true
-git worktree remove ~/Documents/jayson-docs-cursor        2>/dev/null || true
-git worktree remove ~/Documents/jayson-docs-gpt5          2>/dev/null || true
-git worktree remove ~/Documents/jayson-docs-claude-v2
-git worktree remove ~/Documents/jayson-docs-cursor-v2
-git worktree remove ~/Documents/jayson-docs-gpt5-v2
+git worktree remove ~/Documents/jayson-editor-claude        2>/dev/null || true
+git worktree remove ~/Documents/jayson-editor-cursor        2>/dev/null || true
+git worktree remove ~/Documents/jayson-editor-gpt5          2>/dev/null || true
+git worktree remove ~/Documents/jayson-editor-claude-v2
+git worktree remove ~/Documents/jayson-editor-cursor-v2
+git worktree remove ~/Documents/jayson-editor-gpt5-v2
 
 # 2. Cherry-pick the v2 winner's commits onto main
 git cherry-pick bakeoff-start-v2..bakeoff/claude-v2
@@ -418,7 +418,7 @@ git push origin main
 # These ARE the future-bake-off infrastructure. Don't delete them.
 ```
 
-**Important: worktrees first, branches second.** Git refuses to delete a branch that has a worktree on it. If you forget step 1, you'll get `error: Cannot delete branch 'bakeoff/claude-v2' checked out at ~/Documents/jayson-docs-claude-v2` — run `git worktree remove` and retry.
+**Important: worktrees first, branches second.** Git refuses to delete a branch that has a worktree on it. If you forget step 1, you'll get `error: Cannot delete branch 'bakeoff/claude-v2' checked out at ~/Documents/jayson-editor-claude-v2` — run `git worktree remove` and retry.
 
 ---
 
@@ -427,12 +427,12 @@ git push origin main
 To avoid burning 3× the quota on a misconfigured slash command, run **Driver 1** to its first commit only, then inspect:
 
 ```bash
-cd ~/Documents/jayson-docs-claude-v2     # worktree, already on bakeoff/claude-v2
+cd ~/Documents/jayson-editor-claude-v2     # worktree, already on bakeoff/claude-v2
 # In Claude Code (Sonnet 4.6 + high), invoke /next-task-bakeoff ONCE.
 # Wait for it to finish T-01 and stop.
 
 # Then verify (from the main worktree):
-cd ~/Documents/jayson-docs
+cd ~/Documents/jayson-editor
 git log --oneline bakeoff/claude-v2 ^main     # Should show 1 commit: T-01: ...
 git log main                                   # Should be unchanged
 git show bakeoff/claude-v2:STATUS.md | head -10   # Should have "Running on: Claude Sonnet 4.6 at high"

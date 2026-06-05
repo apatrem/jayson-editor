@@ -1,6 +1,6 @@
-# Jayson Docs
+# Jayson Editor
 
-**Jayson Docs** is a local-first desktop application for producing high-quality consultancy deliverables — proposals, reports, and slide decks — from a single structured source of truth.
+**Jayson Editor** is a local-first desktop application for producing high-quality consultancy deliverables — proposals, reports, and slide decks — from a single structured source of truth.
 
 Rather than hand-formatting documents, you author a **DocModel**: a validated, schema-backed representation of your content. The DocModel is rendered into polished HTML and PDF through a curated, closed library of layout blocks, so every document stays on-brand and internally consistent without manual styling. Brand tokens and any custom blocks are generated once at setup time with AI assistance, then locked in for repeatable, predictable output.
 
@@ -21,7 +21,7 @@ Key ideas:
 ## Install
 
 ```bash
-git clone <repo-url> jayson-docs && cd jayson-docs
+git clone <repo-url> jayson-editor && cd jayson-editor
 npm ci
 bash scripts/install-hooks.sh   # pre-commit hook for the autonomous task loop
 ```

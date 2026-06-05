@@ -137,7 +137,7 @@ gaps instead.
 
 Validation currently relies on the **in-repo Node CLI** (`npm run validate`,
 which needs the repo's `tsx`/Node toolchain). This is fine while authoring
-happens inside `jayson-docs`. For **portable / client deployment** — copying this
+happens inside `jayson-editor`. For **portable / client deployment** — copying this
 guide and a template out into a Node-less environment — that gate won't exist and
 we'll need another validation path (validation through the app's IPC layer, or a
 bundled standalone validator). Design that before this guide is copied out of the

@@ -66,7 +66,7 @@ M7-spike touches **only 3 of the 17 IPC commands**: `read_yaml_file` and `write_
 │                                                                              │
 │                                                                              │
 │                          ┌─────────────────────────┐                         │
-│                          │      Jayson Docs         │                         │
+│                          │      Jayson Editor         │                         │
 │                          │                          │                         │
 │                          │  [  Open Document  ]     │                         │
 │                          │                          │                         │

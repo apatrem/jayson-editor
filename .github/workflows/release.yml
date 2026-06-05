@@ -131,7 +131,7 @@ jobs:
           # on macOS/Linux and on unsigned Windows builds.
           args: ${{ (matrix.platform == 'windows-latest' && steps.win_sign.outputs.enabled == 'true') && '--config src-tauri/tauri.windows.signing.conf.json' || '' }}
           tagName: ${{ github.ref_name }}
-          releaseName: "Jayson Docs ${{ github.ref_name }}"
+          releaseName: "Jayson Editor ${{ github.ref_name }}"
           releaseBody: "Signed installers for macOS and Windows; unsigned AppImage for Linux."
           releaseDraft: false
           prerelease: ${{ contains(github.ref_name, '-rc') || contains(github.ref_name, '-beta') || contains(github.ref_name, '-alpha') }}

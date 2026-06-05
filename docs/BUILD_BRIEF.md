@@ -1,4 +1,4 @@
-# Build Brief — Jayson Docs
+# Build Brief — Jayson Editor
 
 **For:** the implementing developer / Claude Code
 **Companion to:** `DOCUMENT_SYSTEM_ARCHITECTURE.md` (the architecture memo)
@@ -43,7 +43,7 @@ acceptance criteria all pass.
 ## 1. Repository layout
 
 ```
-jayson-docs/
+jayson-editor/
   package.json
   tsconfig.json
   vite.config.ts

@@ -1906,7 +1906,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "jayson-docs"
+name = "jayson-editor"
 version = "0.1.0"
 dependencies = [
  "anyhow",

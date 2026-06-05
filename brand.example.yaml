@@ -1,7 +1,7 @@
 # Brand Token File — Professional Consulting Style Example
 #
 # Purpose: single source of truth for all visual identity tokens
-#          consumed by every renderer (HTML, PDF, deck) in Jayson Docs.
+#          consumed by every renderer (HTML, PDF, deck) in Jayson Editor.
 #
 # This file is the canonical example brand used in tests and onboarding.
 # It demonstrates a corporate consulting visual style:

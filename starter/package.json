@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
-  "description": "Jayson Docs — see README.md and docs/",
+  "description": "Jayson Editor — see README.md and docs/",
   "scripts": {
     "dev": "vite",
     "build": "tsc --noEmit && vite build",

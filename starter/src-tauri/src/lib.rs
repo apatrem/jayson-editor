@@ -15,7 +15,7 @@ pub fn run() {
         .plugin(tauri_plugin_store::Builder::default().build())
         .setup(|app| {
             env_logger::init();
-            log::info!("Jayson Docs starting (Tauri {})", tauri::VERSION);
+            log::info!("Jayson Editor starting (Tauri {})", tauri::VERSION);
 
             let _config_dir = app
                 .path()

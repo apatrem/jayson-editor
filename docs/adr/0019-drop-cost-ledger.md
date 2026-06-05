@@ -34,7 +34,7 @@ concluded it isn't worth it for this product:
 
 ## Decision
 
-**Remove the cost ledger and the D-14 monthly cap entirely. Jayson Docs does not meter
+**Remove the cost ledger and the D-14 monthly cap entirely. Jayson Editor does not meter
 or cap LLM spend.** Keep the LLM features (authored-block generation, comment-to-AI)
 active. Runaway-spend protection is delegated to **provider-side billing alerts /
 account limits**; setting up provider/org-level spend controls is a recommended

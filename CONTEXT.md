@@ -1,4 +1,4 @@
-# Jayson Docs — Context
+# Jayson Editor — Context
 
 The vocabulary the team uses when talking about this codebase. Definitions are kept tight on purpose — when a term needs to be clarified, this is where the resolution lives.
 

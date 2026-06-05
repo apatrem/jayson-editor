@@ -21,7 +21,7 @@ pub fn run() {
         .plugin(tauri_plugin_http::init())
         .setup(|app| {
             env_logger::init();
-            log::info!("Jayson Docs starting (Tauri {})", tauri::VERSION);
+            log::info!("Jayson Editor starting (Tauri {})", tauri::VERSION);
 
             #[cfg(target_os = "macos")]
             if let (Some(menu), Some(display_name)) = (app.menu(), app.config().product_name.clone())

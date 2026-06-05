@@ -1,4 +1,4 @@
-# Decisions Log — Jayson Docs
+# Decisions Log — Jayson Editor
 
 **Date:** 2026-05-21
 **Status:** Captured from a grilling session that stress-tested the architecture memo and build brief.
@@ -115,14 +115,14 @@ Default: one API call per batch returns N structured patches in a single respons
 Expected spend with the mixed strategy: ~$120–250/month (≈ $1,500–3,000/year). Soft per-consultant monthly limits (e.g., €50/month) with 80% warning, hard stop at 100%, admin override.
 **Why:** Predictable spend; protects against runaway loops.
 **Implication:** App needs a per-consultant cost ledger — implementation rules in D-34 (carve-out from D-32's no-telemetry default).
-**Superseded (2026-05-29, ADR-0019):** the monthly cap and the per-consultant cost ledger are dropped pre-release — Jayson Docs does not meter or cap LLM spend; spend is governed by provider-side billing / account limits. The ledger design is archived for a possible future release in [docs/archive/cost-ledger.md](archive/cost-ledger.md).
+**Superseded (2026-05-29, ADR-0019):** the monthly cap and the per-consultant cost ledger are dropped pre-release — Jayson Editor does not meter or cap LLM spend; spend is governed by provider-side billing / account limits. The ledger design is archived for a possible future release in [docs/archive/cost-ledger.md](archive/cost-ledger.md).
 
 ---
 
 ## 5. Setup, scaffolding & integration
 
 ### D-15 — Scaffolding skill runs in Claude Code (v1), integrated later
-Initial doc generation is a Claude Code skill that asks structured questions, references the consultancy's roster/fees/references, and outputs a YAML DocModel. Consultant loads the YAML into the Jayson Docs editor.
+Initial doc generation is a Claude Code skill that asks structured questions, references the consultancy's roster/fees/references, and outputs a YAML DocModel. Consultant loads the YAML into the Jayson Editor.
 **Why:** Decoupled, fast to iterate, leverages an existing Claude Code workflow.
 **Roadmap:** v1.1+ — integrate scaffolding into the editor as "New from template" with the same questionnaire inline.
 

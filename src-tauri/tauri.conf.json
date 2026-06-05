@@ -1,6 +1,6 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
-  "productName": "Jayson Docs",
+  "productName": "Jayson Editor",
   "version": "0.1.0",
   "identifier": "com.consultancy.docsystem",
 
@@ -15,7 +15,7 @@
     "windows": [
       {
         "label": "main",
-        "title": "Jayson Docs",
+        "title": "Jayson Editor",
         "width": 1400,
         "height": 900,
         "minWidth": 1024,
@@ -62,7 +62,7 @@
       "icons/icon.icns",
       "icons/icon.ico"
     ],
-    "shortDescription": "Jayson Docs — consultancy document editor",
+    "shortDescription": "Jayson Editor — consultancy document editor",
     "longDescription": "Schema-anchored document and deck editor with comment-to-AI workflow.",
 
     "macOS": {

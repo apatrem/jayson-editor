@@ -1,6 +1,6 @@
 # Release & Code Signing
 
-How Jayson Docs is packaged into downloadable installers, and how to make those
+How Jayson Editor is packaged into downloadable installers, and how to make those
 installers trusted (no "unidentified developer" / SmartScreen warnings).
 
 Related tasks: **T-108** (code signing), **T-110** (release pipeline). The
@@ -37,7 +37,7 @@ git push origin v1.0.0
 
 The `Release` workflow runs the quality gates, then builds + (if secrets are
 present) signs installers on each OS and publishes them to a GitHub Release named
-`Jayson Docs v1.0.0`. Pre-release suffixes (`-rc`, `-beta`, `-alpha`) mark the
+`Jayson Editor v1.0.0`. Pre-release suffixes (`-rc`, `-beta`, `-alpha`) mark the
 release as a prerelease automatically.
 
 ### Local one-off build (unsigned)

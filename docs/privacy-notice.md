@@ -1,8 +1,8 @@
-# Jayson Docs Privacy Notice
+# Jayson Editor Privacy Notice
 
 ## English
 
-Jayson Docs is a local desktop app for internal consultancy staff. It does not collect usage telemetry in v1. No analytics, behavioral tracking, accept/reject ratios, edit patterns, prompt text, or response text are stored or sent to consultancy-owned servers.
+Jayson Editor is a local desktop app for internal consultancy staff. It does not collect usage telemetry in v1. No analytics, behavioral tracking, accept/reject ratios, edit patterns, prompt text, or response text are stored or sent to consultancy-owned servers.
 
 During install, the app stores:
 
@@ -15,7 +15,7 @@ The app does not meter or cap LLM spend, and stores no usage or cost data: there
 
 ## Français
 
-Jayson Docs est une application de bureau locale pour les équipes internes du cabinet. La v1 ne collecte aucune télémétrie d'usage. Aucune donnée d'analyse, aucun suivi comportemental, aucun taux d'acceptation/rejet, aucun schéma d'édition, aucun prompt et aucune réponse de modèle ne sont stockés ni envoyés vers des serveurs du cabinet.
+Jayson Editor est une application de bureau locale pour les équipes internes du cabinet. La v1 ne collecte aucune télémétrie d'usage. Aucune donnée d'analyse, aucun suivi comportemental, aucun taux d'acceptation/rejet, aucun schéma d'édition, aucun prompt et aucune réponse de modèle ne sont stockés ni envoyés vers des serveurs du cabinet.
 
 Pendant l'installation, l'application stocke :
 
