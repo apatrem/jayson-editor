@@ -66,9 +66,12 @@ jobs:
             ~/.cargo/registry
             ~/.cargo/git
             src-tauri/target
-          key: ${{ runner.os }}-cargo-${{ hashFiles('src-tauri/Cargo.lock') }}
+          # Salt (v2) bust — caches built before the jayson-docs → jayson-editor
+          # rename baked the old absolute checkout path into Tauri's build-script
+          # permission output; the salt keeps restore-keys from pulling them.
+          key: ${{ runner.os }}-cargo-v2-${{ hashFiles('src-tauri/Cargo.lock') }}
           restore-keys: |
-            ${{ runner.os }}-cargo-
+            ${{ runner.os }}-cargo-v2-
 
       - name: Install Linux Tauri dependencies
         if: matrix.platform == 'ubuntu-latest'

@@ -57,9 +57,13 @@ jobs:
             ~/.cargo/git
             src-tauri/target
             starter/src-tauri/target
-          key: ${{ runner.os }}-cargo-${{ hashFiles('src-tauri/Cargo.lock', 'starter/src-tauri/Cargo.lock') }}
+          # Salt (v2) bust: caches built before the jayson-docs → jayson-editor
+          # rename baked the old absolute checkout path into Tauri's build-script
+          # permission output, so restoring them breaks the build. The salt keeps
+          # restore-keys from pulling any pre-rename cache.
+          key: ${{ runner.os }}-cargo-v2-${{ hashFiles('src-tauri/Cargo.lock', 'starter/src-tauri/Cargo.lock') }}
           restore-keys: |
-            ${{ runner.os }}-cargo-
+            ${{ runner.os }}-cargo-v2-
 
       - name: Install Linux Tauri dependencies
         run: |
@@ -105,9 +109,10 @@ jobs:
             ~/.cargo/registry
             ~/.cargo/git
             src-tauri/target
-          key: ${{ runner.os }}-cargo-${{ hashFiles('src-tauri/Cargo.lock') }}
+          # Salt (v2) bust — see rust-lockfile-parity job for rationale.
+          key: ${{ runner.os }}-cargo-v2-${{ hashFiles('src-tauri/Cargo.lock') }}
           restore-keys: |
-            ${{ runner.os }}-cargo-
+            ${{ runner.os }}-cargo-v2-
 
       - name: cargo test (Windows fs path)
         working-directory: src-tauri
