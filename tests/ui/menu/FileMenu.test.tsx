@@ -112,7 +112,10 @@ describe("FileMenu", () => {
         expect.stringContaining("Menu heading"),
       );
     });
-    expect(screen.getAllByText("menu-copy.yaml").length).toBeGreaterThan(0);
+    // findAllByText retries: the header re-render that swaps in the new
+    // filename is a separate state update from the writeYamlFile call gated
+    // above, so a synchronous getAllByText here races it under CI load.
+    expect((await screen.findAllByText("menu-copy.yaml")).length).toBeGreaterThan(0);
   });
 
   it("save-as warns when saving outside the configured library folder", async () => {
