@@ -7,11 +7,19 @@ The vocabulary the team uses when talking about this codebase. Definitions are k
 ### Documents
 
 **DocModel**:
-The canonical JSON document conforming to the Zod schema. Every other representation — TipTap editor state, YAML on disk, rendered HTML — is a *projection* of it.
+The canonical JSON document conforming to the Zod schema. Every other representation — TipTap editor state, the [[on-disk-docmodel]] file, rendered HTML — is a *projection* of it.
 _Avoid_: "the document state", "the editor state", "the model"
 
+**On-disk DocModel**:
+The canonical JSON file inside each [[doc-folder]]. Its basename **matches the doc folder name** (e.g. folder `2026-06-07 - Acme - SMR Proposal/` contains `2026-06-07 - Acme - SMR Proposal.json`). The only on-disk document format — no YAML peer. Pre-release: clean break from YAML; no import shim.
+_Avoid_: "proposal.yaml", "proposal.json" (fixed inner name — superseded)
+
+**Doc folder**:
+The unit of library identity (D-19): a directory in the cloud-sync root. **Two-phase naming:** at Pass 0 the skill creates **`YYYY-MM-DD - {client}/`** (date = outline start → `meta.createdAt`; client from brief). At [[structuring]], the app **one-time** expands the folder to **`YYYY-MM-DD - {client} - {title}/`** from the markdown draft's primary heading and writes the matching [[on-disk-docmodel]]. After that, **renamed only explicitly** (Save As / Rename document) — never automatically when `meta.project` or the markdown title changes.
+_Avoid_: conflating with "the DocModel" (the folder is a container, not the canonical artifact)
+
 **Projection**:
-A derived representation of the DocModel (editor JSON, YAML, HTML, PDF). Never canonical — always reconstructible from the DocModel.
+A derived representation of an *existing* DocModel (editor JSON, JSON on disk, HTML, PDF). Never canonical — always reconstructible from the DocModel. A [[markdown-draft]] is **not** a Projection — it precedes the DocModel.
 _Avoid_: "view", "format"
 
 **Block**:
@@ -81,11 +89,11 @@ The on-screen scale of [[page-view]] sheets — a granular control (50 / 75 / 90
 _Avoid_: "scale", "magnification"
 
 **Local setting**:
-A machine-local, app-wide UI preference — e.g. [[page-flow]], [[page-spread]], [[page-zoom]], review mode. Persisted in the browser's localStorage under a `docsystem.*` key. Shared across all documents on that machine, never written to the DocModel or its YAML, so it never shows in a doc diff and never syncs between machines. Distinct from **Document settings** (below), which edits canonical in-doc metadata/layout. The set grows over time; each new preference is one more `docsystem.*` key, not a new store.
+A machine-local, app-wide UI preference — e.g. [[page-flow]], [[page-spread]], [[page-zoom]], review mode. Persisted in the browser's localStorage under a `docsystem.*` key. Shared across all documents on that machine, never written to the DocModel or its on-disk JSON, so it never shows in a doc diff and never syncs between machines. Distinct from **Document settings** (below), which edits canonical in-doc metadata/layout. The set grows over time; each new preference is one more `docsystem.*` key, not a new store.
 _Avoid_: "user setting", "config", "preference" (unqualified), conflating with "Document settings"
 
 **Document settings**:
-The in-app dialog that edits a document's curated `meta` fields and its `meta.layout` overrides (block spacing, heading-numbering format). Everything it writes is **canonical** — it lives in the DocModel and serializes to YAML. The opposite of a [[local-setting]]: per-document, in the doc, travels with the file.
+The in-app dialog that edits a document's curated `meta` fields and its `meta.layout` overrides (block spacing, heading-numbering format). Everything it writes is **canonical** — it lives in the DocModel and serializes to the on-disk JSON file. The opposite of a [[local-setting]]: per-document, in the doc, travels with the file.
 _Avoid_: conflating with "[[local-setting]]"; "preferences"
 
 **Closed editor schema**:
@@ -136,6 +144,48 @@ _Avoid_: "AI edit", "suggestion"
 A structured operation that replaces or updates one block in the DocModel. The only shape the LLM is allowed to return for an edit.
 _Avoid_: "diff", "update"
 
+### Generation (cold-start)
+
+**Cold-start generation**:
+The multi-pass pipeline that produces a first-draft DocModel from a brief. Separate from in-document editing — once a DocModel exists, further change goes through [[block-patch]] only (except scoped section regeneration).
+_Avoid_: "scaffolding" (legacy term), conflating with comment-to-AI editing
+
+**Markdown draft**:
+The transient prose artifact emitted by the writing pass (Pass 1). Lives as `draft.md` in the [[doc-folder]] during the free-markdown phase. Optional **YAML frontmatter** at the top carries `title`, `client`, and `createdAt` (from Pass 0) — authoritative for folder expand and `meta` at [[structuring]]; if frontmatter is absent, fall back to the first `#` H1 for `{title}`. Not canonical — never edited as a co-equal source of truth after structuring. On successful structuring, **archived** (kept for audit, moved out of the editable path).
+_Avoid_: "the document", "the source file", conflating with the DocModel
+
+**Phase gate**:
+The boundary between the free-markdown phase (edit `draft.md` freely) and the canonical DocModel phase (edit in the WYSIWYG / via patches). Crossed only by an explicit consultant action — **Structure draft** — never automatically. **One-way in v1** — no full-doc re-structure; use scoped section regeneration or editor patches. Full restore-from-archive re-structure deferred to v1.1 (see roadmap).
+_Avoid_: "import", "sync", "convert" (implies passive or bidirectional)
+
+**Structuring**:
+Pass 2 of cold-start generation: validates and converts a [[markdown-draft]] into the canonical DocModel. Runs in the app; the trust boundary for externally refined markdown. **Stops at Pass 2 for reports.** For decks, Pass 2 is followed immediately by **Pass 2.5** (layout proposal + deterministic fit-check) in the same **Structure draft** action. [[data-enrichment]] remains a separate step after structuring.
+_Avoid_: "parsing", "import" (too generic)
+
+**Data enrichment**:
+Pass 3 of cold-start generation: fills shape-correct illustrative data on data-bearing blocks, sets `dataState: draft-illustrative`, never LLM-authors external citations. Triggered by **Fill illustrative data** (whole document, **skips blocks already `confirmed`**) after [[structuring]] — not automatic on open, not bundled into Structure draft.
+_Avoid_: "data generation", conflating with consultant paste-from-Excel (R8)
+
+**Deck layout assignment**:
+Pass 2.5 of cold-start generation (decks only): LLM proposes a slide layout from the closed template library; a **deterministic fit-check** is the authority. Bundled into **Structure draft** with Pass 2 in v1. On fit failure: retry next higher-capacity layout → else auto-split to continuation slide + [[readiness-gate]] overflow flag → halt Structure if still failing (D-236; no silent compression in v1).
+_Avoid_: "slide template pick" (implies manual-only), conflating with [[data-enrichment]]
+
+**Source intent**:
+Write-once provenance on blocks born from placeholders at [[structuring]] — the original writing-pass intent string. For traceability in the side panel; **never** read by down-conversion (`toPlaceholder` derives from current block fields only).
+_Avoid_: "description", "intent field" (ambiguous with placeholder intent in markdown)
+
+**Readiness gate**:
+The aggregated set of "needs human review" flags on a DocModel (unconfirmed data, degraded blocks, layout overflow, etc.). Surfaced in three places: on-block in the canvas, in the side panel, and in a document-level checklist. **Does not block export** — at export time a popup summarizes remaining flags (**Review items** vs **Export with flagged content**, one-click proceed, no typed reason); [[block-watermark]]s carry accountability into the output.
+_Avoid_: "blockers" as a hard stop (they are warnings until export review)
+
+**Block watermark**:
+A visible treatment on blocks carrying unverified illustrative data or generation-degradation flags — in the editor and in exported PDF/HTML — so shippable output is never mistaken for fully verified work.
+_Avoid_: "badge" alone (the checklist also uses badges; watermark is the on-block/export treatment)
+
+**Size flag**:
+A readiness flag on a DocModel whose block/slide count exceeds the validated perf envelope (D-35). v1: single DocModel always — flag only, no forced split. Export and editing proceed; perf re-validation sets the evidence ceiling later.
+_Avoid_: "too big" (vague), conflating with layout overflow
+
 ## Flagged ambiguities
 
 **"Document" vs "deck"** — both are kinds of `DocModel` (`kind: "document"` or `kind: "deck"`). When the context could mean either, say "DocModel" or qualify ("flowing document", "slide deck").
@@ -149,6 +199,8 @@ These have been discussed but are intentionally not built in v1. Listed here so 
 - **Organisation-shared Authored block library** — a place where Authored blocks from across a consultancy collect for colleagues to discover and pull (vs the current email-only sharing). Future improvement. See ADR-0004.
 - **Extended Authored-block capabilities** — promotion of atom-node-with-JSON-payload, custom side panels, or ECharts/Mermaid embeds into the Authored tier (currently restricted to Standard/Brand). Triggered when (a) real usage shows the simple-container subset is too restrictive, and (b) the codegen + lint can vet the additional surface area. See ADR-0007.
 - **Flattening the section container** — reconsidering whether the `Section` concept should exist at all, vs a flat block list where headings alone do the chaptering. RESOLVED (partly): sections stay as organizational containers, but their title is now nav-only (see "Section title") so the dual-heading concept is gone — visible headers are heading blocks only. Fully removing the `Section` container remains deferred (it is a canonical DocModel rewrite) and is unnecessary now that sections are the reorder/sidebar unit.
+- **Full re-structure from archived draft** — restore `.generation/source-draft.md`, re-cross the [[phase gate]] with whole-doc replace. Deferred to v1.1; v1 uses scoped section regeneration only. See `docs/DECISIONS.md` roadmap.
+- **Outline-time document split** — when Pass 0 outline exceeds the D-35 perf envelope, propose splitting into multiple linked DocModels (one per workstream) with consultant override at outline approval, instead of a single oversized doc with a [[size-flag]] only. Deferred from v1 cold-start generation (v1 uses single doc + size flag). See `docs/DECISIONS.md` roadmap.
 
 ## Example dialogue
 

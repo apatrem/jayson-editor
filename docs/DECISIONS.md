@@ -363,6 +363,8 @@ A reproducible benchmark harness in `tests/perf/`, run in CI, that:
 Versions are nominal; actual sequencing depends on v1 outcomes.
 
 ### v1.1
+- **Outline-time linked-document split** — when cold-start generation outline exceeds the D-35 envelope, propose splitting into multiple linked DocModels (e.g. one deck per workstream) with consultant override at outline approval; v1 ships single DocModel + size flag only (grilling 2026-06-07)
+- **Full re-structure** — restore `.generation/source-draft.md` to `draft.md`, edit, run **Structure draft** again with explicit confirm (replaces entire DocModel; comments orphaned). v1 is one-way gate + scoped section regeneration only (grilling 2026-06-07)
 - **Consultant-authored custom blocks** beyond the setup pass (email-shared first)
 - **Integrated scaffolding** ("New from template" inside the editor with the questionnaire)
 - **Additional languages** (DE, ES) and FR editor UI
