@@ -122,6 +122,8 @@ Expected spend with the mixed strategy: ~$120–250/month (≈ $1,500–3,000/ye
 ## 5. Setup, scaffolding & integration
 
 ### D-15 — Scaffolding skill runs in Claude Code (v1), integrated later
+**Refined (2026-06-07, [ADR-0021](adr/0021-multi-pass-generation-pipeline.md)):** the skill becomes the multi-pass generation pipeline (outline → writing fan-out → coherence → structuring → layout → data); output is a **JSON** DocModel (ADR-0020), not YAML. The "runs in Claude Code (v1), integrate later" core is unchanged. Full design: [GENERATION_PIPELINE.md](GENERATION_PIPELINE.md).
+
 Initial doc generation is a Claude Code skill that asks structured questions, references the consultancy's roster/fees/references, and outputs a YAML DocModel. Consultant loads the YAML into the Jayson Editor.
 **Why:** Decoupled, fast to iterate, leverages an existing Claude Code workflow.
 **Roadmap:** v1.1+ — integrate scaffolding into the editor as "New from template" with the same questionnaire inline.
@@ -139,6 +141,8 @@ Same setup AI scans demo files and produces a catalogue diff: which pre-built bl
 ## 6. File formats & storage
 
 ### D-18 — YAML is the canonical on-disk format
+**Superseded (2026-06-07, [ADR-0020](adr/0020-json-docmodel-supersedes-yaml.md)):** the canonical on-disk format is now **JSON**, serializing the canonical DocModel. The D-18 premises (human-readable diffs, hand-editability) no longer hold — the file is machine-written and edited via the WYSIWYG surface (R4) — and JSON is more reliable for LLM generation. Markdown/Markdoc were evaluated and rejected as the container. The text below is the original decision.
+
 Each doc is a YAML file. JSON is in-memory only. Cloud-storage diffs are human-readable; consultants can hand-edit in emergencies; LLMs read it natively.
 **Why:** Maximizes diff readability, hand-editability, and direct LLM access (no unzip step). Ruled out a ZIP-based single-file format because it invalidates these properties.
 **Implication:** Each doc is a folder, not a file (see D-19).
