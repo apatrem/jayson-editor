@@ -2085,7 +2085,7 @@ Depends on ADR-0022 (JSON on disk) and [JSON_MIGRATION_INVENTORY.md](JSON_MIGRAT
 - **Acceptance:** Formal grammar, examples, import-time lint rules, re-anchoring algorithm when local ids are lost.
 - **est.** 3h
 
-### T-191 [ ] · Implement placeholder parse + toPlaceholder (per block type)
+### T-191 [~] · Implement placeholder parse + toPlaceholder (per block type)
 - **Depends-on:** T-190
 - **Reads:** `docs/PLACEHOLDER_GRAMMAR.md`, block schemas under `src/blocks/*/schema.ts`
 - **Outputs:** `src/generation/placeholder.ts`, `src/generation/parse-placeholder.ts`, `tests/generation/placeholder.test.ts` (≥1 block type round-trip: `toPlaceholder(structure(p)) ≈ p`)
