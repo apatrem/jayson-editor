@@ -831,7 +831,7 @@ export const GenerationBlockFlagsSchema = z.object({
 }).strict();
 ```
 
-**Readiness gate** (`src/generation/readiness.ts`): `shippable ⟺ collectReadinessBlockers(doc).length === 0`. Blockers: `dataState ≠ confirmed` on data-bearing blocks, `degradedToProse`, `layoutOverflow`, `contradictionFlag`, and `confirmed` without `source.name`. UI spec: `docs/UI_READINESS_GATE.md`.
+**Readiness gate** (`src/generation/readiness.ts`): `allClear ⟺ blockers.length === 0` (checklist). **Export is always allowed**; non-empty blockers trigger an export summary popup. UI spec: `docs/UI_READINESS_GATE.md`.
 
 **Verification rule:** transitioning to `confirmed` requires a real `source`; editing data or `source` after confirmation reverts to `draft-illustrative` (see `dataStateAfterEdit`).
 

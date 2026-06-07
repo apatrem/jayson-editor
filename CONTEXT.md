@@ -167,8 +167,16 @@ Pass 3 of cold-start generation: fills shape-correct illustrative data on data-b
 _Avoid_: "data generation", conflating with consultant paste-from-Excel (R8)
 
 **Deck layout assignment**:
-Pass 2.5 of cold-start generation (decks only): LLM proposes a slide layout from the closed template library; a **deterministic fit-check** is the authority. Bundled into **Structure draft** with Pass 2 in v1. On fit failure: retry next higher-capacity layout → else auto-split to continuation slide + [[readiness-gate]] overflow flag → halt Structure if still failing (D-236; no silent compression in v1).
+Pass 2.5 of cold-start generation (decks only): LLM proposes a slide layout from the closed **slide layout catalogue** (`slide-layouts.catalogue.yaml` — layout id, `use-when`, per-slot accepted block kinds + capacity). A **deterministic fit-check** reads the same file as authority. Bundled into **Structure draft** with Pass 2 in v1. On fit failure: retry next higher-capacity layout → else auto-split to continuation slide + [[readiness-gate]] overflow flag → halt Structure if still failing (D-236; no silent compression in v1). Pass 1 writer capacity budgets for each slide are **derived from the same catalogue row** as the layout named in the [[generation-outline]] (single source — no separate soft limits).
 _Avoid_: "slide template pick" (implies manual-only), conflating with [[data-enrichment]]
+
+**Slide layout catalogue**:
+The closed deck-layout spec at repo root (`slide-layouts.catalogue.yaml`), parallel in role to `blocks.catalogue.yaml`. Consumed by Pass 1 (capacity budgets), Pass 2.5 (LLM `use-when` + fit-check), and validated against editor slot maps.
+_Avoid_: "layout config", scattering capacity in React components only
+
+**Generation outline**:
+Pass 0 artifact persisted as **`outline.json`** in the [[doc-folder]]: the rich outline (key messages, owned claims, glossary, slide/report structure). For decks, slide-granular with a **layout id per slide** pointing into the [[slide-layout-catalogue]]. Drives Pass 1 fan-out and Pass 1 capacity budgets.
+_Avoid_: "table of contents", conflating with markdown `#` headings alone
 
 **Source intent**:
 Write-once provenance on blocks born from placeholders at [[structuring]] — the original writing-pass intent string. For traceability in the side panel; **never** read by down-conversion (`toPlaceholder` derives from current block fields only).

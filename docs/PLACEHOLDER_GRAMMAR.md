@@ -11,6 +11,9 @@ they are plain markdown paragraphs/lists.
 
 ## 1. Surface syntax
 
+`draft.md` may open with YAML frontmatter (`title`, `client`, `createdAt`) — authoritative
+for structuring metadata; not part of the placeholder grammar. See `GENERATION_PIPELINE.md` §4.
+
 A placeholder is a single line (or standalone block) matching:
 
 ```

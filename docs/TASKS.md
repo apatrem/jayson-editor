@@ -2099,11 +2099,11 @@ Depends on ADR-0022 (JSON on disk) and [JSON_MIGRATION_INVENTORY.md](JSON_MIGRAT
 - **Acceptance:** Schemas validate; illustrative data watermark contract documented; `source` vs `sourceHint` separation enforced.
 - **est.** 4h
 
-### T-193 [~] · Readiness gate data model + export lock spec
+### T-193 [~] · Readiness gate data model + export summary popup spec
 - **Depends-on:** T-192
 - **Reads:** `docs/GENERATION_PIPELINE.md` §7
-- **Outputs:** `src/generation/readiness.ts` (pure logic), `docs/UI_READINESS_GATE.md` (or section in UI_APP_SHELL), tests for blocker aggregation
-- **Acceptance:** `shippable ⟺ blockers == []`; export lock predicate matches GENERATION_PIPELINE §7 capstone.
+- **Outputs:** `src/generation/readiness.ts` (pure logic), `docs/UI_READINESS_GATE.md`, tests for blocker aggregation; `canExport()` always true
+- **Acceptance:** Blockers collected for checklist/popup; export never blocked; popup contract documented (Review items / Export with flagged content).
 - **est.** 4h
 
 ### T-194 [~] · Markdown import contract lint (pre-structuring)
@@ -2123,7 +2123,7 @@ Depends on ADR-0022 (JSON on disk) and [JSON_MIGRATION_INVENTORY.md](JSON_MIGRAT
 ### T-196 [ ] · Deck layout fit-check engine (Pass 2.5)
 - **Depends-on:** T-192, D-30 slide layouts
 - **Reads:** `docs/GENERATION_PIPELINE.md` §5, slide layout components
-- **Outputs:** Template capacity metadata spec + `src/generation/layout-fit-check.ts` + tests
+- **Outputs:** `slide-layouts.catalogue.yaml`, layout capacity metadata spec + `src/generation/layout-fit-check.ts` + tests; validate editor `LAYOUT_SLOTS` against catalogue
 - **Acceptance:** Deterministic authority over LLM layout proposal; overflow → auto-split + flag path tested.
 - **est.** 8h
 

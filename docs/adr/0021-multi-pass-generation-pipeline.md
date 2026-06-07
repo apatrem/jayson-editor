@@ -54,10 +54,7 @@ strongest modality and only *wrapped* (not regenerated) into the DocModel:
 transient, deterministically-derived projection (`toPlaceholder` derives from
 current block fields — **never** a stored description).
 
-**Verification:** per-pass gates, a prose-preservation invariant at structuring,
-fail-loud halts (no silent degradation, per D-236), and a single **aggregated
-readiness gate** that locks export until every "needs a human" flag is cleared.
-The pipeline's contract is *valid-draft-with-flags*, not guaranteed-shippable.
+**Readiness gate** — advisory blockers + export summary popup (not export lock); fail-loud halts (no silent degradation, per D-236). The pipeline's contract is *valid-draft-with-flags*, not guaranteed-shippable.
 
 **Host:** V1 runs Pass 0–1 as a Claude Code skill (outline + per-section
 sub-agents); the pipeline is host-agnostic and in-app integration is deferred.

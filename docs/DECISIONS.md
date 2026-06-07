@@ -153,15 +153,31 @@ Each doc is a YAML file. JSON is in-memory only. Cloud-storage diffs are human-r
 **Implication:** Each doc is a folder, not a file (see D-19).
 
 ### D-19 — Each doc is a folder, not a file; export as `.docsys` bundle
+**Amended (2026-06-07, grilling + ADR-0022):** on-disk DocModel is **JSON**, not YAML. Two-phase folder naming for cold-start generation; JSON basename matches folder name. Library scan rule updated.
+
 Working format on disk:
+```
+2026-06-07 - Acme - SMR Proposal/
+├── 2026-06-07 - Acme - SMR Proposal.json   ← canonical DocModel (basename = folder)
+├── outline.json                             ← Pass 0 (pre-structure)
+├── draft.md                                 ← Pass 1 (pre-structure; archived after Structure)
+├── .generation/
+│   └── source-draft.md                      ← archived markdown after Structure
+└── assets/  (optional)
+```
+
+Pass 0 creates `YYYY-MM-DD - {client}/` only; Structure one-time expands to full name above.
+
+"Export as .docsys" zips the folder for email/sharing.
+**Why:** Folder atomicity prevents the DocModel and assets from being separated. ZIP-on-export gives the single-file UX when actually needed.
+**Implication:** Save As creates/renames a folder explicitly; library UI scans folders containing exactly one `{folderName}.json`. **Clean break** from YAML — no import shim (pre-release).
+
+Original YAML layout (superseded):
 ```
 2026-05-21 - Acme - SMR Proposal/
 ├── proposal.yaml
 └── assets/  (optional)
 ```
-"Export as .docsys" zips the folder for email/sharing.
-**Why:** Folder atomicity prevents the YAML and assets from being separated. ZIP-on-export gives the single-file UX when actually needed.
-**Implication:** Save As creates a folder; Open accepts a folder or YAML inside one; library UI surfaces folders containing valid YAML.
 
 ### D-20 — Shared company data lives in a cloud-synced folder (v1)
 Brand tokens, roster, references, shared assets all live in a single cloud-synced folder (e.g., `~/Dropbox/Consultancy-Shared/`). Tauri app reads from a configured path.

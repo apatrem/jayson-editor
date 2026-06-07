@@ -30,7 +30,7 @@ function minimalDoc(blocks: Block[]): DocModel {
 }
 
 describe("readinessSnapshot", () => {
-  it("is shippable when no flags present", () => {
+  it("is allClear when no flags present", () => {
     const doc = minimalDoc([
       {
         id: "p1",
@@ -40,9 +40,10 @@ describe("readinessSnapshot", () => {
       },
     ]);
     expect(canExport(doc)).toBe(true);
+    expect(readinessSnapshot(doc).allClear).toBe(true);
   });
 
-  it("blocks export when chart data is draft-illustrative", () => {
+  it("still allows export when chart data is draft-illustrative", () => {
     const doc = minimalDoc([
       {
         id: "c1",
@@ -58,11 +59,12 @@ describe("readinessSnapshot", () => {
       } as Block,
     ]);
     const snapshot = readinessSnapshot(doc);
-    expect(snapshot.shippable).toBe(false);
+    expect(snapshot.allClear).toBe(false);
+    expect(canExport(doc)).toBe(true);
     expect(snapshot.blockers.some((b) => b.kind === "data-not-confirmed")).toBe(true);
   });
 
-  it("blocks export when degradedToProse flag set", () => {
+  it("still allows export when degradedToProse flag set", () => {
     const doc = minimalDoc([
       {
         id: "p1",
@@ -73,7 +75,7 @@ describe("readinessSnapshot", () => {
       } as Block,
     ]);
     expect(collectReadinessBlockers(doc)).toHaveLength(1);
-    expect(canExport(doc)).toBe(false);
+    expect(canExport(doc)).toBe(true);
   });
 
   it("flags confirmed data without source", () => {

@@ -1,6 +1,6 @@
 /**
- * Aggregated readiness gate — export locks while blockers remain.
- * Spec: docs/GENERATION_PIPELINE.md §7
+ * Aggregated readiness gate — advisory blockers; export always allowed.
+ * Spec: docs/GENERATION_PIPELINE.md §7, docs/UI_READINESS_GATE.md
  */
 
 import type { DocModel } from "../schema/docmodel";
@@ -26,7 +26,8 @@ export interface ReadinessBlocker {
 
 export interface ReadinessSnapshot {
   blockers: ReadinessBlocker[];
-  shippable: boolean;
+  /** True when no readiness flags remain (checklist empty). Does not gate export. */
+  allClear: boolean;
 }
 
 export function collectReadinessBlockers(doc: DocModel): ReadinessBlocker[] {
@@ -97,12 +98,13 @@ export function readinessSnapshot(doc: DocModel): ReadinessSnapshot {
   const blockers = collectReadinessBlockers(doc);
   return {
     blockers,
-    shippable: blockers.length === 0,
+    allClear: blockers.length === 0,
   };
 }
 
-export function canExport(doc: DocModel): boolean {
-  return readinessSnapshot(doc).shippable;
+/** Export is never blocked — blockers drive the export summary popup and watermarks. */
+export function canExport(_doc: DocModel): boolean {
+  return true;
 }
 
 function hasSource(block: Record<string, unknown>): boolean {

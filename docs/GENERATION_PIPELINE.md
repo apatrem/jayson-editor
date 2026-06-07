@@ -1,7 +1,7 @@
 # Generation Pipeline — Design
 
-**Status:** design proposal (settled via grilling session 2026-06-07); not yet
-broken into tasks.
+**Status:** settled (grilling session 2026-06-07 + follow-up); vocabulary in
+`CONTEXT.md`. Implementation tracked in `docs/TASKS.md` Phase 12.
 **Companion to:** `DOCUMENT_SYSTEM_ARCHITECTURE.md`, `DECISIONS.md`,
 `blocks.catalogue.yaml`, `TYPES.md`.
 **Revises:** **D-18** (canonical on-disk format — see
@@ -47,11 +47,22 @@ brief
                                           │  in-app or in their own LLM
                                           ▼
   → [Pass 2] structuring  ────────────►  JSON DocModel (CANONICAL) ── gate ──►
+  (+ Pass 2.5 layout for decks, same Structure draft action)
                                           │
                                           ├─ editor: patch-based editing (D-13)
                                           └─ "rewrite this section":
                                                scoped regenerate-and-replace
 ```
+
+**Phase-gate handoff (v1).** Pass 0–1 run in a Claude Code skill. The skill
+creates **`YYYY-MM-DD - {client}/`** and writes **`outline.json`** (Pass 0) then
+**`draft.md`** (Pass 1). The consultant refines `draft.md` freely, then crosses
+the gate in-app via an explicit **Structure draft** action (never automatic).
+Structure runs Pass 2 (+ Pass 2.5 for decks), expands the folder to
+**`YYYY-MM-DD - {client} - {title}/`**, writes the matching **`{folder}.json`**
+on-disk DocModel, and archives `draft.md` → `.generation/source-draft.md`.
+**v1 is one-way** — no full-doc re-structure (v1.1 roadmap: restore archived
+draft and re-structure with confirm).
 
 **Why not full bidirectional sync.** Markdown is strictly *poorer* than the
 DocModel — it has no native representation for charts, KPI cards, timelines,
@@ -114,9 +125,9 @@ up-conversion (writing, structuring resolution) and rewriting only.
 placeholder then collapsing it reproduces the original placeholder
 (semantically). A unit test per block type.
 
-**Provenance (optional):** the original writing-pass intent may be persisted as a
-write-once `sourceIntent` field — for traceability ("why does this block
-exist"), explicitly *not* the thing down-conversion reads.
+**Provenance:** the original writing-pass intent is persisted as a write-once
+**`sourceIntent`** field on every block born from a placeholder at structuring —
+for traceability in the side panel, explicitly *not* the thing down-conversion reads.
 
 **Catalogue-informed writer (Q5).** The writer is told only the *coarse
 capability menu* (charts, comparisons-over-time, KPIs, timelines, callouts) so it
@@ -142,7 +153,10 @@ A **rich** outline, not a table of contents. Per section it carries:
   **claims/figures ledger**.
 
 For decks the outline is **slide-granular** (one leaf ≈ one slide), so it *is*
-the deck skeleton. (R7: "generation starts from a structured outline.")
+the deck skeleton. Each slide leaf carries a **`layout` id** referencing
+`slide-layouts.catalogue.yaml` (see §5). Persisted as **`outline.json`** in the
+doc folder at Pass 0 (structured data — not markdown frontmatter alone).
+(R7: "generation starts from a structured outline.")
 
 ### Pass 1 — Writing (per-section fan-out)
 Each section/slide expands independently, anchored on the outline + the
@@ -156,10 +170,11 @@ sections (executive summary, conclusion, key-takeaways, transitions) generate in
 a **second wave** seeded by the actual body prose, not the outline — so they
 summarize what was really written.
 
-For decks, the writer expands each slide **to a capacity budget** derived from the
-slide's layout-intent ("headline ≤10 words, ≤5 bullets, takeaway ≤15 words"). The
-budget is just numbers — it does not reintroduce taxonomy reasoning, so the writer
-stays in prose mode. This is where content is made to fit a slide (see §7).
+For decks, the writer expands each slide to a **capacity budget** read from the
+**same `slide-layouts.catalogue.yaml` row** as the slide's outline `layout` id
+(single source — Pass 1 budgets match Pass 2.5 fit-check caps). The budget is
+just numbers — it does not reintroduce taxonomy reasoning, so the writer stays
+in prose mode.
 
 ### Pass 1.5 — Coherence
 - **Deterministic glossary lint** always (flag off-glossary synonyms).
@@ -174,6 +189,11 @@ stays in prose mode. This is where content is made to fit a slide (see §7).
 Structuring turns (possibly externally-refined) markdown into the canonical JSON
 DocModel. **It is the trust boundary** (see §9): incoming markdown is untrusted
 and validated here.
+
+**`draft.md` frontmatter.** Pass 1 emits YAML frontmatter at the top of
+`draft.md` with `title`, `client`, and `createdAt` (from Pass 0). Structuring
+uses frontmatter for folder expand and `meta`; if frontmatter is missing, fall
+back to the first `#` H1 for `{title}`.
 
 **Deterministic-first; the LLM is scoped to two judgments only.**
 
@@ -202,27 +222,33 @@ retry (D-236). See also D-236 for the shared retry contract.
 
 ---
 
-## 5. Pass 2.5: deck layout (Q7) — decks only
+## 5. Pass 2.5: deck layout (Q7) — decks only, v1
 
 Reports bypass this entirely (linear flow + renderer pagination). Decks need
 slide-boundary + layout assignment + slot-fitting on a fixed grid (R5; memo
-LAYER 5; D-30's 15 slide layouts).
+LAYER 5; D-30's 15 slide layouts). **Ships in v1** — bundled into the same
+**Structure draft** action as Pass 2 (not a separate consultant step).
+
+**Catalogue:** `slide-layouts.catalogue.yaml` at repo root (parallel to
+`blocks.catalogue.yaml`). Each layout entry: id, `use-when`, slots with accepted
+block kinds and numeric **capacity** per slot. Pass 1 writer budgets, LLM layout
+proposal, and deterministic fit-check all read this file. Editor slot maps must
+validate against it (T-196).
 
 **LLM proposes, deterministic engine decides.**
 - Slide **boundaries** come from the slide-granular outline (§3), not structuring.
-- The **LLM proposes** the best-matching layout from the closed, brand-themed
-  template library (each template has a `use-when` description).
+- The **LLM proposes** the best-matching layout from the catalogue (`use-when`).
 - A **deterministic fit-check is the authority**: does the template have slots for
-  these blocks within capacity? If not → re-select or escalate.
+  these blocks within capacity?
+
+**Overflow ladder (v1):** on fit failure → retry next **higher-capacity** layout
+(catalogue ordering) → else **auto-split** to continuation slide +
+`layoutOverflow` flag → **halt Structure** if still failing (D-236). **No silent
+compression in v1.**
 
 **Content adaptation lives in the writer, never silently in structuring.** Fitting
-content to a slide is done up front via the writer's capacity budget (§3). On
-overflow, structuring tries deterministic remedies first — higher-capacity
-template, else **auto-split to a continuation slide + flag**. Only as a last
-resort does it trigger compression, and that compression is an **explicit,
-writer-driven, surfaced** edit (a reviewable, undoable diff) — so the
-prose-preservation invariant (§8) survives and no layout constraint silently
-deletes substance the consultant is accountable for.
+content to a slide is done up front via the writer's capacity budget (§3), sourced
+from the same catalogue row as the outline layout id.
 
 This keeps deck support inside R5 (fixed grid), R9 (not a think-cell clone), and
 the memo §10 "no deck editor" guardrail — LLM free-placement would drift toward
@@ -230,10 +256,12 @@ the forbidden free-form deck editor.
 
 ---
 
-## 6. Pass 3: data enrichment (Q3) — conditional, post-structuring
+## 6. Pass 3: data enrichment (Q3) — explicit post-structuring step
 
 Runs only after structuring (only then is each block's required data *shape*
-known), scoped per block.
+known). **Not bundled into Structure draft** — consultant clicks **Fill
+illustrative data** when ready. Scope: **whole document**, skipping blocks
+already `dataState: confirmed`.
 
 **Two kinds of data, opposite risk:**
 - **Grounded data** (from the consultant's uploaded material, roster/fees/
@@ -293,19 +321,22 @@ known), scoped per block.
      items are resolved.
 
 ### The capstone: aggregated readiness gate
-All "needs a human" flags converge into one blockers list, and **export
-(PDF/HTML) is locked while it is non-empty**:
+
+All "needs a human" flags converge into one blockers list:
 
 ```
-shippable  ⟺  blockers == []
-  blockers = [ dataState ≠ confirmed,
-               "degraded to prose" flags,
-               overflow / auto-split flags,
-               unverified sources,
-               unresolved contradiction flags ]
+blockers = [ dataState ≠ confirmed,
+             "degraded to prose" flags,
+             overflow / auto-split flags,
+             unverified sources (confirmed without source),
+             unresolved contradiction flags,
+             size flag (block/slide count > D-35 envelope) ]
 ```
 
-An "export anyway" escape hatch requires a typed reason that is **logged**.
+**Export is never locked.** Blockers surface in the canvas (watermarks/badges),
+side panel, and a document-level checklist. At **Export PDF/HTML**, a popup
+summarizes remaining blockers with **Review items** (primary) and **Export with
+flagged content** (secondary, one-click — no typed reason).
 
 **Honest contract:** the pipeline guarantees *structural validity, prose fidelity,
 and that every judgment-call is flagged* — **not** factual accuracy, narrative
@@ -319,10 +350,14 @@ quality, or that the layout "looks right." Those are human gates. The output is 
 ### Host — V1 is a Claude Code skill (refines D-15)
 - Pass 0 (outline) + Pass 1 (writing) run as a **Claude Code skill** — outline +
   **sub-agents per section** (a natural fit for the parallel fan-out of §3).
-- The skill emits a markdown draft. The consultant may **refine it freely, in-app
-  or in their own LLM**, before handing it to structuring (this *is* the §1
-  free-markdown phase).
-- Structuring → app produce the canonical DocModel.
+- Pass 0 creates **`YYYY-MM-DD - {client}/`**, writes **`outline.json`**, sets
+  `createdAt` from outline start.
+- Pass 1 writes **`draft.md`** with YAML frontmatter (`title`, `client`,
+  `createdAt`) plus prose and placeholders.
+- The consultant may **refine `draft.md` freely** (in-app or external LLM) before
+  **Structure draft** in the app (§1).
+- Structure (Pass 2 + 2.5 for decks) → canonical `{folder}.json` DocModel.
+- Pass 3 (**Fill illustrative data**) is a separate explicit action in the app.
 - The pipeline is **host-agnostic**: the design is identical whether generation
   runs in the skill (v1) or in-app (later). Only the "Generate" front-end moves.
 - The two moments split across the host boundary cleanly: **Moment 1** lives where
@@ -349,13 +384,12 @@ the editor (ProseMirror large-doc cliff), PDF render (Chromium), and the
 render-budget watchdog (D-36), none tested at that size. A 50-page report is
 closer to the envelope (prose-dense, fewer node-views/page).
 
-**Decisions:**
+**Decisions (v1):**
+- **Single DocModel always** — add a **size flag** when block/slide count exceeds
+  the D-35 envelope; no forced split. Outline-time linked-document split deferred
+  to v1.1 (`DECISIONS.md` roadmap).
 - **Commit to re-validating perf** at the larger target — extend the **D-39**
-  benchmark harness to a ~1000-node-view fixture; set the v1 ceiling on evidence
-  (consistent with "never silently adjust a target; benchmark it").
-- **Prefer splitting large outputs into linked documents** (e.g. a deck per
-  workstream) as the primary lever — each sub-doc stays inside the validated
-  envelope and the readiness review is tractable.
+  benchmark harness to a ~1000-node-view fixture; set the v1 ceiling on evidence.
 - **Render only visible slides (virtualization)** is the deck-specific fallback
   for unavoidable single-large docs. Cautions: virtualizing one ProseMirror doc
   is genuinely hard (selection/find/decorations/watchdog assume rendered nodes);
@@ -377,10 +411,10 @@ closer to the envelope (prose-dense, fewer node-views/page).
 
 **Open items to resolve before tasks:**
 1. ~~Concrete placeholder grammar + the re-anchoring algorithm when ids are lost.~~ → [PLACEHOLDER_GRAMMAR.md](PLACEHOLDER_GRAMMAR.md) (T-190); implementation T-191.
-2. The slide-template capacity-metadata spec (per-slot budgets) the fit-check needs.
+2. ~~Slide-template capacity metadata.~~ → **`slide-layouts.catalogue.yaml`** (T-196); single source for Pass 1 budgets + Pass 2.5 fit-check.
 3. The schema additions: `dataState`, `source`, `sourceHint`, `verifiedBy/At`,
-   `sourceIntent`, degraded/overflow flags — reconcile with `TYPES.md` §12 + `src/schema/generation.ts` (T-192).
-4. The readiness-gate data model and its surfacing in the editor + library UI — `src/generation/readiness.ts` + [UI_READINESS_GATE.md](UI_READINESS_GATE.md) (T-193).
+   `sourceIntent`, degraded/overflow/**size** flags — reconcile with `TYPES.md` §12 + `src/schema/generation.ts` (T-192).
+4. ~~Readiness gate model.~~ → advisory blockers + export summary popup — [UI_READINESS_GATE.md](UI_READINESS_GATE.md), `src/generation/readiness.ts` (T-193).
 5. The v1 document-size ceiling (output of the D-39 re-validation).
-6. Whether the YAML→JSON change (ADR-0022) cascades into `YAML_FORMAT.md`,
-   examples, templates, and AUTHORING.md (migration inventory).
+6. ~~YAML→JSON migration inventory.~~ → [JSON_MIGRATION_INVENTORY.md](JSON_MIGRATION_INVENTORY.md): **clean break**, two-phase folder naming, JSON basename = folder name (T-183–T-187).
+7. **`outline.json` schema** — Zod shape for Pass 0 outline (slide `layout` ids, claims ledger, glossary).
