@@ -386,5 +386,7 @@ closer to the envelope (prose-dense, fewer node-views/page).
    `sourceIntent`, degraded/overflow flags — reconcile with `TYPES.md`.
 4. The readiness-gate data model and its surfacing in the editor + library UI.
 5. The v1 document-size ceiling (output of the D-39 re-validation).
-6. Whether the YAML→JSON change (ADR-0020) cascades into `YAML_FORMAT.md`,
-   examples, templates, and AUTHORING.md (migration inventory).
+6. Migration sweep inventory: `examples/sample-*.yaml` + `templates/*.yaml` → JSON,
+   `AUTHORING.md` wording, and the `YAML_FORMAT.md` → `JSON_FORMAT.md` rename
+   (content already rewritten for JSON on this branch; 8 references to sweep).
+   D-05/D-19 annotated.

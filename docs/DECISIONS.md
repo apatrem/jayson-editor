@@ -45,6 +45,8 @@ When AI patches arrive, they apply against the **current** (post-manual-edit) do
 **Implication:** Before each "Process all" batch, the app auto-saves the doc as a clean checkpoint. AI patches are generated against this checkpoint.
 
 ### D-05 — Autosave is mandatory; version history via cloud storage
+**Amended (2026-06-07, [ADR-0020](adr/0020-json-docmodel-supersedes-yaml.md)):** autosave persists **JSON**, not YAML.
+
 Autosave persists the YAML on edit (debounced). Version history relies on the consultant's existing cloud-sync provider (Dropbox/GDrive/OneDrive) — the app does not implement its own VCS.
 **Why:** Most consultants already have synced cloud folders with file history. Reusing that is free and trustworthy.
 **Implication:** No app-side commit/checkpoint UI. Recovery from corruption = consultant uses cloud-sync history.
@@ -148,6 +150,8 @@ Each doc is a YAML file. JSON is in-memory only. Cloud-storage diffs are human-r
 **Implication:** Each doc is a folder, not a file (see D-19).
 
 ### D-19 — Each doc is a folder, not a file; export as `.docsys` bundle
+**Amended (2026-06-07, [ADR-0020](adr/0020-json-docmodel-supersedes-yaml.md)):** the doc file is **`*.json`** (e.g. `proposal.json`), not `*.yaml`. The folder model and `.docsys` bundle are unchanged; Open/library scanning matches `*.json` ("valid YAML" → "valid JSON").
+
 Working format on disk:
 ```
 2026-05-21 - Acme - SMR Proposal/
