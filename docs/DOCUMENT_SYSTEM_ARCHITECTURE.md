@@ -53,8 +53,8 @@ materials. Their role is deliberately narrow and one-time:
 ## 2. The one principle that governs everything
 
 **The source of truth is a schema-defined document model
-("DocModel"). The editor, the collaboration layer, and YAML are all
-*projections* of it — none of them is canonical.**
+("DocModel"). The editor, the collaboration layer, and the on-disk serialization
+are all *projections* of it — none of them is canonical.**
 
 A common mistake (made by at least one AI design suggestion reviewed during
 scoping) is to make the editor's internal state (TipTap/ProseMirror JSON, or a
@@ -62,7 +62,8 @@ Yjs CRDT document) the canonical artifact. Do not do this. It causes:
 
 - **Editor lock-in** — every document becomes trapped in an
   editor-specific format.
-- **Lossy round-trips** — YAML ⇄ editor-JSON ⇄ YAML is not a clean bijection;
+- **Lossy round-trips** — treating any projection (editor JSON, markdown, a
+  stale file format) as co-equal with the DocModel is not a clean bijection;
   documents degrade on each conversion.
 - **Broken comment anchoring** — AI comments need stable anchors that survive
   serialization; if comments live only in editor state they die on export.
@@ -70,7 +71,9 @@ Yjs CRDT document) the canonical artifact. Do not do this. It causes:
   PDF/HTML *even if the editor never runs*.
 
 The DocModel is canonical. TipTap edits it. A renderer consumes it. The LLM
-patches it. YAML is a readable projection of it. Yjs (later) syncs it.
+patches it (or generates it cold-start — see Layer 2). JSON on disk is the
+canonical serialization ([ADR-0022](adr/0022-json-docmodel-supersedes-yaml.md)).
+Yjs (later) syncs it.
 
 ---
 
@@ -131,7 +134,7 @@ patches it. YAML is a readable projection of it. Yjs (later) syncs it.
 ├─────────────────────────────────────────────────────────────┤
 │ LAYER 0 — CANONICAL DOCUMENT MODEL (DocModel)                 │
 │   One schema-defined JSON document. THE source of truth.      │
-│   Renders without the editor. YAML is a projection of it.     │
+│   Renders without the editor. JSON on disk is canonical.       │
 └─────────────────────────────────────────────────────────────┘
 ```
 
@@ -140,9 +143,9 @@ A single JSON document conforming to the schema. Contains: document metadata,
 a brand reference, an ordered list of sections, each with an ordered list of
 typed blocks. **Every block carries a stable `id`** (required for comment
 anchoring and for scoped LLM patches). Rich text inside prose blocks is stored
-as a ProseMirror-JSON fragment so text editing is lossless. YAML is generated
-from / parsed to the DocModel as a human- and LLM-readable projection — first
-class, but not canonical.
+as a ProseMirror-JSON fragment so text editing is lossless. The canonical
+on-disk file is JSON serializing this model ([ADR-0022](adr/0022-json-docmodel-supersedes-yaml.md)).
+Markdown is a transient projection for LLM prose work only (GENERATION_PIPELINE §1).
 
 ### Layer 1 — Schema & validation
 **Define a Zod schema from scratch.** It is used in three places: validating
@@ -197,11 +200,24 @@ renderer. If the documented brand and actual template files disagree,
 resolve the conflict into that single authoritative source.
 
 ### Layer 2 — LLM interface
-The LLM generates and edits the DocModel. Generation starts from a structured
-outline (R7) and fills blocks. **All LLM edits are structured patches scoped to
-specific blocks — never full-document rewrites** — so human edits are never
-clobbered. Prefer JSON structured output (the schema can constrain decoding);
-YAML is fine as a readable equivalent.
+The LLM generates and edits the DocModel. **Two machines, one canonical file:**
+
+1. **Cold-start generation** ([GENERATION_PIPELINE.md](GENERATION_PIPELINE.md),
+   ADR-0021): a multi-pass pipeline (outline → writing → structuring → …) that
+   produces the initial JSON DocModel from a brief. Prose is generated in
+   transient markdown and wrapped into blocks at the structuring trust boundary.
+   This is a full-document *creation* pass — not patch editing.
+2. **In-document editing** (D-13): once a document exists, **all further change
+   is patch-based** — structured patches scoped to specific blocks, never
+   full-document rewrites — so human edits are never clobbered. Scoped section
+   regeneration ("rewrite this section") replaces a bounded subtree wholesale
+   (GENERATION_PIPELINE §1); it is not bidirectional markdown↔JSON sync.
+
+Generation starts from a structured outline (R7) and fills blocks. Prefer JSON
+structured output (the schema can constrain decoding); the canonical on-disk
+format is JSON ([ADR-0022](adr/0022-json-docmodel-supersedes-yaml.md)).
+Invalid LLM output follows D-236 (schema-validate, max 2 corrective retries,
+then fail loud).
 
 ### Layer 3 — Editing surface
 See §6 and §7.
@@ -354,7 +370,8 @@ ThreadEntry =
   consultant's own AI edits — it mirrors Word track-changes, which consultants
   already understand. It does not conflict with read-only client output (R3):
   nothing here is exposed to the client.
-- **Comments anchor to stable `blockId`s** so they survive YAML serialization
+- **Comments anchor to stable `blockId`s** so they survive save/reload and
+  canonical serialization
   and the editor↔DocModel mapping. (This is why Layer 0 must be canonical.)
 - **Support a batch mode.** Consultants mark up a whole draft with several
   comments, then "process all" and review every proposed change at once — the
