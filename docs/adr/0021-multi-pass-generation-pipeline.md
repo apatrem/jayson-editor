@@ -25,6 +25,13 @@ editing flow (D-13), decoupled through the canonical DocModel file.
 Separate **writing** from **structuring**, so prose is generated in the model's
 strongest modality and only *wrapped* (not regenerated) into the DocModel:
 
+**Scope: v1 = document generation only.** Decks are v1.1 across the roadmap (D-30,
+M6 DeckRenderer, BUILD_BRIEF) — the renderer and slide-layout library don't exist
+until then, so a generated deck DocModel would have nothing to render it in v1.
+v1 produces a `document` DocModel via the passes below; the deck-specific parts
+(Pass 2.5, the slide-granular outline, per-slide capacity budgets) are **v1.1**,
+gated on M6.
+
 1. **Pass 0 — Outline.** A *rich* outline is the coherence backbone: per-section
    key message, owned claims, cross-refs, glossary + claims-ledger. Slide-granular
    for decks. (R7.)
@@ -39,7 +46,7 @@ strongest modality and only *wrapped* (not regenerated) into the DocModel:
    resolution and promotion (per the catalogue `avoid:` rules). Prose →
    `prosemirror-fragment` is a deterministic, schema-aware conversion. This pass is
    the **trust boundary** for externally-refined markdown.
-5. **Pass 2.5 — Layout (decks only).** LLM proposes a layout from the closed
+5. **Pass 2.5 — Layout (decks only — v1.1).** LLM proposes a layout from the closed
    template library (D-30); a **deterministic fit-check is the authority**.
    Content adaptation happens in the writer (capacity budget), never silently in
    structuring; overflow auto-splits + flags.
@@ -75,9 +82,10 @@ sub-agents); the pipeline is host-agnostic and in-app integration is deferred.
 - **New deterministic components:** schema-aware markdown↔ProseMirror converter,
   `toPlaceholder` per block type, the layout fit-check engine, the import-time
   contract lint, the readiness-gate model.
-- **Scale:** large decks exceed the D-35 envelope — gate the v1 ceiling on a D-39
-  perf re-validation; prefer splitting into linked documents; deck render
-  virtualization is the fallback (helps editor, not export).
+- **Scale:** decks (and their 200-slide scale problem) are v1.1, so v1's target is
+  the ~50-page *document* — closer to the D-35 ~200-node-view envelope. Gate any
+  ceiling increase on a D-39 perf re-validation. (v1.1 decks: prefer splitting into
+  linked documents; render virtualization is the editor-only fallback.)
 - Keeps deck support inside R5 / R9 / memo §10 (no free-form deck editor).
 
 ## Notes

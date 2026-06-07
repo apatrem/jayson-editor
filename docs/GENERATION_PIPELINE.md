@@ -13,6 +13,10 @@ generation — see [ADR-0021](adr/0021-multi-pass-generation-pipeline.md)).
 > document exists, all further change goes through the patch-based editing flow
 > (D-13, `BlockPatch`). The two are decoupled through the canonical DocModel
 > file; see §1.
+>
+> **v1 scope: document generation only.** Decks are v1.1 (D-30, M6 DeckRenderer);
+> the deck-specific passes — §5, and the slide-granular parts of §3 — are deferred
+> with them.
 
 ---
 
@@ -202,7 +206,7 @@ retry (D-31 / "LLM returns invalid output").
 
 ---
 
-## 5. Pass 2.5: deck layout (Q7) — decks only
+## 5. Pass 2.5: deck layout (Q7) — decks only (v1.1)
 
 Reports bypass this entirely (linear flow + renderer pagination). Decks need
 slide-boundary + layout assignment + slot-fitting on a fixed grid (R5; memo
