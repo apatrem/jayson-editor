@@ -1,13 +1,25 @@
-# ADR-0020 — JSON DocModel supersedes YAML as the canonical on-disk format
+# ADR-0020 — On-disk projection format: JSON, not YAML
+
+<!-- Filename retained from the initial draft while this ADR is Proposed; the
+H1 above is the corrected title. Rename to 0020-on-disk-projection-format.md
+when the ADR is Accepted. -->
 
 **Status:** Proposed (design session 2026-06-07)
-**Supersedes:** **D-18** ("YAML is the canonical on-disk format")
+**Amends:** **D-18** (corrects its overloaded "canonical on-disk format" wording — see Context)
 **Related:** memo §2 (DocModel is canonical), [ADR-0021](0021-multi-pass-generation-pipeline.md),
 [GENERATION_PIPELINE.md](../GENERATION_PIPELINE.md)
 
 ## Context
 
-D-18 chose YAML as the canonical on-disk format for three reasons: human-readable
+**The DocModel is the canonical model; the on-disk file is a Projection of it** —
+not the source of truth. The code is decisive: `file-open.ts` does
+`DocModelSchema.parse(parseDocModelYaml(raw))` (YAML → Zod → DocModel) and
+`file-save.ts` does `serializeDocModel(doc)` (DocModel → YAML). Memo §2 and
+CONTEXT.md agree. D-18's phrase "canonical on-disk format" used *canonical* to
+mean *the one standard disk encoding*, not source-of-truth — a wording collision
+this ADR corrects. So this is a **projection-format change, not a model change.**
+
+D-18 chose YAML for that on-disk projection for three reasons: human-readable
 cloud-sync diffs, emergency hand-editability, and native LLM reading. Two of those
 three premises no longer hold under the converging design:
 
@@ -32,7 +44,11 @@ Markdown/Markdoc/MDX were evaluated as the *container* format and rejected:
 
 ## Decision
 
-The **canonical on-disk format is JSON**, serializing the canonical DocModel.
+The **on-disk Projection serializes as JSON instead of YAML.** The canonical
+DocModel and `canonicalize()` (the format-neutral byte-stability engine) are
+unchanged — `serialize.ts` swaps `yaml.stringify` for `JSON.stringify(canonical,
+null, 2)` and `yaml.parse` for `JSON.parse`. The on-disk JSON is the canonicalized
+DocModel serialized directly (a near-identity projection).
 
 - Chart/table/KPI **specs are inline** in the document JSON (JSON nests arbitrarily;
   the Markdoc "nested-attributes get clunky → external file" workaround does not

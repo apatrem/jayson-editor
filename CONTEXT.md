@@ -7,11 +7,11 @@ The vocabulary the team uses when talking about this codebase. Definitions are k
 ### Documents
 
 **DocModel**:
-The canonical JSON document conforming to the Zod schema. Every other representation — TipTap editor state, YAML on disk, rendered HTML — is a *projection* of it.
+The canonical JSON document conforming to the Zod schema. Every other representation — TipTap editor state, JSON on disk, rendered HTML — is a *projection* of it.
 _Avoid_: "the document state", "the editor state", "the model"
 
 **Projection**:
-A derived representation of the DocModel (editor JSON, YAML, HTML, PDF). Never canonical — always reconstructible from the DocModel.
+A derived representation of the DocModel (editor state, the on-disk JSON file, HTML, PDF). Never canonical — always reconstructible from the DocModel.
 _Avoid_: "view", "format"
 
 **Block**:
