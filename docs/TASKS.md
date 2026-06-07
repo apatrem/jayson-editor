@@ -2092,21 +2092,21 @@ Depends on ADR-0022 (JSON on disk) and [JSON_MIGRATION_INVENTORY.md](JSON_MIGRAT
 - **Acceptance:** Deterministic down-conversion for all 15 catalogue blocks; parse rejects malformed placeholders; callout + chart round-trip tests pass.
 - **est.** 6h
 
-### T-192 [ ] · Add generation schema fields to TYPES.md (+ Zod)
+### T-192 [~] · Add generation schema fields to TYPES.md (+ Zod)
 - **Depends-on:** T-190
 - **Reads:** `docs/GENERATION_PIPELINE.md` §6–§7, `docs/TYPES.md`
 - **Outputs:** `dataState`, `source`, `sourceHint`, `verifiedBy`/`verifiedAt`, `sourceIntent`, degraded/overflow flag shapes in TYPES.md + `src/schema/` implementations
 - **Acceptance:** Schemas validate; illustrative data watermark contract documented; `source` vs `sourceHint` separation enforced.
 - **est.** 4h
 
-### T-193 [ ] · Readiness gate data model + export lock spec
+### T-193 [~] · Readiness gate data model + export lock spec
 - **Depends-on:** T-192
 - **Reads:** `docs/GENERATION_PIPELINE.md` §7
 - **Outputs:** `src/generation/readiness.ts` (pure logic), `docs/UI_READINESS_GATE.md` (or section in UI_APP_SHELL), tests for blocker aggregation
 - **Acceptance:** `shippable ⟺ blockers == []`; export lock predicate matches GENERATION_PIPELINE §7 capstone.
 - **est.** 4h
 
-### T-194 [ ] · Markdown import contract lint (pre-structuring)
+### T-194 [~] · Markdown import contract lint (pre-structuring)
 - **Depends-on:** T-191
 - **Reads:** `docs/GENERATION_PIPELINE.md` §8, `docs/PLACEHOLDER_GRAMMAR.md`
 - **Outputs:** `src/generation/import-lint.ts`, tests with valid/invalid external-refinement fixtures

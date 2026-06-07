@@ -28,7 +28,7 @@ import { CommentSchema } from "./comment";
 import { SectionSchema, SlideSchema } from "./containers";
 
 /**
- * The canonical document. A YAML file on disk parses into this shape.
+ * The canonical document. A JSON file on disk parses into this shape (ADR-0022).
  *
  * A doc is either kind:"document" (with sections) or kind:"deck" (with slides).
  * Per D-29, the two kinds share leaf blocks but have distinct top-level containers.
@@ -797,7 +797,47 @@ function zodIssueToValidationError(issue: z.ZodIssue): ValidationError {
 
 ---
 
-## 12. Type/file map (quick reference)
+## 12. Generation pipeline types (ADR-0021)
+
+**File:** `src/schema/generation.ts` (draft — extend data-bearing block schemas in T-192)
+
+Cold-start generation and the readiness gate add optional fields to blocks. They
+are **not** yet merged into `BlockBaseSchema`; chart/table/kpi-cards blocks will
+`.merge()` these shapes during T-192.
+
+```typescript
+import { z } from "zod";
+
+export const DataStateSchema = z.enum(["empty", "draft-illustrative", "confirmed"]);
+
+export const DataSourceSchema = z.object({
+  name: z.string().min(1).max(200),
+  link: z.string().url().optional(),
+}).strict();
+
+export const GenerationDataFieldsSchema = z.object({
+  dataState: DataStateSchema.default("empty"),
+  source: DataSourceSchema.optional(),       // human-authoritative; LLM fills only for grounded uploads
+  sourceHint: z.string().max(300).optional(), // advisory only — never rendered as citation
+  verifiedBy: z.string().email().optional(),
+  verifiedAt: z.string().datetime().optional(),
+}).strict();
+
+export const GenerationBlockFlagsSchema = z.object({
+  sourceIntent: z.string().max(500).optional(),
+  degradedToProse: z.boolean().optional(),
+  layoutOverflow: z.boolean().optional(),
+  contradictionFlag: z.boolean().optional(),
+}).strict();
+```
+
+**Readiness gate** (`src/generation/readiness.ts`): `shippable ⟺ collectReadinessBlockers(doc).length === 0`. Blockers: `dataState ≠ confirmed` on data-bearing blocks, `degradedToProse`, `layoutOverflow`, `contradictionFlag`, and `confirmed` without `source.name`. UI spec: `docs/UI_READINESS_GATE.md`.
+
+**Verification rule:** transitioning to `confirmed` requires a real `source`; editing data or `source` after confirmation reverts to `draft-illustrative` (see `dataStateAfterEdit`).
+
+---
+
+## 13. Type/file map (quick reference)
 
 | Type | File |
 |---|---|
@@ -815,3 +855,5 @@ function zodIssueToValidationError(issue: z.ZodIssue): ValidationError {
 | `BatchedCommentRequest`, `BatchedCommentResponse` | `src/llm/batch-comments.ts` |
 | `AppConfig` | `src/config/types.ts` |
 | `validateDocModel`, `ValidationResult` | `src/schema/validate.ts` |
+| `DataState`, `GenerationDataFields`, `GenerationBlockFlags` | `src/schema/generation.ts` |
+| `collectReadinessBlockers`, `canExport` | `src/generation/readiness.ts` |

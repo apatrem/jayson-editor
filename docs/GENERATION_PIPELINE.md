@@ -379,8 +379,8 @@ closer to the envelope (prose-dense, fewer node-views/page).
 1. ~~Concrete placeholder grammar + the re-anchoring algorithm when ids are lost.~~ → [PLACEHOLDER_GRAMMAR.md](PLACEHOLDER_GRAMMAR.md) (T-190); implementation T-191.
 2. The slide-template capacity-metadata spec (per-slot budgets) the fit-check needs.
 3. The schema additions: `dataState`, `source`, `sourceHint`, `verifiedBy/At`,
-   `sourceIntent`, degraded/overflow flags — reconcile with `TYPES.md`.
-4. The readiness-gate data model and its surfacing in the editor + library UI.
+   `sourceIntent`, degraded/overflow flags — reconcile with `TYPES.md` §12 + `src/schema/generation.ts` (T-192).
+4. The readiness-gate data model and its surfacing in the editor + library UI — `src/generation/readiness.ts` + [UI_READINESS_GATE.md](UI_READINESS_GATE.md) (T-193).
 5. The v1 document-size ceiling (output of the D-39 re-validation).
 6. Whether the YAML→JSON change (ADR-0022) cascades into `YAML_FORMAT.md`,
    examples, templates, and AUTHORING.md (migration inventory).
