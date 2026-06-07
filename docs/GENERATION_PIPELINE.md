@@ -144,7 +144,7 @@ A **rich** outline, not a table of contents. Per section it carries:
 For decks the outline is **slide-granular** (one leaf ≈ one slide), so it *is*
 the deck skeleton. (R7: "generation starts from a structured outline.")
 
-### Pass 1 — Writing (per-section fan-out)
+### Pass 1 — Writing (per-section fan-out — *Section* for documents, *Slide* for decks)
 Each section/slide expands independently, anchored on the outline + the
 prompt-cached glossary + claims-ledger + brand voice (caching per D-13). Default
 is **parallel fan-out**; a **sequential** mode (each section sees a running
@@ -186,7 +186,7 @@ and validated here.
 | **Promotion** (paragraph→`callout`; number-table→`chart`) | **LLM** (per `avoid:` rules) |
 | Assign ids, cross-refs, `sourceIntent`, validate | **Deterministic** |
 
-**Schema-aware prose→ProseMirror.** `prose.body` is a `prosemirror-fragment` with
+**Schema-aware prose→ProseMirror.** `prose.content` is a `prosemirror-fragment` with
 a *specific* allowed mark/node set. The converter must target the editor's exact
 PM schema; markdown constructs outside it are coerced or dropped deterministically
 and logged — never emitted as fragments the editor can't render.
@@ -198,7 +198,7 @@ attention" flag.** Never invent an off-catalogue block; never silently drop inte
 
 **Fidelity gates (§8):** prose-preservation invariant, placeholder-completeness,
 override-rate monitor, PM-schema conformance, schema-validate + 2× corrective
-retry (D-236 / "LLM returns invalid output").
+retry (D-31 / "LLM returns invalid output").
 
 ---
 
@@ -211,7 +211,7 @@ LAYER 5; D-30's 15 slide layouts).
 **LLM proposes, deterministic engine decides.**
 - Slide **boundaries** come from the slide-granular outline (§3), not structuring.
 - The **LLM proposes** the best-matching layout from the closed, brand-themed
-  template library (each template has a `use-when` description).
+  template library (each template has a `use-when` description); the chosen layout populates the schema's existing `slide.layout` field.
 - A **deterministic fit-check is the authority**: does the template have slots for
   these blocks within capacity? If not → re-select or escalate.
 
@@ -274,7 +274,7 @@ known), scoped per block.
 - **Coherence:** contradiction detection (reports); stitch edits are visible/logged.
 - **Structuring:** prose-preservation invariant; placeholder-completeness;
   `toPlaceholder(structure(p))≈p`; override-rate monitor; PM-schema conformance;
-  schema-validate + 2× retry (D-236).
+  schema-validate + 2× retry (D-31).
 - **Layout (decks):** deterministic fit-check; overflow flagged; no orphan block.
 - **Data:** `dataState` integrity; source-present-to-verify; edit-reverts;
   shape-validity.
@@ -283,7 +283,7 @@ known), scoped per block.
 - **Moment 1 — during generation (fail-loud).** A pass that fails its gate after
   the 2× corrective retry **halts and surfaces an honest error** ("couldn't
   structure section 7 — here's why"); it never passes partial/degraded output
-  downstream. Mirrors D-236 and the autonomous-loop conservative-halt posture.
+  downstream. Mirrors D-31 and the autonomous-loop conservative-halt posture.
 - **Moment 2 — after generation (readiness flags).** The document opens as a
   complete, editable draft carrying flags that surface in three places:
   1. **on the block in the canvas** (watermark/hatch, ⚠ badge, colored bar);

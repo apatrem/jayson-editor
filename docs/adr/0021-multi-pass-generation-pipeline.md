@@ -55,7 +55,7 @@ transient, deterministically-derived projection (`toPlaceholder` derives from
 current block fields — **never** a stored description).
 
 **Verification:** per-pass gates, a prose-preservation invariant at structuring,
-fail-loud halts (no silent degradation, per D-236), and a single **aggregated
+fail-loud halts (no silent degradation, per D-31), and a single **aggregated
 readiness gate** that locks export until every "needs a human" flag is cleared.
 The pipeline's contract is *valid-draft-with-flags*, not guaranteed-shippable.
 
@@ -64,9 +64,14 @@ sub-agents); the pipeline is host-agnostic and in-app integration is deferred.
 
 ## Consequences
 
-- **Schema additions** to reconcile with `TYPES.md`: `dataState`, `source`,
-  `sourceHint`, `verifiedBy/At`, `sourceIntent`, degraded/overflow flags, the
-  placeholder grammar, slide-template capacity metadata.
+- **Schema additions cascade through the byte-stability engine, not around it.**
+  New fields (`dataState`, `source`, `sourceHint`, `verifiedBy/At`, `sourceIntent`,
+  degraded/overflow flags) and new shapes (placeholder grammar, slide-template
+  capacity metadata) each require: (a) a Zod addition in `src/schema/`; (b) a
+  corresponding `KEY_ORDERS` entry in `src/docmodel/canonicalize.ts` — or ADR-0020's
+  byte-stable round-trip silently breaks for the new field; (c) a `schemaVersion`
+  bump (no data migration under the hard cut, but the version must be honest). The
+  byte-stable round-trip test must cover the new fields. Reconcile with `TYPES.md`.
 - **New deterministic components:** schema-aware markdown↔ProseMirror converter,
   `toPlaceholder` per block type, the layout fit-check engine, the import-time
   contract lint, the readiness-gate model.
