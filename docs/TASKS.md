@@ -2078,7 +2078,7 @@ Depends on ADR-0022 (JSON on disk) and [JSON_MIGRATION_INVENTORY.md](JSON_MIGRAT
 - **Acceptance:** No spec still claims YAML is the canonical DocModel format except historical/strikethrough context.
 - **est.** 3h
 
-### T-190 [ ] · Write PLACEHOLDER_GRAMMAR.md (concrete grammar + re-anchoring)
+### T-190 [x] · Write PLACEHOLDER_GRAMMAR.md (concrete grammar + re-anchoring)
 - **Depends-on:** T-182
 - **Reads:** `docs/GENERATION_PIPELINE.md` §2, `blocks.catalogue.yaml`
 - **Outputs:** `docs/PLACEHOLDER_GRAMMAR.md`

@@ -376,7 +376,7 @@ closer to the envelope (prose-dense, fewer node-views/page).
   generation becomes this multi-pass pipeline.
 
 **Open items to resolve before tasks:**
-1. Concrete placeholder grammar + the re-anchoring algorithm when ids are lost.
+1. ~~Concrete placeholder grammar + the re-anchoring algorithm when ids are lost.~~ → [PLACEHOLDER_GRAMMAR.md](PLACEHOLDER_GRAMMAR.md) (T-190); implementation T-191.
 2. The slide-template capacity-metadata spec (per-slot budgets) the fit-check needs.
 3. The schema additions: `dataState`, `source`, `sourceHint`, `verifiedBy/At`,
    `sourceIntent`, degraded/overflow flags — reconcile with `TYPES.md`.
