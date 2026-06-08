@@ -1,0 +1,10 @@
+---
+description: Repo conventions (AGENTS.md is the source of truth)
+alwaysApply: true
+---
+
+Read **AGENTS.md** — it governs this repo (workflow, rules, the gate, DoD).
+
+- Work in your own worktree; **never commit to `main`** (protected — PR + green CI).
+- Before claiming success, run the repo's gate command (`npm run lint && npm test && npm run build`). Do not invent passing results.
+- Smallest correct change; keep diffs small. No new dependencies without asking.
