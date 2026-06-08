@@ -20,6 +20,11 @@ block), `reference/callout/` (Standard block canonical scaffold), `reference/cha
 > mapping.ts, and src/schema/blocks/index.ts all derive from `loadAllBlocks()`/
 > `loadAllSchemas()`.
 
+> **ADR-0022 fixture note:** this guide still names the current pre-clean-break
+> YAML fixture files in a few places. When the Document file clean break lands,
+> retarget those examples to deterministic JSON fixtures; the block
+> implementation pattern itself is unchanged.
+
 ---
 
 ## 1. The single-manifest pattern (mandatory for every Standard block)

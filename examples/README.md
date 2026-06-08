@@ -2,6 +2,12 @@
 
 Worked examples that match the shapes defined in `TYPES.md`. Use these as fixtures, reference patterns, and acceptance-test inputs.
 
+> **Pre-clean-break fixtures:** the DocModel examples below are still YAML
+> filenames in the current repository. ADR-0022 requires the clean-break task to
+> retarget document fixtures to deterministic JSON before generation-pipeline
+> implementation begins. The LLM I/O fixtures are already JSON and are
+> unaffected.
+
 ## Files
 
 ### Valid documents

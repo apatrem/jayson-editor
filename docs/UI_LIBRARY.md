@@ -110,12 +110,12 @@ After 12 months at 40 docs/month, the cloud-sync folder holds ~500 documents. Th
 interface LibraryEntry {
   // Identity
   path: string;                            // absolute folder path
-  yamlFilename: string;                    // e.g. "proposal.yaml"
+  documentFilename: string;                // e.g. "proposal.json"
 
-  // Indexed metadata (from doc's `meta:` block; updated on file change)
+  // Indexed metadata (from doc's `meta` object; updated on file change)
   meta: Meta;                              // see TYPES.md §2
 
-  // Render hints (computed, not in YAML)
+  // Render hints (computed, not in the Document file)
   thumbnailUri: string | null;             // lazy-generated PNG; null until rendered
   fileSize: number;                        // bytes; for "show large docs" filter
   fileMtime: number;                       // unix ms; for sort by "most recent"
@@ -152,14 +152,14 @@ On app launch:
   1. Read AppConfig.paths.cloudSyncRoot
   2. Tauri `list_directory(root)` recursively (limit depth 4 — beyond that
      is unlikely to be docs)
-  3. For each folder containing a *.yaml file:
-        a. Read the YAML (Tauri `read_yaml_file`)
-        b. Parse only the `meta:` block (do not validate the whole doc — too slow)
+  3. For each folder containing a document *.json file:
+        a. Read the Document file (Tauri `read_document_file`)
+        b. Parse the `meta` object and validate it against `MetaSchema`
         c. Create a LibraryEntry
   4. Cache the LibraryIndex in memory; render the library
 
 On file change (watcher fires):
-  - Re-read the changed YAML's `meta:` block
+  - Re-read the changed Document file's `meta` object
   - Update the affected LibraryEntry in place
   - Re-sort if necessary (only if the sort key changed)
 
@@ -167,7 +167,7 @@ On manual refresh:
   - Repeat the launch scan
 ```
 
-**Performance budget:** scanning 500 folders + parsing 500 `meta:` blocks should complete in **< 2s** on a typical laptop with cloud-synced storage. If it doesn't, parse `meta:` blocks lazily on-demand (parse just enough YAML to extract the meta map without reading the rest).
+**Performance budget:** scanning 500 folders + parsing 500 `meta` objects should complete in **< 2s** on a typical laptop with cloud-synced storage. If full JSON parsing proves too slow on real libraries, index `meta` lazily on demand before introducing a second metadata store.
 
 ## Filter logic
 
@@ -320,7 +320,7 @@ Show small badges on cards when the doc has issues:
 ## Acceptance checklist (per T-84)
 
 - [ ] App opens to the library on launch (or to a "no docs yet" state if empty).
-- [ ] Cloud-sync root scanned recursively; doc folders identified by presence of `*.yaml`.
+- [ ] Cloud-sync root scanned recursively; doc folders identified by presence of a document `*.json`.
 - [ ] Filter sidebar with all five filter groups (status / kind / sector / language / owner).
 - [ ] Search matches client + project + tags.
 - [ ] Sort dropdown with four orderings.

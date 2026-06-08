@@ -7,6 +7,15 @@
 
 ## Context
 
+**The DocModel is the canonical *model*; the on-disk file is a *projection* of
+it — not the source of truth.** The code is decisive: `src/editor/file-open.ts`
+does `DocModelSchema.parse(parseDocModelYaml(raw))`, and `src/docmodel/serialize.ts`
+does `serializeDocModel(doc)` → `canonicalize(doc)` → `stringify(...)`. D-18's
+phrase "canonical on-disk format" overloaded *canonical* to mean *the one standard
+disk encoding*, not *source of truth*. So this is a **projection-format change,
+not a model change** — the canonical DocModel and the byte-stability engine
+(`canonicalize()`) are untouched.
+
 D-18 chose YAML as the canonical on-disk format for three reasons: human-readable
 cloud-sync diffs, emergency hand-editability, and native LLM reading. Two of those
 three premises no longer hold under the converging design:
@@ -33,6 +42,17 @@ Markdown/Markdoc/MDX were evaluated as the *container* format and rejected:
 ## Decision
 
 The **canonical on-disk format is JSON**, serializing the canonical DocModel.
+Mechanically this is a near-identity change to one layer: `serialize.ts` swaps the
+`yaml` package's `stringify`/`parse` for `JSON.stringify`/`JSON.parse`, while
+`canonicalize()` — the format-neutral byte-stability engine — stays exactly as is.
+
+**Scope — the DocModel document only.** D-18's wording was "each *doc* is a YAML
+file", so this change applies only to the **DocModel document** (`*.yaml` →
+`*.json`) and its read/write path. It does **not** touch the other YAML in the
+repo: `config.yaml` (install/runtime config), `brand*.yaml` (brand tokens,
+human-reviewed per D-16), and `blocks.catalogue.yaml` (developer spec). Those are
+human-authored/reviewed config where comments and hand-editability remain assets
+and none of the anti-YAML arguments apply — they stay YAML.
 
 - Chart/table/KPI **specs are inline** in the document JSON (JSON nests arbitrarily;
   the Markdoc "nested-attributes get clunky → external file" workaround does not
@@ -52,6 +72,13 @@ ECharts-native in memory (already true under D-18, which kept JSON in-memory).
 
 ## Consequences
 
+- **Hard cut, no backward compatibility:** the project is pre-release with no
+  `.yaml` documents in the wild, so the YAML read/write paths for documents are
+  **deleted**, not dual-supported — no legacy parser, no open-time converter.
+  Repo-controlled fixtures (`examples/`, `templates/`) are converted once.
+- **The `yaml` dependency is retained** — `config.yaml`, `brand*.yaml`, and
+  `blocks.catalogue.yaml` keep using it. The change drops YAML *from the DocModel
+  projection*, not from the repo.
 - **Migration inventory required:** `YAML_FORMAT.md` (byte-stable serialization
   rules), `examples/*.yaml`, `templates/*.yaml`, `AUTHORING.md`, the
   DocModel↔editor mapping, and any IPC that reads/writes the on-disk file. The

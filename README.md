@@ -51,16 +51,16 @@ src/
   export/           # PDF / bundle export
   brand/            # brand-token runtime
   block-primitives/ # shared renderer primitives
-generated-blocks/   # setup AI output (pending/ vs active/)
-setup/              # setup-time CLI sources (stubs in M0)
-templates/          # slide layouts (v1.1)
-fixtures/           # sample DocModel YAML
+  generated-blocks/   # setup AI output (pending/ vs active/)
+  setup/              # setup-time CLI sources (stubs in M0)
+  templates/          # slide layouts (v1.1)
+fixtures/           # sample DocModel document fixtures
 tests/              # Vitest suites
 scripts/            # validate, export-pdf, check-specs, hooks
 src-tauri/          # Tauri 2.x Rust shell + IPC stubs
 docs/               # architecture, types, tasks, decisions
 reference/          # copy-paste patterns (callout, chart, mapping, primitives)
-examples/           # valid + invalid YAML/JSON fixtures
+examples/           # valid + invalid DocModel and LLM fixtures
 starter/            # pinned drop-in configs for greenfield init
 ```
 
@@ -78,7 +78,8 @@ starter/            # pinned drop-in configs for greenfield init
 | Setup AI pipeline | [`docs/SETUP_PIPELINE.md`](docs/SETUP_PIPELINE.md) |
 | Install CLI | [`docs/SETUP_INSTALL_FLOW.md`](docs/SETUP_INSTALL_FLOW.md) |
 | Tauri IPC | [`docs/TAURI_IPC.md`](docs/TAURI_IPC.md) |
-| YAML format | [`docs/YAML_FORMAT.md`](docs/YAML_FORMAT.md) |
+| Document file format decision | [`docs/adr/0022-json-docmodel-supersedes-yaml.md`](docs/adr/0022-json-docmodel-supersedes-yaml.md) |
+| Historical YAML format | [`docs/YAML_FORMAT.md`](docs/YAML_FORMAT.md) |
 | Review panel UI | [`docs/UI_REVIEW_PANEL.md`](docs/UI_REVIEW_PANEL.md) |
 | Library UI | [`docs/UI_LIBRARY.md`](docs/UI_LIBRARY.md) |
 

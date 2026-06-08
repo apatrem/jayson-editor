@@ -10,12 +10,12 @@ The Page view is gaining consultant-facing display controls — **Page flow**
 control *how the consultant looks at a document*, not *what the document is*.
 
 The repository's foundational guardrail is that the **DocModel is canonical**
-(memo §2): TipTap editor state, YAML on disk, and rendered HTML/PDF are all
-*Projections*, reconstructible from the DocModel, and the YAML serialization is
+(memo §2): TipTap editor state, the Document file, and rendered HTML/PDF are
+representations of the DocModel, and the Document file serialization is
 byte-stable so documents diff cleanly. That dogma makes it tempting to reach for
 the nearest persistence we already have — the document — and stash a `meta.ui`
 blob there. Doing so would be a mistake: it would put view state into the
-canonical document, pollute every doc diff with per-viewer noise, and travel
+canonical document data, pollute every doc diff with per-viewer noise, and travel
 with a file shared between consultants (your zoom level is not my zoom level).
 
 There is already one ad-hoc precedent for machine-local UI state:
@@ -27,14 +27,15 @@ inventing a parallel one.
 
 **View preferences are [[local-setting]]s: machine-local, app-wide, persisted in
 the renderer's `localStorage` under `docsystem.*` keys, and never written to the
-DocModel or its YAML.**
+DocModel or its Document file.**
 
 - **Machine-local.** Stored in `localStorage`, not in any document and not in a
-  synced location. They do not travel with a shared `.yaml` file.
+  synced location. They do not travel with a shared Document file.
 - **App-wide, not per-document.** One value per preference for the consultant,
   applied to every document. A document does not remember its own zoom.
-- **Outside the DocModel.** The canonical document and its byte-stable YAML are
-  untouched; preferences never appear in a doc diff. No `meta.ui` field exists.
+- **Outside the DocModel.** The canonical document and its byte-stable Document
+  file are untouched; preferences never appear in a doc diff. No `meta.ui` field
+  exists.
 - **Additive by key.** Each new preference is one more `docsystem.*` key read at
   mount and written on change — not a new store, schema, or IPC surface.
 

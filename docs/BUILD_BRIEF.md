@@ -26,9 +26,9 @@ acceptance criteria all pass.
   listed in memo §5. Do **not** add any other runtime dependency without
   explicit written approval. The LLM is the sole non-OSS component (memo §9).
 - **Do not use** Tiptap Pro, Tiptap Cloud, or any paid SaaS.
-- **DocModel is canonical** (memo §2). The editor, Yjs, and YAML are
-  projections of it. Never make editor state or a CRDT document the source of
-  truth.
+- **DocModel is canonical** (memo §2). The editor, Yjs, Document file, and
+  rendered outputs are representations of it. Never make editor state, a CRDT
+  document, or a secondary projection the source of truth.
 - **Do not build** anything in memo §10: no think-cell clone, no free-canvas
   deck editor, no DOCX/PPTX import or parsing, no PPTX export, no real-time
   collaboration in v1, no live-models platform.
@@ -37,6 +37,17 @@ acceptance criteria all pass.
   the only permitted exception.
 - **When uncertain, stop and ask.** Do not invent brand values, client
   content, or block types. Use `TBD` placeholders and flag them.
+
+**Format clean-break note:** ADR-0022 changes the on-disk document contract from
+YAML to deterministic JSON. The project is still in development, so there is no
+legacy YAML document compatibility requirement. Do not update one surface at a
+time; serialization, fixtures, templates, IPC, library scanning, and authoring
+docs must move together. This clean break is blocking: generation-pipeline work
+starts only after the active document-file contract is JSON. The clean break is
+limited to DocModel document files; brand/config/catalogue/setup YAML may remain
+YAML. File IPCs should be domain-named (`read_document_file`,
+`write_document_file`) rather than syntax-named. Rename DocModel document-file
+format docs/helpers/tests away from YAML terminology.
 
 ---
 
@@ -55,7 +66,7 @@ jayson-editor/
       brand.ts       #   brand-token schema
     /docmodel        # DocModel operations
       load.ts        #   load + validate
-      serialize.ts   #   DocModel <-> YAML projection (lossless)
+      serialize.ts   #   DocModel <-> Document file serialization (lossless)
       patch.ts       #   scoped block-patch operations
     /renderer        # DocModel -> HTML (memo L5)
       /blocks        #   one React component per pre-built block type
@@ -79,7 +90,7 @@ jayson-editor/
     lint-generated.ts #  whitelist + forbidden-pattern enforcement
   /templates         # slide-layout library (v1.1)
   /scripts           # validate.mjs, export-pdf.mjs, setup-install.mjs
-  /fixtures          # sample DocModel YAML; valid + invalid validation fixtures
+  /fixtures          # sample DocModel document files; valid + invalid validation fixtures
   /tests
 ```
 
@@ -119,11 +130,12 @@ jayson-editor/
 - [ ] **Every block has a stable `id`.**
 - [ ] Brand-token schema (per `brand.example.yaml`); one authoritative brand file per consultancy.
 - [ ] `validate()` rejects invalid documents with clear, located errors.
-- [ ] YAML projection: `DocModel -> YAML` and `YAML -> DocModel`.
+- [ ] Deterministic JSON Document file serialization: `DocModel -> Document file`
+  and `Document file -> DocModel`.
 - **Acceptance:**
   - the valid fixture DocModels validate.
   - the invalid fixtures all fail with readable errors.
-  - **YAML round-trip is byte-stable and lossless** (automated test).
+  - **Document file round-trip is byte-stable and lossless** (automated test).
   - duplicate stable IDs fail validation.
 
 ### M1b — Pre-built 15-block library
@@ -181,13 +193,13 @@ jayson-editor/
 - [ ] Structural blocks → atom nodes with a schema-validated `attrs` payload edited via a React node view; prose → native rich text.
 - [ ] `mapping.ts`: `DocModel <-> editor document`, with **losslessness tests both ways**.
 - [ ] Block-library palette (closed set); reorder/add/remove; grid-anchored placement; **no free canvas**.
-- **Acceptance:** load a DocModel, edit it, save it back → round-trip is lossless (automated test); a consultant can add/remove/reorder blocks; the editor **cannot** produce off-schema content; consultants never see YAML/JSON (R4).
+- **Acceptance:** load a DocModel, edit it, save it back → round-trip is lossless (automated test); a consultant can add/remove/reorder blocks; the editor **cannot** produce off-schema content; consultants never see document-file JSON or code (R4).
 
 ### M5 — Comment-to-AI
 - [ ] Custom inline comment **mark** with an ID; comment records in a top-level `comments[]` array on the DocModel (shape per memo §7).
 - [ ] Single-comment and **batch** ("process all") workflows.
 - [ ] AI returns a patch scoped to the comment's block; shown as an **accept/reject proposal**; **never auto-applied**.
-- **Acceptance:** highlight → comment → AI proposal → accept/reject works; comments survive save/reload **and** YAML round-trip; batch mode works; the AI never edits outside the comment's block (automated test).
+- **Acceptance:** highlight → comment → AI proposal → accept/reject works; comments survive save/reload **and** Document file round-trip; batch mode works; the AI never edits outside the comment's block (automated test).
 
 ### M6 — Deck renderer (v1.1)
 - [ ] `DeckRenderer` over the **same** DocModel; a fixed, closed library of slide layouts.
@@ -195,10 +207,10 @@ jayson-editor/
 
 ### M7 — Document Editor Spike (minimum runnable app)
 
-Deliberately narrow first integration milestone: prove a real consultant can open a YAML document, edit it, insert blocks via the palette, save it, and export it to PDF via the user's default browser — WITHOUT a library, install wizard, AI, comments, deck rendering, or settings. Those surfaces stay disconnected modules until M8+ where their scope can be informed by what M7-spike user testing reveals.
+Deliberately narrow first integration milestone: prove a real consultant can open a Document file, edit it, insert blocks via the palette, save it, and export it to PDF via the user's default browser — WITHOUT a library, install wizard, AI, comments, deck rendering, or settings. Those surfaces stay disconnected modules until M8+ where their scope can be informed by what M7-spike user testing reveals.
 
 - [ ] `UI_APP_SHELL.md` spec describes the single-document shell architecture (no router, no install wizard, no library scan).
-- [ ] Two Tauri IPC commands hardened: `read_yaml_file` and `write_yaml_file`. `export_pdf` IPC reimplemented as a browser-handoff (pre-renders HTML, writes to temp via Rust, opens in user's default browser via `shell.open`). The other 14 IPC commands stay as registered no-op stubs (not called by the spike).
+- [ ] Two Tauri IPC commands hardened: `read_document_file` and `write_document_file`. `export_pdf` IPC reimplemented as a browser-handoff (pre-renders HTML, writes to temp via Rust, opens in user's default browser via `shell.open`). The other 14 IPC commands stay as registered no-op stubs (not called by the spike).
 - [ ] `src/App.tsx` no longer returns null — boots a single-document shell. Welcome screen with "Open Document" button; once a document is open, DocumentView fills the window.
 - [ ] DocumentView wires DocumentRenderer + Editor + the autosave debounce from T-82. File → Save / Save As work via fs IPC.
 - [ ] BlockPalette (existing 15-block component) mounted in DocumentView with `+` button + `/` keyboard shortcut to insert blocks; `generatedBlocks` slot empty for M7-spike (filled by M8 T-132).
@@ -206,7 +218,7 @@ Deliberately narrow first integration milestone: prove a real consultant can ope
 - [ ] Top-level `withRenderWatchdog` wrap on DocumentView honours D-39 perf budget; top-level error boundary so a thrown block doesn't crash the whole app.
 - **Acceptance:**
   - launching the app shows a blank welcome screen with a single "Open Document" button.
-  - clicking Open Document opens the native file dialog; selecting `examples/sample-proposal.yaml` renders the document in the editor with BlockPalette mounted.
+  - clicking Open Document opens the native file dialog; selecting `examples/sample-proposal.json` renders the document in the editor with BlockPalette mounted.
   - editing prose, inserting a block from the palette, then File → Save, then File → Open + reload → the edits and inserted block are preserved (lossless round-trip).
   - File → Export PDF pre-renders a self-contained HTML file, opens it in the user's default browser; the user can then save as PDF natively.
   - T-123 integration test covers the full open → edit + insert block → save → reopen → export-pdf-handoff happy path end-to-end.
@@ -230,8 +242,8 @@ Note on vocabulary: "generated blocks" in M8 means **Brand blocks** (Tier 2 per 
 - [ ] **End-to-end pipeline validation:** the M1d setup pipeline gets an integration test proving scan-demos → AI-propose → lint reject malicious → approve cycle works on committed fixture demos.
 - **Acceptance:**
   - first launch with no config opens the folder picker; completing it lands in the library view.
-  - empty cloud-sync folder shows the empty-state with "Use Sample" button; clicking copies sample-proposal.yaml in.
-  - library lists all YAML docs; filter + sort + search work.
+  - empty cloud-sync folder shows the empty-state with "Use Sample" button; clicking copies sample-proposal.json in.
+  - library lists all Document files; filter + sort + search work.
   - "Create from Template" → pick any of 4 → name it → opens in editor; new doc appears in the card grid.
   - BlockPalette shows any Brand blocks from `generated-blocks/active/` alongside the 15 Standard defaults.
   - Clicking any library card routes to DocumentView (same view M7-spike built); the M7-spike File menu (Open / Save / Save As / Export PDF) still works.
@@ -244,13 +256,13 @@ Note on vocabulary: "generated blocks" in M8 means **Brand blocks** (Tier 2 per 
 | Component | Done when |
 |-----------|-----------|
 | Schema | Every block type validated; closed library enforced; clear errors |
-| DocModel + YAML | Lossless round-trip proven by test; renders without the editor |
+| DocModel + Document file | Lossless round-trip proven by test; renders without the editor |
 | Renderer | One component per block; HTML+PDF from one render; brand consistent |
 | LLM interface | Output schema-gated; patches provably scoped to one block |
 | Editor | DocModel⇄editor mapping lossless (tested); off-schema content impossible |
 | Comment-to-AI | Proposals never auto-apply; comments survive serialization; batch works |
 | Deck renderer | Closed layout set; reuses all shared layers unchanged |
-| Document Editor Spike (M7) | Single-document shell wired (File → Open → edit → save → Export PDF via browser handoff); 2 fs IPC commands hardened (`read_yaml_file`, `write_yaml_file`); `export_pdf` IPC reimplemented as HTML browser-handoff; BlockPalette mounted; T-123 integration test passes in CI |
+| Document Editor Spike (M7) | Single-document shell wired (File → Open → edit → save → Export PDF via browser handoff); 2 fs IPC commands hardened (`read_document_file`, `write_document_file`); `export_pdf` IPC reimplemented as HTML browser-handoff; BlockPalette mounted; T-123 integration test passes in CI |
 | Integrated App + Library (M8) | First-launch folder picker → library card grid; 4 standard document templates ship; library "Create from Template" surface works; `generated-blocks/active/` loaded at startup and surfaced in BlockPalette as Brand blocks; M1d pipeline validated end-to-end; T-134 integration test passes in CI. M8 still does NOT include AI/comments/cost-ledger UI, deck rendering, reviewer mode, signed installers, or the Authored-block tier (ADR-0004 + ADR-0005) and its registry refactor — those are M9-M11 + Phase 9 |
 
 ---
@@ -258,7 +270,7 @@ Note on vocabulary: "generated blocks" in M8 means **Brand blocks** (Tier 2 per 
 ## 5. Testing requirements
 
 - **Mandatory automated tests:** schema validation (valid + invalid fixtures);
-  YAML round-trip losslessness; DocModel⇄editor mapping losslessness; LLM-patch
+  Document file round-trip losslessness; DocModel⇄editor mapping losslessness; LLM-patch
   scoping (only the target block changes).
 - Render smoke tests: each block type renders to HTML and to PDF without error.
 - Keep `/fixtures` with at least two complete sample DocModels and a set of

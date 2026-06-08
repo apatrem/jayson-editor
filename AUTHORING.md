@@ -1,7 +1,7 @@
 # AUTHORING.md
 
 How an agent authors a **client document** in this repo: take one of the
-`templates/*.yaml` files and fill it into a valid DocModel YAML for one specific
+`templates/*.json` files and fill it into a valid Document file for one specific
 engagement.
 
 > This is the **content-authoring** guide. For **building the app** (editor,
@@ -10,11 +10,11 @@ engagement.
 
 ## What you produce
 
-A DocModel YAML — the canonical document, per [CONTEXT.md](CONTEXT.md). Every
-other form (editor state, HTML, PDF) is a *projection* of it. You are writing
-the source of truth, so it must validate.
+A Document file — the deterministic JSON on-disk serialization of a DocModel, per
+[CONTEXT.md](CONTEXT.md). You are writing the saved document file, so it must
+validate. Consultants still edit only through the app's WYSIWYG surface.
 
-Output goes to `documents/<client>-<slug>.yaml`. The contents of `documents/`
+Output goes to `documents/<client>-<slug>.json`. The contents of `documents/`
 are **git-ignored** — real engagements carry `confidentialityLevel: high`, so
 client content never gets committed to this repo. Only this guide and the
 templates are tracked.
@@ -26,7 +26,7 @@ do not invent.** Every `[REPLACE: …]` placeholder is client content you must n
 fabricate.
 
 - Fill a placeholder **only** from supplied source material.
-- Anything the source doesn't cover becomes literal **`TBD`** in the YAML.
+- Anything the source doesn't cover becomes literal **`TBD`** in the Document file.
 - If the source is too thin to produce a coherent document, **stop and ask**
   rather than guessing.
 - Never invent brand values (`brandRef` stays `$brand:default` unless the intake
@@ -51,8 +51,8 @@ Selection = `docKind` × `kind`:
 
 |              | document (flowing prose) | deck (slides)                  |
 | ------------ | ------------------------ | ------------------------------ |
-| **proposal** | `commercial-proposal.yaml` | `commercial-proposal-deck.yaml` |
-| **report**   | `standard-report.yaml`     | `standard-report-deck.yaml`     |
+| **proposal** | `commercial-proposal.json` | `commercial-proposal-deck.json` |
+| **report**   | `standard-report.json`     | `standard-report-deck.json`     |
 
 The user must state **both** axes ("commercial proposal, slide deck"). If either
 is missing or ambiguous from the request + intake, **ask** — never default.
@@ -110,16 +110,15 @@ numbered-list  prose  risk-matrix  roadmap  table  team  timeline
 - **Stable IDs.** Sections/slides and blocks you add get unique, descriptive
   kebab-case ids (e.g. `risks-callout`, `risks-table`). Never reuse an id —
   `validateDocModel` rejects duplicates.
-- **Formatting.** Mirror the template's YAML style (2-space indent, double quotes
-  where it quotes, block collections). The app owns byte-stable serialization
-  ([docs/YAML_FORMAT.md](docs/YAML_FORMAT.md)) and will normalise on first save,
-  so the binding check below is *parse + validate*, not byte-equality. Section
-  comments are fine.
+- **Formatting.** Mirror the deterministic JSON style from the templates. The app
+  owns byte-stable serialization and will normalise on first save, so the binding
+  check below is *parse + validate*, not byte-equality. JSON comments are not
+  allowed.
 
 ### 5. Validate — the "done" gate
 
 ```
-npm run validate documents/<client>-<slug>.yaml
+npm run validate documents/<client>-<slug>.json
 ```
 
 This runs the same `validateDocModel()` the app uses at import (Zod schema +

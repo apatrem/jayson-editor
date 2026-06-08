@@ -6,6 +6,14 @@
 
 **Companion to:** `docs/BUILD_BRIEF.md` §3 (M7 entry), `docs/TASKS.md` Phase 7 (T-115..T-123), `docs/TAURI_IPC.md` (IPC contract), `docs/DECISIONS.md` (D-39 perf budget, D-36 watchdog HOC), `docs/UI_LIBRARY.md` + `docs/UI_REVIEW_PANEL.md` + `docs/SETUP_INSTALL_FLOW.md` (cross-referenced ONLY for what M7-spike defers — none of those surfaces ship in M7-spike).
 
+> **ADR-0022 supersession note:** this spec predates the JSON Document file
+> clean break and still contains many YAML filenames and `read_yaml_file` /
+> `write_yaml_file` references. For DocModel document files, read those as
+> superseded implementation detail: the active target is deterministic `.json`
+> Document files and domain-named `read_document_file` /
+> `write_document_file` IPC commands. Non-document YAML references
+> (`brand.example.yaml`, `config.yaml`) still stand.
+
 ---
 
 ## Why this milestone matters

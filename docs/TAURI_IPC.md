@@ -13,7 +13,7 @@
 1. **Every privileged operation is a command.** Filesystem reads, keychain access, PDF export, SQLite writes — all go through `invoke(...)`. The frontend never imports `node:fs`, `node:path`, or anything that bypasses the boundary.
 2. **Commands accept and return JSON-serializable types only.** Text files return strings. Binary asset reads return base64 strings when the caller immediately embeds bytes into self-contained export HTML; no raw filesystem handles ever cross the boundary.
 3. **Errors are typed.** Each command returns `Result<T, IpcError>` where `IpcError` is a tagged-union enum (NotFound, PermissionDenied, Invalid, etc.). The frontend gets a discriminated TypeScript error and can dispatch UI per case.
-4. **Side effects are explicit.** Commands that mutate state name the resource (`write_yaml_file`, `set_secret`, `move_file`). Commands that read are pure verbs (`read_yaml_file`, `read_app_config`).
+4. **Side effects are explicit.** Commands that mutate state name the resource (`write_document_file`, `set_secret`, `move_file`). Commands that read are pure verbs (`read_document_file`, `read_app_config`).
 5. **The CSP and `assetProtocol.scope` in `tauri.conf.json` are part of the contract.** A command accepting a path must validate that the path is within an allowed scope; rejecting paths outside scope at the Rust layer.
 
 ## Shared types
@@ -63,15 +63,25 @@ export function isIpcError(e: unknown): e is IpcError {
 
 These commands wrap the Tauri FS plugin with path-scope validation. The frontend never receives raw filesystem handles. The allowed roots are derived from `src-tauri/tauri.conf.json` `app.security.assetProtocol.scope`; there is no separate Rust-side hardcoded allowlist.
 
-**M7-spike command surface:** only `read_yaml_file` and `write_yaml_file` are registered. `list_directory`, `file_exists`, `ensure_directory`, and `move_file` are documented below for M8, but are intentionally deferred in M7 and return "command not registered" from the renderer. M8 T-125 re-registers them with the same canonicalize + scope-check hardening used by the YAML commands.
+**M7-spike command surface:** only `read_document_file` and `write_document_file`
+are registered. `list_directory`, `file_exists`, `ensure_directory`, and
+`move_file` are documented below for M8, but are intentionally deferred in M7 and
+return "command not registered" from the renderer. M8 T-125 re-registers them
+with the same canonicalize + scope-check hardening used by the Document file
+commands.
 
-### `read_yaml_file(path: string) -> string`
+**ADR-0022 clean-break target:** DocModel document files are deterministic JSON.
+The file IPC commands are domain-named and enforce `.json` document paths. Keep
+JSON parsing and DocModel schema validation in TypeScript; Rust only shuttles
+scoped UTF-8 text.
+
+### `read_document_file(path: string) -> string`
 
 **Rust:**
 
 ```rust
 #[tauri::command]
-pub async fn read_yaml_file(path: String) -> IpcResult<String> {
+pub async fn read_document_file(path: String) -> IpcResult<String> {
     let validated = validate_path_in_scope(&path)?;
     std::fs::read_to_string(&validated).map_err(|e| IpcError::Io(e.to_string()))
 }
@@ -82,8 +92,8 @@ pub async fn read_yaml_file(path: String) -> IpcResult<String> {
 ```typescript
 import { invoke } from "@tauri-apps/api/core";
 
-export async function readYamlFile(path: string): Promise<string> {
-  return invoke<string>("read_yaml_file", { path });
+export async function readDocumentFile(path: string): Promise<string> {
+  return invoke<string>("read_document_file", { path });
 }
 ```
 
@@ -91,9 +101,10 @@ export async function readYamlFile(path: string): Promise<string> {
 
 - Reads UTF-8 text. Rejects non-UTF-8 (Invalid).
 - Path must be within an `assetProtocol.scope` glob (rejects otherwise: PermissionDenied).
-- Does NOT parse YAML — the frontend's `yaml` package does that. Rust just shuttles bytes.
+- Path must end in `.json`.
+- Does NOT parse JSON or validate the DocModel — the frontend does that. Rust just shuttles bytes.
 
-### `write_yaml_file(path: string, content: string) -> void`
+### `write_document_file(path: string, content: string) -> void`
 
 Writes UTF-8 text atomically (write-to-temp + rename). Rejects paths outside scope.
 On Windows, replacement uses `MoveFileExW` with replace-existing and write-through
@@ -108,7 +119,7 @@ Reads an image asset for PDF export inlining. Registered in M7.5 T-123e.
 
 **Behavior:**
 
-- Path must be absolute and within the same scoped roots as `read_yaml_file`.
+- Path must be absolute and within the same scoped roots as `read_document_file`.
 - Path must end with `.jpg`, `.jpeg`, `.png`, `.svg`, or `.webp`.
 - File size must be at most 5 MB.
 - Returns base64-encoded bytes so the frontend can build `data:image/{mime};base64,...` in `renderStaticHtmlForExport` without JSON number-array amplification.
@@ -122,8 +133,8 @@ interface DirEntry {
   name: string;
   path: string; // absolute
   kind: "file" | "directory";
-  isYaml: boolean; // helper: name endsWith .yaml
-  isDocFolder: boolean; // helper: directory containing a *.yaml file
+  isDocumentFile: boolean; // helper: name endsWith .json
+  isDocFolder: boolean; // helper: directory containing a document .json file
 }
 ```
 
@@ -371,7 +382,8 @@ export async function permanentlyDeleteAuthoredBlock(path: string): Promise<void
 Things to keep in JS (don't add Tauri commands for them):
 
 - **LLM API calls.** The frontend calls Anthropic/OpenAI directly via `fetch` (the CSP allows `connect-src` to those origins). Pulling the API key through `get_secret` then calling `fetch` from JS is fine — the key never lives in JS state longer than one request.
-- **YAML parsing.** Use the `yaml` npm package in the frontend.
+- **Document JSON parsing.** Use Web/TypeScript JSON parsing in the frontend,
+  followed by `validateDocModel`.
 - **ProseMirror manipulation.** Pure JS.
 - **ECharts rendering.** Pure JS for the editor; pre-rendered to SVG by JS in a Node subprocess (or browser worker) for PDF export.
 
@@ -379,7 +391,7 @@ Things to keep in JS (don't add Tauri commands for them):
 
 ## §7 — Why commands are split this way (rationale)
 
-1. **Privileged ops in Rust, pure compute in JS.** Filesystem and keychain need the Rust layer because Tauri's security model gates them. YAML parsing is pure compute — no reason to cross the boundary.
+1. **Privileged ops in Rust, pure compute in JS.** Filesystem and keychain need the Rust layer because Tauri's security model gates them. Document JSON parsing is pure compute — no reason to cross the boundary.
 2. **No `dangerouslySetInnerHTML`-equivalent escape hatch.** No `execute_arbitrary_javascript` command. No `read_any_file` command. The frontend cannot reach outside the scope defined in `tauri.conf.json`.
 3. **Each command has one clear purpose.** Avoid `do_lots_of_stuff` commands — they accumulate special cases and become impossible to audit.
 4. **All paths validated at the Rust layer.** Even though `AssetPathSchema` rejects bad paths in the schema, the Rust commands re-validate against `assetProtocol.scope`. Defense in depth.

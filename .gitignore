@@ -4,6 +4,9 @@
 # CodeGraph local index
 .codegraph/
 
+# Local agent workspace files
+.agents/
+
 # Editor caches
 .vscode/
 .idea/

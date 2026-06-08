@@ -1,5 +1,12 @@
 # YAML Serialization Format — Byte-Stable Rules
 
+> **Superseded for DocModel document files:** ADR-0022 replaces YAML document
+> files with deterministic JSON Document files. This file is retained as
+> historical implementation context until the clean-break task replaces it with
+> JSON document-file serialization rules and renames DocModel helpers/tests away
+> from YAML terminology. Non-document YAML artifacts such as `brand.yaml`,
+> `config.yaml`, and `blocks.catalogue.yaml` may remain YAML.
+
 **Purpose:** specify the exact YAML formatter configuration so DocModel ⇄ YAML round-trips are byte-stable (acceptance criterion T-40, decision D-05/D-18).
 
 **Audience:** the developer implementing `src/docmodel/serialize.ts`.
