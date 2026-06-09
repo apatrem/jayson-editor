@@ -307,6 +307,12 @@ DOCX/PPTX import/export, v1 real-time collab, live-models platform).
 at runtime (the setup-time pipeline is the sole exception).
 - **When uncertain, stop and ask.** Use `TBD` and flag it; do not invent brand
 values, client content, or block types.
+- **Frozen acceptance tests are immutable.** Test files headed
+`FROZEN ACCEPTANCE TESTS` (T-201–T-204, `/agentic-workflow:plan`) and the
+contract artifacts they pin (`docs/JSON_FORMAT.md`,
+`slide-layouts.catalogue.yaml`) must never be edited to make a gate pass —
+the implementation adapts to the test, not vice versa. Changes require human
+sign-off on the plan PR.
 
 ## Working style
 
@@ -426,4 +432,3 @@ include these explicit checks in the prompt:
   than the JSON shape) reproduce the test-vs-runtime gap the prior
   conventions warn about — mock with the JSON shape instead, mirroring
   `tests/ipc/errors.test.ts`.
-

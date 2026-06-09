@@ -1263,7 +1263,7 @@ First integration milestone. Deliberately narrow: prove a consultant can open a 
       for (const b of bytes) binary += String.fromCharCode(b);
       return btoa(binary);
     }
-    
+
     function base64ToUtf8(s: string): string {
       const binary = atob(s);
       const bytes = Uint8Array.from(binary, (c) => c.charCodeAt(0));
@@ -1288,17 +1288,17 @@ First integration milestone. Deliberately narrow: prove a consultant can open a 
           (globalThis as { Buffer?: unknown }).Buffer = originalBuffer;
         }
       });
-      
+
       it("inlines SVG images without throwing ReferenceError", async () => {
         // Doc with one SVG image; mock read_binary_file to return SVG bytes containing <script>
         // assert: no ReferenceError; output contains data:image/svg+xml; sanitized SVG has no <script>
       });
-      
+
       it("emits the oversized-image placeholder without throwing ReferenceError", async () => {
         // mock read_binary_file to reject with "exceeds 5MB"
         // assert: no ReferenceError; output contains placeholder data:image/svg+xml with "too large" text
       });
-      
+
       it("emits the total-cap-exhausted placeholder without throwing", async () => {
         // mock multiple images that individually pass but cumulatively exceed 50MB
         // assert: no ReferenceError; later images get placeholders
@@ -2036,6 +2036,8 @@ Decisions: ADR-0004, ADR-0005, ADR-0006, ADR-0007, ADR-0009 (identity), ADR-0010
 
 Depends on ADR-0022 (JSON on disk) and [JSON_MIGRATION_INVENTORY.md](JSON_MIGRATION_INVENTORY.md). JSON migration tasks (T-183–T-189) should land before or in parallel with generation implementation (T-190+). Generation skill (Pass 0–1) can ship while structuring (Pass 2+) is built in-app.
 
+> **Coarse re-plan (2026-06-09, `/agentic-workflow:plan`):** the not-started tasks below are consolidated into coarser tasks with frozen acceptance tests under [`tasks/`](../tasks/): **T-201** (JSON persistence core ← T-183 + T-184), **T-202** (app on JSON ← T-185 + T-186 + T-187), **T-203** (markdown→ProseMirror ← T-195), **T-204** (deck layout fit-check ← T-196). Work them from `tasks/T-20x-*.md`, **not** from the entries below. In-flight T-191–T-194 are unchanged.
+
 ### T-182 [x] · Write YAML→JSON migration inventory
 - **Depends-on:** ADR-0022
 - **Reads:** ADR-0022, repo grep for `yaml`/`read_yaml`/`write_yaml`
@@ -2044,6 +2046,8 @@ Depends on ADR-0022 (JSON on disk) and [JSON_MIGRATION_INVENTORY.md](JSON_MIGRAT
 - **est.** 2h
 
 ### T-183 [ ] · JSON_FORMAT.md + deterministic JSON serializer
+
+> Consolidated into [tasks/T-201-json-persistence-core.md](../tasks/T-201-json-persistence-core.md) — do not start from this entry.
 - **Depends-on:** T-182
 - **Reads:** `docs/YAML_FORMAT.md`, `src/docmodel/{serialize,canonicalize,yaml-config}.ts`, ADR-0022
 - **Outputs:** `docs/JSON_FORMAT.md`, `src/docmodel/json-config.ts` (or equivalent), migrate `serialize.ts` to JSON (`parseDocModelJson`), `tests/docmodel/json-roundtrip.test.ts`
@@ -2051,6 +2055,8 @@ Depends on ADR-0022 (JSON on disk) and [JSON_MIGRATION_INVENTORY.md](JSON_MIGRAT
 - **est.** 4h
 
 ### T-184 [ ] · read_json_file + write_json_file IPC
+
+> Consolidated into [tasks/T-201-json-persistence-core.md](../tasks/T-201-json-persistence-core.md) — do not start from this entry.
 - **Depends-on:** T-183
 - **Reads:** `src-tauri/src/ipc/fs.rs`, `docs/TAURI_IPC.md`, `tests/ipc/fs.smoke.test.ts`
 - **Outputs:** JSON IPC commands (rename or add alongside YAML during transition — decide in T-182 §9), updated TAURI_IPC.md, smoke tests
@@ -2058,6 +2064,8 @@ Depends on ADR-0022 (JSON on disk) and [JSON_MIGRATION_INVENTORY.md](JSON_MIGRAT
 - **est.** 3h
 
 ### T-185 [ ] · Wire editor open/save/autosave to JSON
+
+> Consolidated into [tasks/T-202-app-on-json.md](../tasks/T-202-app-on-json.md) — do not start from this entry.
 - **Depends-on:** T-184
 - **Reads:** `src/editor/{file-open,file-save,autosave}.ts`, `src/ui/menu/FileMenu.tsx`, `docs/UI_APP_SHELL.md`
 - **Outputs:** Editor + file menu use JSON IPC + `.json` dialog filters
@@ -2065,6 +2073,8 @@ Depends on ADR-0022 (JSON on disk) and [JSON_MIGRATION_INVENTORY.md](JSON_MIGRAT
 - **est.** 3h
 
 ### T-186 [ ] · Migrate library scan + templates to JSON
+
+> Consolidated into [tasks/T-202-app-on-json.md](../tasks/T-202-app-on-json.md) — do not start from this entry.
 - **Depends-on:** T-185
 - **Reads:** `src/library/index-builder.ts`, `templates/*.yaml`, `src/ui/library/CreateFromTemplateModal.tsx`, `docs/UI_LIBRARY.md`
 - **Outputs:** `templates/*.json`, library scans `*.json`, create-from-template clones JSON; update integration tests
@@ -2072,6 +2082,8 @@ Depends on ADR-0022 (JSON on disk) and [JSON_MIGRATION_INVENTORY.md](JSON_MIGRAT
 - **est.** 4h
 
 ### T-187 [ ] · Doc/spec sweep for JSON canonical format
+
+> Consolidated into [tasks/T-202-app-on-json.md](../tasks/T-202-app-on-json.md) — do not start from this entry.
 - **Depends-on:** T-186
 - **Reads:** `docs/TYPES.md`, `AUTHORING.md`, `docs/DECISIONS.md` (D-05, D-19), `docs/BUILD_BRIEF.md`, `AGENTS.md`
 - **Outputs:** Updated specs; D-05/D-19 text amended (`proposal.json`); optional one-release YAML import shim (if decided in T-182 §9)
@@ -2114,6 +2126,8 @@ Depends on ADR-0022 (JSON on disk) and [JSON_MIGRATION_INVENTORY.md](JSON_MIGRAT
 - **est.** 3h
 
 ### T-195 [ ] · Deterministic markdown → ProseMirror converter (structuring prose path)
+
+> Consolidated into [tasks/T-203-markdown-to-prosemirror.md](../tasks/T-203-markdown-to-prosemirror.md) — do not start from this entry.
 - **Depends-on:** T-191
 - **Reads:** editor PM schema, `docs/GENERATION_PIPELINE.md` §4
 - **Outputs:** `src/generation/markdown-to-prosemirror.ts`, tests for allowed mark/node set + coercion logging
@@ -2121,6 +2135,8 @@ Depends on ADR-0022 (JSON on disk) and [JSON_MIGRATION_INVENTORY.md](JSON_MIGRAT
 - **est.** 8h
 
 ### T-196 [ ] · Deck layout fit-check engine (Pass 2.5)
+
+> Consolidated into [tasks/T-204-deck-layout-fit-check.md](../tasks/T-204-deck-layout-fit-check.md) — do not start from this entry.
 - **Depends-on:** T-192, D-30 slide layouts
 - **Reads:** `docs/GENERATION_PIPELINE.md` §5, slide layout components
 - **Outputs:** `slide-layouts.catalogue.yaml`, layout capacity metadata spec + `src/generation/layout-fit-check.ts` + tests; validate editor `LAYOUT_SLOTS` against catalogue
