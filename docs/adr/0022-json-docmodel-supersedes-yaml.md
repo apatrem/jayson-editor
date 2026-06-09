@@ -41,7 +41,7 @@ Markdown/Markdoc/MDX were evaluated as the *container* format and rejected:
 
 ## Decision
 
-The **canonical on-disk format is JSON**, serializing the canonical DocModel.
+The **on-disk projection format is JSON**, serializing the canonical DocModel.
 Mechanically this is a near-identity change to one layer: `serialize.ts` swaps the
 `yaml` package's `stringify`/`parse` for `JSON.stringify`/`JSON.parse`, while
 `canonicalize()` — the format-neutral byte-stability engine — stays exactly as is.
