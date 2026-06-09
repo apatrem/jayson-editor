@@ -11,6 +11,7 @@ surface.
 ## Acceptance criteria  (must be machine-checkable)
 - [ ] `src/editor/file-open.ts` parses via `parseDocModelJson`; no YAML parse or `.yaml` discovery left in the document open path → `tests/integration/app-on-json-wiring.test.ts`
 - [ ] `file-save.ts` / `autosave.ts` write the JSON projection; `FileMenu.tsx` dialogs filter `.json` → same file
+- [ ] **No document flow invokes YAML document IO** — file-open/save/autosave, `DocumentView.tsx`, `Routes.tsx`, `main.tsx`, `LibraryView.tsx`, `CreateFromTemplateModal.tsx`; `parseDocModelYaml` deleted repo-wide (hard cut). Non-document YAML (config/brand/catalogue, authored manifests) untouched → same file
 - [ ] All four `templates/*.json` exist and validate as DocModels → same file
 - [ ] `src/library/index-builder.ts` indexes `*.json` documents → same file
 - [ ] M7/M8 integration harnesses load JSON fixtures (no `.yaml` fixture paths) → same file
@@ -19,6 +20,7 @@ surface.
 
 ## Files likely involved
 - `src/editor/{file-open,file-save,autosave}.ts`, `src/ui/menu/FileMenu.tsx`
+- `src/ui/views/DocumentView.tsx`, `src/ui/router/Routes.tsx`, `src/main.tsx`, `src/ui/library/{LibraryView,CreateFromTemplateModal}.tsx`
 - `src/library/index-builder.ts`, `templates/*.json`
 - `tests/integration/{m7-spike-harness,m8-harness}.ts` (fixture paths)
 - `docs/DECISIONS.md` (D-05), `AUTHORING.md`, `docs/BUILD_BRIEF.md`, `docs/UI_LIBRARY.md`

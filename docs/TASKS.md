@@ -546,7 +546,7 @@ Depends on ADR-0022 (JSON on disk) and [JSON_MIGRATION_INVENTORY.md](JSON_MIGRAT
 
 ### T-182 [x] · Write YAML→JSON migration inventory
 
-### T-183 [ ] · JSON_FORMAT.md + deterministic JSON serializer
+### T-183 [skip] · JSON_FORMAT.md + deterministic JSON serializer
 
 > Consolidated into [tasks/T-201-json-persistence-core.md](../tasks/T-201-json-persistence-core.md) — do not start from this entry.
 - **Depends-on:** T-182
@@ -555,7 +555,7 @@ Depends on ADR-0022 (JSON on disk) and [JSON_MIGRATION_INVENTORY.md](JSON_MIGRAT
 - **Acceptance:** Byte-stable JSON round-trip; canonical key order documented; `npm test` green for new round-trip suite.
 - **est.** 4h
 
-### T-184 [ ] · read_json_file + write_json_file IPC
+### T-184 [skip] · read_json_file + write_json_file IPC
 
 > Consolidated into [tasks/T-201-json-persistence-core.md](../tasks/T-201-json-persistence-core.md) — do not start from this entry.
 - **Depends-on:** T-183
@@ -564,7 +564,7 @@ Depends on ADR-0022 (JSON on disk) and [JSON_MIGRATION_INVENTORY.md](JSON_MIGRAT
 - **Acceptance:** Read/write a valid DocModel JSON file through IPC; atomic write-then-rename preserved.
 - **est.** 3h
 
-### T-185 [ ] · Wire editor open/save/autosave to JSON
+### T-185 [skip] · Wire editor open/save/autosave to JSON
 
 > Consolidated into [tasks/T-202-app-on-json.md](../tasks/T-202-app-on-json.md) — do not start from this entry.
 - **Depends-on:** T-184
@@ -573,7 +573,7 @@ Depends on ADR-0022 (JSON on disk) and [JSON_MIGRATION_INVENTORY.md](JSON_MIGRAT
 - **Acceptance:** M7-spike flow (open → edit → save) works with `examples/sample-proposal.json`; autosave writes JSON.
 - **est.** 3h
 
-### T-186 [ ] · Migrate library scan + templates to JSON
+### T-186 [skip] · Migrate library scan + templates to JSON
 
 > Consolidated into [tasks/T-202-app-on-json.md](../tasks/T-202-app-on-json.md) — do not start from this entry.
 - **Depends-on:** T-185
@@ -582,7 +582,7 @@ Depends on ADR-0022 (JSON on disk) and [JSON_MIGRATION_INVENTORY.md](JSON_MIGRAT
 - **Acceptance:** M8 happy path works with JSON templates; library meta read parses JSON only.
 - **est.** 4h
 
-### T-187 [ ] · Doc/spec sweep for JSON canonical format
+### T-187 [skip] · Doc/spec sweep for JSON canonical format
 
 > Consolidated into [tasks/T-202-app-on-json.md](../tasks/T-202-app-on-json.md) — do not start from this entry.
 - **Depends-on:** T-186
@@ -621,7 +621,7 @@ Depends on ADR-0022 (JSON on disk) and [JSON_MIGRATION_INVENTORY.md](JSON_MIGRAT
 - **Acceptance:** Detects broken placeholders, orphaned ids, structural damage before full structuring pass; clear error messages (Moment 1).
 - **est.** 3h
 
-### T-195 [ ] · Deterministic markdown → ProseMirror converter (structuring prose path)
+### T-195 [skip] · Deterministic markdown → ProseMirror converter (structuring prose path)
 
 > Consolidated into [tasks/T-203-markdown-to-prosemirror.md](../tasks/T-203-markdown-to-prosemirror.md) — do not start from this entry.
 - **Depends-on:** T-191
@@ -630,7 +630,7 @@ Depends on ADR-0022 (JSON on disk) and [JSON_MIGRATION_INVENTORY.md](JSON_MIGRAT
 - **Acceptance:** Known markdown constructs map to editor-renderable fragments; out-of-schema constructs dropped with logged warnings, never invalid fragments emitted.
 - **est.** 8h
 
-### T-196 [ ] · Deck layout fit-check engine (Pass 2.5)
+### T-196 [skip] · Deck layout fit-check engine (Pass 2.5)
 
 > Consolidated into [tasks/T-204-deck-layout-fit-check.md](../tasks/T-204-deck-layout-fit-check.md) — do not start from this entry.
 - **Depends-on:** T-192, D-30 slide layouts

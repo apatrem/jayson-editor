@@ -84,6 +84,21 @@ describe("T-204 · fit-check is the deterministic layout authority", () => {
     blocks: Array.from({ length: 24 }, (_, i) => ({ id: `b${i}`, type: "prose" })),
   };
 
+  const withinCapacitySlide = {
+    id: "slide-fit",
+    layout: "title-body",
+    blocks: [{ id: "b0", type: "prose" }],
+  };
+
+  it("accepts a within-capacity slide (fits: true, no overflow flag)", async () => {
+    // Dual-review punch-list #3: without this case a constant
+    // {fits:false, flags:["layoutOverflow"]} implementation passes the suite.
+    const fitCheck = await loadFitCheck();
+    const result = fitCheck(withinCapacitySlide, loadCatalogue());
+    expect(result.fits).toBe(true);
+    expect(result.flags).not.toContain("layoutOverflow");
+  });
+
   it("flags layoutOverflow on an over-capacity slide (never silent truncation)", async () => {
     const fitCheck = await loadFitCheck();
     const result = fitCheck(overCapacitySlide, loadCatalogue());
