@@ -1,5 +1,13 @@
 # Implementation Tasks — Jayson Editor v1
 
+> **System change (2026-06-09, `/agentic-workflow:plan`):** this file is now a
+> **milestone index + remaining legacy backlog**. New work is specified in
+> [`../tasks/`](../tasks/) as coarse tasks with frozen acceptance tests and
+> human-approved plan PRs — do not add tasks here. Completed task bodies moved
+> to [TASKS_ARCHIVE.md](TASKS_ARCHIVE.md); their `[x]`/`[skip]` header stubs
+> remain below so dependency resolution and the loop's marker grammar keep
+> working.
+
 **Purpose:** decompose `BUILD_BRIEF.md` milestones (M0–M6) into atomic tasks of ≤4 hours each.
 
 **How to use this doc:**
@@ -2221,3 +2229,5 @@ These numbers match the architecture memo's §11 estimate of "6–12 months comm
 - **When blocked:** if a task can't proceed, note the blocker in this file and pick the next unblocked task.
 
 This is a backlog, not a contract. Reorder freely as you learn — but always against the BUILD_BRIEF acceptance gates, which are the real targets.
+
+**New work (Phase 12 onward):** specify via `/agentic-workflow:plan` into [`../tasks/`](../tasks/) — this list only tracks the remaining legacy entries to completion.
