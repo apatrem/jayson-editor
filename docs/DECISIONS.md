@@ -59,6 +59,11 @@ Every editor edit and every individual comment-accept/reject is a separate undo 
 **Why:** Gives consultants fine-grained control during dozens-of-proposals batches. Aligns with how Word/Google Docs feel.
 **Implication:** The undo stack contains mixed types (text edits, block edits, comment acceptances). UI doesn't need to differentiate — it's just a list of operations.
 
+### D-40 — External-change detection: auto-reload clean, prompt dirty
+A Rust-side file watcher (`notify`) watches the **open doc folder** and the **library root**. When the on-disk DocModel changes under an open document: if the in-memory doc has no unsaved delta (autosave caught up), reload silently with a toast; if unsaved edits exist, prompt **Reload from disk / Keep mine** — Keep mine means the next autosave overwrites, with the cloud provider's version history (D-05) as the recovery net. No auto-merge. Library-root events refresh the library index. The shared-data folder (D-20) is **not** watched in v1 — brand tokens are locked-in after setup; staleness there is cosmetic.
+**Why:** Doc folders live in a cloud-sync root (D-19/D-20), so another machine or an external agent can rewrite files under the app; with mandatory autosave (D-05), a stale in-memory DocModel silently clobbering newer synced bytes is a real data-loss path. Same-stack prior art: erictli/scratch (Tauri 2 + notify, 500ms debounce, `file-change` event) — patterns only, the repo is unlicensed.
+**Implication:** New watcher + `file-change` event to add to `docs/TAURI_IPC.md` when implemented. "Dirty" is defined by the autosave debounce window. Also covers `draft.md` changing during the free-markdown phase (external-agent refinement is an expected flow, see `docs/GENERATION_PIPELINE.md`).
+
 ---
 
 ## 3. Block library & schema
@@ -205,6 +210,11 @@ A native installer using Tauri 2.x. No central server. Files read/written direct
 User name, email, role, cloud-sync paths, and LLM keys are configured by a setup script at install time. The app trusts the local config — single-user-per-machine.
 **Why:** Avoids building auth in v1. Comments are stamped automatically with the local user.
 **Roadmap:** v2 — proper auth (SSO/OAuth) when real-time collaboration arrives.
+
+### D-41 — Single app instance per machine
+The Tauri shell registers `tauri-plugin-single-instance`: a second launch focuses the existing window instead of starting a second process; second-launch arguments are forwarded to the running instance.
+**Why:** Two instances autosaving the same DocModel (D-05) is a silent last-writer-wins data-loss path with no conflict signal. One plugin registration closes it.
+**Implication:** One-line dependency + handler in `src-tauri`; complements the external-change watcher (D-40), which covers the cross-machine variant of the same hazard.
 
 ---
 
@@ -382,11 +392,11 @@ Versions are nominal; actual sequencing depends on v1 outcomes.
 - **Outline-time linked-document split** — when cold-start generation outline exceeds the D-35 envelope, propose splitting into multiple linked DocModels (e.g. one deck per workstream) with consultant override at outline approval; v1 ships single DocModel + size flag only (grilling 2026-06-07)
 - **Full re-structure** — restore `.generation/source-draft.md` to `draft.md`, edit, run **Structure draft** again with explicit confirm (replaces entire DocModel; comments orphaned). v1 is one-way gate + scoped section regeneration only (grilling 2026-06-07)
 - **Consultant-authored custom blocks** beyond the setup pass (email-shared first)
-- **Integrated scaffolding** ("New from template" inside the editor with the questionnaire)
+- **Integrated scaffolding** ("New from template" inside the editor with the questionnaire). *Candidate mechanic (not committed):* detect a locally installed agent CLI (Claude Code / Codex) and run Pass 0–1 as a subprocess from the Rust shell — zero per-seat API-key provisioning; the Rust HTTP client stays primary for structured passes (2/2.5/3). Solved gotchas documented by erictli/scratch (patterns only, unlicensed): PATH expansion across nvm/fnm/Homebrew, prompt via stdin, timeout + kill handle, `which`/`where` provider detection. Decide in its own grilling when this is scheduled — CLI availability across ~30 consultant machines is unverified.
 - **Additional languages** (DE, ES) and FR editor UI
 - **Per-language brand tokens** (different fonts/logos by language)
 - **Admin UI** for tweaking brand tokens without YAML editing
-- **Deck path** — 15 slide layouts + DeckRenderer (D-29, D-30)
+- **Deck path** — 15 slide layouts + DeckRenderer (D-29, D-30). *Design prior art for `slide-layouts.catalogue.yaml`:* Slidev's layout system — layouts as components exposing **named slots**, slide content mapped into slots declaratively (`::slot::` sugar), and **cascading layout resolution** (built-in → theme → project), which maps onto a Standard/Brand layout tiering.
 - **Opt-in local telemetry + opt-in shared pilot reports**
 - **Move shared data to a Git repo** (`consultancy-shared-data`) with PR review
 
@@ -396,6 +406,11 @@ Versions are nominal; actual sequencing depends on v1 outcomes.
 - **Synced library** for consultant-shared blocks (replacing email-based sharing)
 - **Proper auth** (SSO/OAuth) for the multi-user/collab era
 - **Central aggregate analytics** with explicit consent (if a clear use case emerges)
+
+### Unscheduled (worth doing, not currently necessary — revisit after pilot feedback)
+- **Library full-text search** — upgrade the library SearchBar from metadata-only filtering (`src/library/filter.ts` filters `Meta` fields) to full-text search over block content via an embedded Tantivy index in the Rust shell; stable block ids let hits deep-link to the block. Same-stack feasibility proven by erictli/scratch (tantivy + Tauri 2, watcher-driven incremental reindex) — patterns only, repo is unlicensed.
+- **Slash-command block insertion** — `/` suggestion menu in the editor whose items derive from the closed registry (Standard blocks ∪ Installed manifest set), preserving the closed-schema boundary (ADR-0015). Additive to the toolbar "Add block" button: keyboard-flow insertion at the cursor. Prior art: TipTap `Suggestion` plugin (steven-tey/novel `slash-command.tsx`); item shape with aliases/groups (BlockNote).
+- **Command palette + shortcut registry** — Cmd+K palette (e.g. `cmdk`) over library + editor actions with a discoverable shortcut cheat-sheet. Pure power-user convenience; pick up only if pilot consultants ask for it.
 
 ---
 
