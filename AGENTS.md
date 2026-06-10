@@ -29,7 +29,10 @@ working in this repository.
 │   ├── YAML_FORMAT.md                   — byte-stable serialization rules
 │   ├── UI_REVIEW_PANEL.md               — wireframe for the comment-review panel
 │   ├── UI_LIBRARY.md                    — wireframe for the doc library
-│   └── TASKS.md                         — ~112 atomic tasks ≤4h each
+│   ├── TASKS.md                         — milestone index + remaining legacy tasks
+│   └── TASKS_ARCHIVE.md                 — completed task bodies (history; do not work from)
+├── tasks/                          ← agentic-workflow task specs (current system, ADR-0001 pack)
+│   └── T-2xx-<slug>.md             — goal + frozen acceptance tests + risk/mode metadata
 ├── starter/                        ← drop-in project configs (M0 starter pack)
 │   ├── package.json                — pinned dependency versions
 │   ├── tsconfig.json               — strict TS + path aliases
@@ -110,7 +113,25 @@ code for any new feature, milestone, or refactor:
 
 This applies to anything bigger than a one-file edit or a typo fix.
 
+### Task system precedence (2026-06-09)
+
+New work follows the **agentic-workflow** (ADR-0001 pack): `/agentic-workflow:plan`
+turns ADRs into coarse task specs in `tasks/<id>-<slug>.md` (goal, frozen red
+acceptance tests, risk/mode/depends-on metadata, protected contracts), a human
+approves the plan PR, and `/agentic-workflow:run` implements in isolated
+worktrees — a human merges. Coarse tasks target distinct, non-overlapping
+outputs rather than ≤4h granularity.
+
+The legacy autonomous loop below remains **only** to finish the entries still
+carried in `docs/TASKS.md` (T-181, T-108/T-109, in-flight T-191–T-194). Do not
+add new tasks to `docs/TASKS.md`; completed task bodies are archived in
+`docs/TASKS_ARCHIVE.md`.
+
 ## Autonomous task loop
+
+> **Scope (2026-06-09): legacy.** Finishes the remaining `docs/TASKS.md`
+> entries only — new work goes through the agentic-workflow (`tasks/`; see
+> "Task system precedence" above).
 
 `docs/TASKS.md` is driven by an autonomous loop. The loop is conservative:
 defaults to halting cleanly when something is wrong rather than charging ahead.
@@ -307,6 +328,12 @@ DOCX/PPTX import/export, v1 real-time collab, live-models platform).
 at runtime (the setup-time pipeline is the sole exception).
 - **When uncertain, stop and ask.** Use `TBD` and flag it; do not invent brand
 values, client content, or block types.
+- **Frozen acceptance tests are immutable.** Test files headed
+`FROZEN ACCEPTANCE TESTS` (T-201–T-204, `/agentic-workflow:plan`) and the
+contract artifacts they pin (`docs/JSON_FORMAT.md`,
+`slide-layouts.catalogue.yaml`) must never be edited to make a gate pass —
+the implementation adapts to the test, not vice versa. Changes require human
+sign-off on the plan PR.
 
 ## Working style
 
@@ -426,4 +453,3 @@ include these explicit checks in the prompt:
   than the JSON shape) reproduce the test-vs-runtime gap the prior
   conventions warn about — mock with the JSON shape instead, mirroring
   `tests/ipc/errors.test.ts`.
-
