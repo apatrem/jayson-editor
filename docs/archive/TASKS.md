@@ -1,5 +1,7 @@
 # Implementation Tasks — Jayson Editor v1
 
+> **Archived (ADR-0023, 2026-06-10).** This was the v1 autonomous-loop backlog; the loop is retired. Open work at archive time was re-grouped into [`tasks/`](../../tasks/) (T-201–T-211, provenance noted per file). Do not add tasks here.
+
 **Purpose:** decompose `BUILD_BRIEF.md` milestones (M0–M6) into atomic tasks of ≤4 hours each.
 
 **How to use this doc:**

@@ -1,0 +1,25 @@
+---
+description: Terminal commands no agent may run in this repo (AGENTS.md git rules)
+alwaysApply: true
+---
+
+# Terminal safety — forbidden commands
+
+For any agent working in this repo (worktree implementer, reviewer, orchestrator):
+
+**Never run** (stop and report if a task seems to require one — do not bypass):
+
+- `git push --force` / `git push -f`
+- `git commit --amend`
+- `git commit --no-verify` / `git commit --no-gpg-sign`
+- `git add -A` / `git add .` / `git add --all`
+- `rm -rf` or broad `rm` on project paths
+- `git reset --hard`, `git clean -fd`, destructive `git checkout --`
+
+**Prefer** explicit-path `git add <path>` only. Never commit to `main` —
+work on `agent/<lineage>/<task>` and ship via PR (AGENTS.md → Workflow).
+
+Project deny rules also live in `.cursor/cli.json` (`permissions.deny`). Cursor
+IDE has no separate terminal deny-list UI — use allowlist mode plus these denies
+and **Settings → Cursor Settings → Agents → Protection** (File-Deletion
+Protection on).

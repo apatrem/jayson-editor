@@ -26,7 +26,7 @@ jobs:
         run: npx playwright install --with-deps chromium
 
       - name: Verify gates
-        run: bash scripts/verify-gates.sh
+        run: ruby scripts/check-specs && npm run lint && npm test && npm run build
 
   build-installers:
     needs: quality

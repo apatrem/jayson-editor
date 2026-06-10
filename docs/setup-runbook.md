@@ -124,7 +124,7 @@ That command checks the runtime install state — the approved `brand.yaml`, eve
 Then, **inside the repository checkout** (not the shared folder), run:
 
 ```bash
-bash scripts/verify-gates.sh
+ruby scripts/check-specs && npm run lint && npm test && npm run build
 ```
 
 This is the dev-loop gate runner (tsc + lint + tests). It validates that the **repository checkout** the consultancy will ship from is internally consistent — it does NOT re-validate the shared folder. Both checks must pass before configuring consultant machines.

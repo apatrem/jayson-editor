@@ -1,5 +1,7 @@
 # Blockers — append-only audit log
 
+> **Archived (ADR-0023, 2026-06-10).** Append-only audit trail of the v1 autonomous loop. Drift entries (`[drift-…]`) cited by the AGENTS.md review playbook live here. No longer maintained.
+
 This file records every `[?]` and `[!]` marker created by `/next-task`, with enough context for the human to resolve each one in the morning-check ritual.
 
 ## How this file works
@@ -372,4 +374,3 @@ Two different actions (`dtolnay/rust-toolchain@1.83.0` and `ruby/setup-ruby@v1`)
 **Important: NOT resolved by M9b.** M9b's authoring UX (T-171..T-173) implements an in-app trigger for *Authored* blocks (Tier 3 — declarative-data, ADR-0013). Authored blocks operate under a tighter security envelope (no React/TipTap, no atom nodes, AST-extracted as data per ADR-0013). The deferred decision above operates on *Brand* blocks (Tier 2 — imperative `defineBlock`, full React/TipTap runtime), where consultant-triggered LLM code-gen has materially higher attack surface and would need its own threat model. The two are different decisions with different security envelopes; M9b shipping does not close this audit item.
 **Action needed:** None right now. When M8 has been in consultants' hands long enough to measure devops new-block request volume, decide which option to spec, then add a future task (T-180+) to TASKS.md. Reopen / supersede this entry at that point.
 **Suggested trigger metric:** ≥ N new-block requests/month from consultants for ≥ M consecutive months (N, M TBD by product). Until then, option (a) is the de-facto status quo.
-
