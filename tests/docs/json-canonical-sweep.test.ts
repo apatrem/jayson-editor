@@ -23,7 +23,11 @@ function walkDocs(dir: string): string[] {
   for (const entry of readdirSync(dir, { withFileTypes: true })) {
     const path = join(dir, entry.name);
     if (entry.isDirectory()) {
-      if (entry.name === "adr") continue; // ADRs are historical records
+      // adr/ and archive/ are historical by definition (archive absorbs the
+      // retired loop's TASKS.md/TASKS_ARCHIVE.md — ADR-0023). Layout-only
+      // adaptation of this frozen test, human-signed-off on PR #7; the
+      // sweep's red baseline (AGENTS.md, AUTHORING.md wording) is untouched.
+      if (entry.name === "adr" || entry.name === "archive") continue;
       out.push(...walkDocs(path));
     } else if (entry.name.endsWith(".md")) {
       out.push(path);
@@ -36,8 +40,8 @@ const LIVE_CLAIM = /YAML is the canonical|canonical on-disk format is YAML|persi
 
 const ALLOWLIST = new Set([
   join("docs", "DECISIONS.md"), // D-18 historical text (D-05 has its own case below)
-  join("docs", "TASKS.md"), // historical task wording
-  join("docs", "TASKS_ARCHIVE.md"), // archived completed-task bodies
+  // docs/TASKS.md + docs/TASKS_ARCHIVE.md moved under docs/archive/ (ADR-0023),
+  // which walkDocs skips wholesale as historical.
   join("docs", "YAML_FORMAT.md"), // superseded banner kept for history (T-201/JSON_FORMAT.md)
   join("docs", "JSON_MIGRATION_INVENTORY.md"),
 ]);
