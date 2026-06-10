@@ -603,8 +603,8 @@ Depends on ADR-0022 (JSON on disk) and [JSON_MIGRATION_INVENTORY.md](JSON_MIGRAT
 ### T-192 [~] · Add generation schema fields to TYPES.md (+ Zod)
 - **Depends-on:** T-190
 - **Reads:** `docs/GENERATION_PIPELINE.md` §6–§7, `docs/TYPES.md`
-- **Outputs:** `dataState`, `source`, `sourceHint`, `verifiedBy`/`verifiedAt`, `sourceIntent`, degraded/overflow flag shapes in TYPES.md + `src/schema/` implementations
-- **Acceptance:** Schemas validate; illustrative data watermark contract documented; `source` vs `sourceHint` separation enforced.
+- **Outputs:** `dataState`, `source`, `sourceHint`, `verifiedBy`/`verifiedAt`, `sourceIntent`, degraded/overflow flag shapes in TYPES.md + `src/schema/` implementations; **+ matching `KEY_ORDERS` entries in `src/docmodel/canonicalize.ts`** for every block that gains these fields (`chart`/`table`/`kpi-cards` for data fields; any flag-bearing block for `sourceIntent`/flags)
+- **Acceptance:** Schemas validate; illustrative data watermark contract documented; `source` vs `sourceHint` separation enforced; **every new field is added to its block's `KEY_ORDERS` AND the byte-stable round-trip test is strengthened to fail on any field absent from its shape's `KEY_ORDERS`** — today the test only catches missing block *types*, so unknown *fields* append in insertion order and pass silently, breaking byte-stability (ADR-0022).
 - **est.** 4h
 
 ### T-193 [~] · Readiness gate data model + export summary popup spec
@@ -639,7 +639,7 @@ Depends on ADR-0022 (JSON on disk) and [JSON_MIGRATION_INVENTORY.md](JSON_MIGRAT
 - **Acceptance:** Deterministic authority over LLM layout proposal; overflow → auto-split + flag path tested.
 - **est.** 8h
 
-**Phase 12 acceptance gate:** JSON DocModel round-trips byte-stable through editor save/load; placeholder grammar implemented with ≥2 block round-trips; readiness gate blocks export when blockers non-empty; import lint catches broken external markdown before structuring.
+**Phase 12 acceptance gate:** JSON DocModel round-trips byte-stable through editor save/load; placeholder grammar implemented with ≥2 block round-trips; readiness gate surfaces all blockers in one checklist (export is **never locked** — advisory only, per `docs/UI_READINESS_GATE.md` and `readiness.ts`); import lint catches broken external markdown before structuring.
 
 ---
 

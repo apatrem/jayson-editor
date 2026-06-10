@@ -1,7 +1,7 @@
-# ADR-0022 — JSON DocModel supersedes YAML as the canonical on-disk format
+# ADR-0022 — On-disk projection format: JSON, not YAML
 
 **Status:** Accepted (design session 2026-06-07; ADR renumbered from 0020 to resolve collision with [ADR-0020](0020-local-ui-settings-outside-docmodel.md))
-**Supersedes:** **D-18** ("YAML is the canonical on-disk format")
+**Amends:** **D-18** — corrects its overloaded "canonical on-disk format" wording (the on-disk file is a *Projection*, not the canonical model; see Context)
 **Related:** memo §2 (DocModel is canonical), [ADR-0021](0021-multi-pass-generation-pipeline.md),
 [GENERATION_PIPELINE.md](../GENERATION_PIPELINE.md)
 
@@ -41,7 +41,7 @@ Markdown/Markdoc/MDX were evaluated as the *container* format and rejected:
 
 ## Decision
 
-The **canonical on-disk format is JSON**, serializing the canonical DocModel.
+The **on-disk projection format is JSON**, serializing the canonical DocModel.
 Mechanically this is a near-identity change to one layer: `serialize.ts` swaps the
 `yaml` package's `stringify`/`parse` for `JSON.stringify`/`JSON.parse`, while
 `canonicalize()` — the format-neutral byte-stability engine — stays exactly as is.

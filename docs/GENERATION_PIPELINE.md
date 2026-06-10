@@ -4,7 +4,7 @@
 `CONTEXT.md`. Implementation tracked in `docs/TASKS.md` Phase 12.
 **Companion to:** `DOCUMENT_SYSTEM_ARCHITECTURE.md`, `DECISIONS.md`,
 `blocks.catalogue.yaml`, `TYPES.md`.
-**Revises:** **D-18** (canonical on-disk format — see
+**Amends:** **D-18** (canonical on-disk format — see
 [ADR-0022](adr/0022-json-docmodel-supersedes-yaml.md)) and **D-15** (initial doc
 generation — see [ADR-0021](adr/0021-multi-pass-generation-pipeline.md)).
 
