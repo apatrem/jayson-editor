@@ -1,4 +1,4 @@
-# T-201: Render/export path for installed Authored blocks (preview + PDF + deck)
+# T-205: Render/export path for installed Authored blocks (preview + PDF + deck)
 
 <!-- Provenance: archived T-181 (docs/archive/TASKS.md), spec carried over verbatim where still accurate. -->
 

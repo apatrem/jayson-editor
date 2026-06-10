@@ -1,7 +1,7 @@
 # Generation Pipeline — Design
 
 **Status:** settled (grilling session 2026-06-07 + follow-up); vocabulary in
-`CONTEXT.md`. Implementation tracked in `tasks/` (T-202–T-207; see ADR-0023).
+`CONTEXT.md`. Implementation tracked in `tasks/` (T-201–T-204 from the PR #5 plan, plus T-206–T-207; see ADR-0023).
 **Companion to:** `DOCUMENT_SYSTEM_ARCHITECTURE.md`, `DECISIONS.md`,
 `blocks.catalogue.yaml`, `TYPES.md`.
 **Amends:** **D-18** (canonical on-disk format — see

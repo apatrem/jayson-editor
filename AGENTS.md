@@ -31,7 +31,7 @@ working in this repository.
 │   ├── YAML_FORMAT.md                   — historical byte-stable YAML rules (see ADR-0022)
 │   ├── UI_REVIEW_PANEL.md               — wireframe for the comment-review panel
 │   ├── UI_LIBRARY.md                    — wireframe for the doc library
-│   └── archive/                         — retired docs (v1 task backlog, loop state files)
+│   └── archive/                         — retired docs (v1 backlog index, completed task bodies, loop state)
 ├── starter/                        ← drop-in project configs (M0 starter pack)
 ├── examples/                       ← valid + invalid YAML/JSON fixtures
 └── reference/                      ← fully-worked code patterns to copy
@@ -56,7 +56,7 @@ If the brief and the memo conflict, the memo's §2 principle and §3 requirement
 ### Specifications
 
 - [docs/TYPES.md](docs/TYPES.md) — every shared TypeScript type lives here. No type is defined twice.
-- [tasks/](tasks/) — the active backlog: one file per task, each with machine-checkable acceptance criteria. (The completed v1 backlog lives at [docs/archive/TASKS.md](docs/archive/TASKS.md).)
+- [tasks/](tasks/) — the active backlog: one file per task, each with machine-checkable acceptance criteria. (The v1 backlog is archived: index at [docs/archive/TASKS.md](docs/archive/TASKS.md), completed bodies at [docs/archive/TASKS_ARCHIVE.md](docs/archive/TASKS_ARCHIVE.md).)
 - [docs/BLOCK_IMPLEMENTATION_GUIDE.md](docs/BLOCK_IMPLEMENTATION_GUIDE.md) — copy-pattern for the 15 blocks.
 - [docs/SETUP_PIPELINE.md](docs/SETUP_PIPELINE.md) — setup AI pipeline (ingestion + code-gen + lint).
 - [docs/SETUP_INSTALL_FLOW.md](docs/SETUP_INSTALL_FLOW.md) — per-consultant install CLI prompts.
@@ -210,6 +210,12 @@ DOCX/PPTX import/export, v1 real-time collab, live-models platform).
 at runtime (the setup-time pipeline is the sole exception).
 - **When uncertain, stop and ask.** Use `TBD` and flag it; do not invent brand
 values, client content, or block types.
+- **Frozen acceptance tests are immutable.** Test files headed
+`FROZEN ACCEPTANCE TESTS` (T-201–T-204, `/agentic-workflow:plan`) and the
+contract artifacts they pin (`docs/JSON_FORMAT.md`,
+`slide-layouts.catalogue.yaml`) must never be edited to make a gate pass —
+the implementation adapts to the test, not vice versa. Changes require human
+sign-off on the plan PR.
 
 ## Working style
 

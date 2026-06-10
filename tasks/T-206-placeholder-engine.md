@@ -1,4 +1,4 @@
-# T-204: Placeholder engine — parse, toPlaceholder per block type, import lint
+# T-206: Placeholder engine — parse, toPlaceholder per block type, import lint
 
 <!-- Provenance: archived T-191 + T-194 (docs/archive/TASKS.md). Partial implementation already landed:
      src/generation/placeholder.ts, src/generation/import-lint.ts, tests/generation/placeholder.test.ts. -->
@@ -19,8 +19,8 @@ Complete the placeholder contract from `docs/PLACEHOLDER_GRAMMAR.md`: determinis
 - Reads: `docs/PLACEHOLDER_GRAMMAR.md`, `docs/GENERATION_PIPELINE.md` §2 + §8, block schemas under `src/blocks/*/schema.ts`
 
 ## Out of scope
-- The markdown → ProseMirror prose converter (T-206)
-- Generation schema fields / readiness flags (T-205)
+- The markdown → ProseMirror prose converter (T-203)
+- Generation schema fields / readiness flags (T-207)
 
 ## Risks / do-not-touch
 - Down-conversion derives from current block fields only — never reads `sourceIntent` (write-once provenance; see CONTEXT.md "Source intent")
@@ -30,5 +30,5 @@ Complete the placeholder contract from `docs/PLACEHOLDER_GRAMMAR.md`: determinis
 - mode: low
 - risk: low
 - depends-on: []
-- parallel-safe: yes     # src/generation + its tests only; disjoint from T-201/T-202/T-203
+- parallel-safe: yes     # src/generation + its tests only; disjoint from T-201/T-202/T-205
 - size budget: < 300 changed lines

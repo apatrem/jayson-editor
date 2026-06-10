@@ -1,4 +1,4 @@
-# T-205: Generation schema fields + readiness gate completion
+# T-207: Generation schema fields + readiness gate completion
 
 <!-- Provenance: archived T-192 + T-193 (docs/archive/TASKS.md). Partial implementation already landed:
      src/generation/readiness.ts, tests/generation/readiness.test.ts, docs/UI_READINESS_GATE.md. -->
@@ -21,7 +21,7 @@ Land the generation-era schema fields (`dataState`, `source`, `sourceHint`, `ver
 
 ## Out of scope
 - The on-block watermark rendering (separate UI work; the flag shapes land here)
-- Deck fit-check overflow producers (T-207 — consumes the flag shapes defined here)
+- Deck fit-check overflow producers (T-204 — consumes the flag shapes defined here)
 
 ## Risks / do-not-touch
 - Illustrative data watermark contract: blocks with `dataState: draft-illustrative` must be distinguishable in the model — renderers depend on it
@@ -30,6 +30,6 @@ Land the generation-era schema fields (`dataState`, `source`, `sourceHint`, `ver
 ## Meta
 - mode: low
 - risk: low
-- depends-on: [T-202]    # the strengthened round-trip test and KEY_ORDERS entries build on the JSON core
-- parallel-safe: no      # touches src/docmodel/canonicalize.ts (shared with T-202) and TYPES.md (shared with T-203's sweep)
+- depends-on: [T-201]    # the strengthened round-trip test and KEY_ORDERS entries build on the JSON persistence core
+- parallel-safe: no      # touches src/docmodel/canonicalize.ts (shared with T-201) and TYPES.md (shared with T-202's sweep)
 - size budget: < 300 changed lines

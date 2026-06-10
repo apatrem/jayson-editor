@@ -65,11 +65,13 @@ single workflow:
    loop-specific Cursor rule. The generic terminal-safety prohibitions
    (no force-push, no amend, no `--no-verify`, explicit-path staging) move
    into `AGENTS.md` and remain denied in `.cursor/cli.json`.
-6. Loop state is archived, not deleted: `docs/TASKS.md` (the completed v1
-   backlog), `BLOCKERS.md` (append-only audit trail), and the final
-   `STATUS.md` move to `docs/archive/`. Remaining open work is re-grouped
-   into `tasks/T-201`–`T-211`, preserving the original task IDs and specs
-   in each file's provenance line.
+6. Loop state is archived, not deleted: `docs/TASKS.md` (milestone index +
+   final legacy state), `docs/TASKS_ARCHIVE.md` (completed task bodies),
+   `BLOCKERS.md` (append-only audit trail), and the final `STATUS.md` move
+   to `docs/archive/`. The Phase 12 coarse re-plan (PR #5, `tasks/T-201`–
+   `T-204` with frozen acceptance tests) stands as-is; the remaining legacy
+   entries are re-grouped into `tasks/T-205`–`T-211`, preserving original
+   task IDs and specs in each file's provenance line.
 
 ## Consequences
 
