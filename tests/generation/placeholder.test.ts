@@ -1,11 +1,13 @@
 import { describe, expect, it } from "vitest";
 import type { CalloutBlock } from "../../src/blocks/callout/schema";
 import type { ChartBlock } from "../../src/blocks/chart/schema";
-import { lintMarkdownPlaceholders } from "../../src/generation/import-lint";
+import type { DocBlock } from "../../src/schema/blocks";
+import { defaultTableBlock } from "../../src/blocks/table/schema";
 import {
   formatPlaceholder,
   normalizeIntent,
   parsePlaceholderLine,
+  parsePlaceholderLineDetailed,
   placeholdersSemanticallyEqual,
   structurePlaceholder,
   toPlaceholder,
@@ -34,6 +36,21 @@ describe("parsePlaceholderLine", () => {
     expect(
       parsePlaceholderLine('Text [[block: chart | intent: "x" | id: x]] more'),
     ).toBeNull();
+  });
+
+  it("returns actionable errors for malformed placeholders", () => {
+    const missingClose = parsePlaceholderLineDetailed(
+      '[[block: chart | intent: "missing close" | id: rev',
+    );
+    expect("message" in missingClose && missingClose.message).toContain("closing ']]'");
+
+    const emptyIntent = parsePlaceholderLineDetailed(
+      '[[block: chart | intent: "" | id: rev]]',
+    );
+    expect("message" in emptyIntent && emptyIntent.message).toContain("non-empty");
+
+    const badId = parsePlaceholderLineDetailed('[[block: chart | intent: "x" | id: Bad]]');
+    expect("message" in badId && badId.message).toContain("[a-z][a-z0-9-]");
   });
 });
 
@@ -74,6 +91,113 @@ describe("toPlaceholder", () => {
     expect(p?.localId).toBe("revenue-trend");
     expect(normalizeIntent(p!.intent)).toContain("Revenue trend");
     expect(normalizeIntent(p!.intent)).toContain("takeaway: Growth accelerated in FY25");
+  });
+
+  it("returns null for prose-native block types", () => {
+    const proseLike: DocBlock[] = [
+      {
+        id: "p1",
+        type: "prose",
+        align: "left",
+        content: { type: "doc", content: [] },
+      },
+      { id: "h1", type: "heading", level: 2, text: "Section", numbered: true },
+      { id: "d1", type: "divider" },
+      {
+        id: "bl1",
+        type: "bullet-list",
+        items: [{ text: { type: "doc", content: [] } }],
+      },
+      {
+        id: "nl1",
+        type: "numbered-list",
+        items: [{ text: { type: "doc", content: [] } }],
+      },
+    ];
+    for (const block of proseLike) {
+      expect(toPlaceholder(block)).toBeNull();
+    }
+  });
+
+  it("derives placeholder intent for all non-prose catalogue blocks", () => {
+    const table = defaultTableBlock("metrics", ["Revenue", "Cost"]);
+    table.caption = "Q3 Results";
+    const blocks: DocBlock[] = [
+      table,
+      {
+        id: "kpis",
+        type: "kpi-cards",
+        cards: [
+          { value: "€42M", label: "Revenue", trend: "none", emphasis: "neutral" },
+          { value: "12%", label: "Growth", trend: "none", emphasis: "neutral" },
+        ],
+      },
+      {
+        id: "plan",
+        type: "timeline",
+        phases: [{ label: "Discovery" }, { label: "Launch" }],
+        orientation: "horizontal",
+        connector: "arrow",
+      },
+      {
+        id: "roadmap",
+        type: "roadmap",
+        timeUnit: "month",
+        startDate: "2026-01-01",
+        endDate: "2026-12-31",
+        workstreams: [
+          {
+            label: "Platform",
+            startDate: "2026-01-01",
+            endDate: "2026-06-30",
+            color: "auto",
+          },
+        ],
+        milestones: [{ label: "Beta", date: "2026-06-01" }],
+      },
+      {
+        id: "hero",
+        type: "image",
+        src: "assets/hero.png",
+        alt: "Leadership team",
+        caption: "Figure 1",
+        width: "medium",
+        align: "center",
+      },
+      {
+        id: "flow",
+        type: "diagram",
+        source: "graph TD; A-->B;",
+        title: "Process flow",
+        caption: "Onboarding steps",
+        width: "large",
+      },
+      {
+        id: "team",
+        type: "team",
+        layout: "grid",
+        members: [
+          { name: "Alice", role: "Lead" },
+          { name: "Bob", role: "Analyst" },
+        ],
+      },
+      {
+        id: "risks",
+        type: "risk-matrix",
+        gridSize: "3x3",
+        xAxisLabel: "Likelihood",
+        yAxisLabel: "Impact",
+        risks: [{ label: "Supply", x: 2, y: 3, severity: "high" }],
+      },
+    ];
+
+    for (const block of blocks) {
+      const p = toPlaceholder(block);
+      expect(p, block.type).not.toBeNull();
+      expect(p!.kindHint).toBe(block.type);
+      expect(p!.localId).toBe(block.id);
+      expect(p!.intent.length).toBeGreaterThan(0);
+    }
   });
 
   it("derives callout intent from variant, title, and body", () => {
@@ -122,30 +246,5 @@ describe("toPlaceholder(structure(p)) ≈ p", () => {
     expect(roundTripped.kindHint).toBe("callout");
     expect(roundTripped.localId).toBe("exec-note");
     expect(normalizeIntent(roundTripped.intent)).toContain("Key takeaway for exec summary");
-  });
-});
-
-describe("lintMarkdownPlaceholders", () => {
-  it("accepts valid standalone placeholders", () => {
-    const md = [
-      "Intro prose.",
-      "",
-      '[[block: chart | intent: "Revenue" | id: rev]]',
-      "",
-      "More prose.",
-    ].join("\n");
-    const result = lintMarkdownPlaceholders(md);
-    expect(result.ok).toBe(true);
-    expect(result.placeholders).toHaveLength(1);
-  });
-
-  it("errors on duplicate ids", () => {
-    const md = [
-      '[[block: chart | intent: "A" | id: dup]]',
-      '[[block: table | intent: "B" | id: dup]]',
-    ].join("\n");
-    const result = lintMarkdownPlaceholders(md);
-    expect(result.ok).toBe(false);
-    expect(result.errors.some((e) => e.message.includes("Duplicate"))).toBe(true);
   });
 });

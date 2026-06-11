@@ -3,7 +3,11 @@
  * Spec: docs/PLACEHOLDER_GRAMMAR.md §5
  */
 
-import { parsePlaceholderLine, type Placeholder } from "./placeholder";
+import {
+  CATALOGUE_KIND_HINTS,
+  parsePlaceholderLineDetailed,
+  type Placeholder,
+} from "./placeholder";
 
 export interface LintMessage {
   line: number;
@@ -18,6 +22,7 @@ export interface ImportLintResult {
 }
 
 const PLACEHOLDER_SUBSTRING = /\[\[block:/;
+const BACKTICK_ID = /`([a-z][a-z0-9-]{0,31})`/g;
 
 export function lintMarkdownPlaceholders(markdown: string): ImportLintResult {
   const errors: LintMessage[] = [];
@@ -43,28 +48,61 @@ export function lintMarkdownPlaceholders(markdown: string): ImportLintResult {
       continue;
     }
 
-    const parsed = parsePlaceholderLine(line);
-    if (!parsed) {
-      errors.push({ line: lineNo, message: "Malformed placeholder syntax." });
+    const parsed = parsePlaceholderLineDetailed(line);
+    if (!("placeholder" in parsed)) {
+      errors.push({ line: lineNo, message: parsed.message });
       continue;
     }
 
-    if (!parsed.intent.trim()) {
-      errors.push({ line: lineNo, message: "Placeholder intent must be non-empty." });
-      continue;
+    const placeholder = parsed.placeholder;
+    if (
+      placeholder.kindHint &&
+      !CATALOGUE_KIND_HINTS.has(placeholder.kindHint)
+    ) {
+      warnings.push({
+        line: lineNo,
+        message: `Unknown kind-hint '${placeholder.kindHint}' — treat as empty hint at structuring.`,
+      });
     }
 
-    const prev = seenIds.get(parsed.localId);
+    const prev = seenIds.get(placeholder.localId);
     if (prev !== undefined) {
       errors.push({
         line: lineNo,
-        message: `Duplicate placeholder id '${parsed.localId}' (also on line ${prev}).`,
+        message: `Duplicate placeholder id '${placeholder.localId}' (also on line ${prev}).`,
       });
     } else {
-      seenIds.set(parsed.localId, lineNo);
+      seenIds.set(placeholder.localId, lineNo);
     }
 
-    placeholders.push(parsed);
+    placeholders.push(placeholder);
+  }
+
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i] ?? "";
+    const lineNo = i + 1;
+    if (PLACEHOLDER_SUBSTRING.test(line)) continue;
+
+    for (const match of line.matchAll(BACKTICK_ID)) {
+      const refId = match[1];
+      if (!refId || seenIds.has(refId)) continue;
+      errors.push({
+        line: lineNo,
+        message: `Orphaned placeholder reference \`${refId}\` — no matching placeholder id.`,
+      });
+    }
+  }
+
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i] ?? "";
+    const lineNo = i + 1;
+    if (!line.includes("[[block:")) continue;
+    if (PLACEHOLDER_SUBSTRING.test(line) && !line.includes("]]")) {
+      errors.push({
+        line: lineNo,
+        message: "Unclosed placeholder marker — line contains '[[block:' without closing ']]'.",
+      });
+    }
   }
 
   return {
