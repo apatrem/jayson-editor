@@ -21,6 +21,7 @@ hostile input.
 - [ ] Out-of-schema constructs (e.g. raw HTML elements outside the allowed set) are dropped with a coercion warning — never thrown, never emitted → same file
 - [ ] Deterministic: identical input ⇒ identical output → same file
 - [ ] gate green: `ruby scripts/check-specs && npm run lint && npm test && npm run build`
+- [ ] This task's frozen tests (`tests/generation/markdown-to-prosemirror.test.ts`) removed from `tests/frozen-acceptance.json` — they now run inside `quality`
 
 ## Files likely involved
 - `src/generation/markdown-to-prosemirror.ts` (new)

@@ -124,7 +124,7 @@ The autonomous TASKS.md loop is retired (ADR-0023). Work flows through
 
 - Work in your own worktree on `agent/<lineage>/<task>` (e.g.
   `agent/claude/T-204-placeholder-engine`); **never commit to `main`**
-  (protected — PR + green `quality` check + 1 approval).
+  (protected — PR + green `quality` check).
 - Start every task from a clean worktree cut from the current `origin/main`;
   never carry uncommitted changes into or between tasks (pre-flight).
 - Small PRs: routine < 300 changed lines; split or stack larger ones.
@@ -140,7 +140,13 @@ ruby scripts/check-specs && npm run lint && npm test && npm run build
 ```
 
 CI's `quality` check runs exactly this on every PR. Run it locally before
-claiming success — do not invent passing results. Local hygiene hooks:
+claiming success — do not invent passing results.
+
+`npm test` excludes the frozen acceptance suites listed in
+[`tests/frozen-acceptance.json`](tests/frozen-acceptance.json); they run in the
+**non-required** `frozen-acceptance` CI lane (expected red) until each
+implementing task's PR removes its files from that list — the list may only
+shrink (ADR-0023). Run the frozen lane locally with `npm run test:frozen`. Local hygiene hooks:
 `pipx install pre-commit && pre-commit install` (see `.pre-commit-config.yaml`).
 
 ### Effort/review dial (`mode` in the task meta)
@@ -217,7 +223,9 @@ values, client content, or block types.
 contract artifacts they pin (`docs/JSON_FORMAT.md`,
 `slide-layouts.catalogue.yaml`) must never be edited to make a gate pass —
 the implementation adapts to the test, not vice versa. Changes require human
-sign-off on the plan PR.
+sign-off on the plan PR. The exclude list `tests/frozen-acceptance.json` may
+only shrink (an implementing task removing its now-green files); adding an
+entry to mask a failure is forbidden.
 - **Never silently weaken a failing target** (sibling of the frozen-test rule):
 when a gate or acceptance target fails, do not adjust `DECISIONS.md` targets,
 acceptance criteria, or frozen tests to make it pass — record the regression

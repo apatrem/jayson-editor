@@ -1,0 +1,11 @@
+{
+  "$doc": "Frozen acceptance tests (committed red on purpose by /agentic-workflow:plan) are excluded from the `quality` gate's `npm test` and run in the non-required `frozen-acceptance` CI lane instead (ADR-0023). An implementing task's PR REMOVES its files from this list so they join `quality`. This list may only SHRINK — adding a file to hide a failure violates the never-silently-weaken guardrail in AGENTS.md; any other change requires human sign-off per the frozen-test guardrail.",
+  "files": [
+    "tests/docmodel/json-roundtrip.test.ts",
+    "tests/docs/json-canonical-sweep.test.ts",
+    "tests/generation/layout-fit-check.test.ts",
+    "tests/generation/markdown-to-prosemirror.test.ts",
+    "tests/integration/app-on-json-wiring.test.ts",
+    "tests/ipc/fs-json.smoke.test.ts"
+  ]
+}

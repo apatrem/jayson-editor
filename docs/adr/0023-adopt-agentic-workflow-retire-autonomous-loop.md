@@ -54,6 +54,13 @@ single workflow:
    Protection moves entirely to **CI required checks + protected `main`**;
    the policy-enforcing git hooks are deleted. Local hooks are reduced to
    hygiene (`.pre-commit-config.yaml`).
+   **Transition for the frozen-red baseline:** the frozen acceptance suites
+   from PR #5 are listed in `tests/frozen-acceptance.json` and excluded from
+   `quality`'s `npm test`; a separate **non-required** `frozen-acceptance` CI
+   lane runs exactly those suites, visibly red until implemented. An
+   implementing task's PR removes its files from the list, moving them into
+   `quality`. The list may only shrink — growing it to mask a failure
+   violates the never-silently-weaken guardrail.
 3. **Isolation** is per-task worktrees on `agent/<lineage>/<task>` branches;
    every change lands via PR; **a human merges**.
 4. **Effort/review** is the per-task `mode` dial (default `low`; justify
@@ -75,6 +82,9 @@ single workflow:
 
 ## Consequences
 
+- `quality` is green-able again from this change onward; the frozen suites'
+  redness stays visible in the non-required `frozen-acceptance` lane instead
+  of blocking every merge.
 - New work = grill → plan (task files, human-approved) → worktree per task →
   gate green → small PR → tiered review → human merge. Parallel-safe tasks
   fan out concurrently instead of serializing through one loop.

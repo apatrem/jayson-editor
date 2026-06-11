@@ -16,6 +16,7 @@ this layer.
 - [ ] `docs/JSON_FORMAT.md` documents canonical key order + formatter config (the byte-stability contract; successor to `YAML_FORMAT.md`) → same file
 - [ ] `read_document_file` / `write_document_file` (domain-named per `docs/BUILD_BRIEF.md` — never syntax-named) exist in `src-tauri/src/ipc/fs.rs`, keep the atomic write-then-rename + canonical-path validation contracts, and are documented in `docs/TAURI_IPC.md` → `tests/ipc/fs-json.smoke.test.ts`
 - [ ] gate green: `ruby scripts/check-specs && npm run lint && npm test && npm run build`
+- [ ] This task's frozen tests (`tests/docmodel/json-roundtrip.test.ts` + `tests/ipc/fs-json.smoke.test.ts`) removed from `tests/frozen-acceptance.json` — they now run inside `quality`
 
 ## Files likely involved
 - `src/docmodel/serialize.ts`, `src/docmodel/yaml-config.ts` (JSON equivalent or retirement)

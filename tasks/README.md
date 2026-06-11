@@ -16,6 +16,9 @@ and ADR-0023.
   bodies at [docs/archive/TASKS_ARCHIVE.md](../docs/archive/TASKS_ARCHIVE.md).
 - T-201–T-204 are the Phase 12 coarse re-plan (PR #5) with frozen acceptance
   tests (committed red on purpose; see the frozen-test guardrail in AGENTS.md).
+  Frozen suites are listed in `tests/frozen-acceptance.json` and run in the
+  non-required `frozen-acceptance` CI lane; the implementing PR removes its
+  files from that list so they join `quality` (ADR-0023).
   T-205–T-211 absorb the remaining legacy entries + D-40/D-41.
 
 **Pending human action (not a task):** the M9b acceptance-gate review requested

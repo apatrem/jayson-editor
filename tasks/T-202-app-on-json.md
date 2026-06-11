@@ -17,6 +17,7 @@ surface.
 - [ ] M7/M8 integration harnesses load JSON fixtures (no `.yaml` fixture paths) → same file
 - [ ] D-05 autosave wording reflects JSON; no live doc claims a canonical YAML format outside allowlisted historical context → `tests/docs/json-canonical-sweep.test.ts`
 - [ ] gate green: `ruby scripts/check-specs && npm run lint && npm test && npm run build`
+- [ ] This task's frozen tests (`tests/integration/app-on-json-wiring.test.ts` + `tests/docs/json-canonical-sweep.test.ts`) removed from `tests/frozen-acceptance.json` — they now run inside `quality`
 
 ## Files likely involved
 - `src/editor/{file-open,file-save,autosave}.ts`, `src/ui/menu/FileMenu.tsx`
