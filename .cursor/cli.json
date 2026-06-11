@@ -1,5 +1,6 @@
 {
   "permissions": {
+    "allow": [],
     "deny": [
       "Shell(rm)",
       "Shell(rm:*)",
