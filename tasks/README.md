@@ -9,6 +9,8 @@ and ADR-0023.
   acceptance boxes in the task file.
 - `depends-on` gates start order (IDs here, must be merged first).
 - `parallel-safe: yes` tasks may run concurrently, one worktree each.
+- `blocked-by` names a non-task prerequisite (a PR, an external account/key)
+  that must clear before the task is spawned; `depends-on` lists task IDs only.
 - The v1 autonomous-loop backlog is archived: milestone index + final legacy
   state at [docs/archive/TASKS.md](../docs/archive/TASKS.md), completed task
   bodies at [docs/archive/TASKS_ARCHIVE.md](../docs/archive/TASKS_ARCHIVE.md).

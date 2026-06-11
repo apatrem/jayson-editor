@@ -10,11 +10,10 @@ The editor path inserts/saves/reloads installed Authored blocks, but the render/
 - [ ] An uninstalled / permanently-deleted authored type still renders `RemovedBlockPlaceholder` → same suite
 - [ ] PDF export of an authored-block doc does not emit the placeholder → export-path test
 - [ ] `Section.blocks` / `Slide.blocks` are typed `DocBlock[]`; the `ZodType<Block>` cast in `src/blocks/schema-registry.ts` is gone; every consumer narrows explicitly (`isAuthoredBlockType` → render-or-placeholder) — `tsc` green proves the propagation
-- [ ] Stale comment at `src/renderer/DocumentRenderer.tsx:208–211` corrected
 - [ ] gate green: `ruby scripts/check-specs && npm run lint && npm test && npm run build`
 
 ## Files likely involved
-- `src/renderer/DocumentRenderer.tsx` (accept the Installed manifest set; default `useAuthoredManifestsFromRegistry()`)
+- `src/renderer/DocumentRenderer.tsx` (accept the Installed manifest set; default `useAuthoredManifestsFromRegistry()`; also fix the misleading comment near the `isAuthoredBlockType` branch claiming archived Authored blocks "ARE in the registry")
 - `src/renderer/DeckRenderer.tsx`
 - PDF export path (installed set must reach the export renderer; preview and PDF must agree)
 - `src/ui/views/DocumentView.tsx` (pass the installed set, ~line 372)

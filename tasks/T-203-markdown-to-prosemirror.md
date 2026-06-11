@@ -20,7 +20,7 @@ hostile input.
 - [ ] Fragment normalizes cleanly through `normalizeProseMarksForEditor` into `ALLOWED_EDITOR_MARK_NAMES` → same file
 - [ ] Out-of-schema constructs (e.g. raw HTML elements outside the allowed set) are dropped with a coercion warning — never thrown, never emitted → same file
 - [ ] Deterministic: identical input ⇒ identical output → same file
-- [ ] gate green: `npm run lint && npm test && npm run build`
+- [ ] gate green: `ruby scripts/check-specs && npm run lint && npm test && npm run build`
 
 ## Files likely involved
 - `src/generation/markdown-to-prosemirror.ts` (new)
@@ -28,7 +28,7 @@ hostile input.
 
 ## Out of scope
 - Heading/list/table → block mapping — structuring's separate deterministic job (GENERATION_PIPELINE §4 job table)
-- Placeholder grammar parse (T-191, in flight) and import lint (T-194, in flight)
+- Placeholder grammar parse and import lint (absorbed into [T-206](T-206-placeholder-engine.md))
 - Prose generation itself — skill-side, ADR-0021
 - Link/image handling policy is the implementer's design call (the editor mark
   set has no `link` mark today) — whatever the choice, the closed-schema and
@@ -41,8 +41,8 @@ hostile input.
 
 ## Meta
 - risk: low
-- mode: solo
-- depends-on: T-191
+- mode: low
+- depends-on: [T-206]         # placeholder engine (absorbs legacy T-191 + T-194)
 - parallel-safe: yes          # new module; only reads editor exports
 - frozen-tests: `tests/generation/markdown-to-prosemirror.test.ts`
 - size budget: < 300 changed lines

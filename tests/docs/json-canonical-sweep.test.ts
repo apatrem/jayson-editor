@@ -25,8 +25,8 @@ function walkDocs(dir: string): string[] {
     if (entry.isDirectory()) {
       // adr/ and archive/ are historical by definition (archive absorbs the
       // retired loop's TASKS.md/TASKS_ARCHIVE.md — ADR-0023). Layout-only
-      // adaptation of this frozen test, human-signed-off on PR #7; the
-      // sweep's red baseline (AGENTS.md, AUTHORING.md wording) is untouched.
+      // adaptation of this frozen test (requires human sign-off — PR #7);
+      // the sweep's red baseline (offenders: AGENTS.md) is untouched.
       if (entry.name === "adr" || entry.name === "archive") continue;
       out.push(...walkDocs(path));
     } else if (entry.name.endsWith(".md")) {

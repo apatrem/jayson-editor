@@ -141,7 +141,8 @@ jobs:
           # T-109 (Tauri updater) is still [!] — no updater signing key, no
           # feed URL. Emitting latest.json without those would ship a
           # partial-state release that the app couldn't validate. Re-enable
-          # this when T-109 lands. See BLOCKERS.md §T-109.
+          # this when T-209 (tasks/T-209-tauri-updater.md, ex-T-109) lands.
+          # History: docs/archive/BLOCKERS.md §T-109.
           includeUpdaterJson: false
 
       - name: Verify installer artifact exists

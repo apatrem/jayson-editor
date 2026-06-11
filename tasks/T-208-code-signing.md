@@ -25,6 +25,7 @@ Turn on installer signing. All plumbing is wired (2026-05-29): macOS Developer I
 ## Meta
 - mode: low
 - risk: high             # acceptance requires real certs + a CI release run — not locally runnable; never auto-merge eligible
-- depends-on: []         # externally blocked: Apple Developer enrollment + Azure Trusted Signing account
+- depends-on: []
+- blocked-by: external — Apple Developer enrollment + Azure Trusted Signing account + GitHub secrets
 - parallel-safe: no      # touches release workflow/config shared with T-209
 - size budget: < 100 changed lines (config/doc only)

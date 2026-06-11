@@ -31,6 +31,7 @@ Doc folders live in a cloud-sync root, so another machine or an external agent c
 ## Meta
 - mode: medium           # data-loss surface + cross-layer (Rust watcher ↔ frontend dirty-state) — dual review justified
 - risk: low
-- depends-on: []         # D-40 text lands with PR #6; implementation is independent
+- depends-on: []
+- blocked-by: PR #6 merge (D-40 decision text in docs/DECISIONS.md)
 - parallel-safe: no      # touches src-tauri/src/lib.rs registration (shared with T-201/T-209/T-211)
 - size budget: < 300 changed lines

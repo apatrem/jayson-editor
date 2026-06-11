@@ -285,7 +285,7 @@ export const Editor: FC<EditorProps> = ({
   onAddBlock,
 }) => {
   const deck = docModel?.kind === "deck" ? docModel : null;
-  // M6 known limitation (see BLOCKERS.md drift-2026-05-25b): the deck surface
+  // M6 known limitation (see docs/archive/BLOCKERS.md drift-2026-05-25b): the deck surface
   // strips the slide wrapper when feeding a slide into TipTap, so there is no
   // inverse mapping from edited editor JSON back to the deck DocModel. Until
   // that round-trip exists, force editable=false for decks — silently allowing

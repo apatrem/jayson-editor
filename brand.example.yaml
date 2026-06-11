@@ -27,7 +27,7 @@
 #   - Paths:  relative to the shared folder root.
 #
 # Naming constraint: do not name the consultancy this style is modelled
-# after. Use generic descriptions throughout. See docs/TASKS.md T-141a.
+# after. Use generic descriptions throughout. See docs/archive/TASKS_ARCHIVE.md T-141a.
 
 schemaVersion: "1.0.0"
 lastUpdated: "2026-05-27"

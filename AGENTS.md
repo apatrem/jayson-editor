@@ -125,6 +125,8 @@ The autonomous TASKS.md loop is retired (ADR-0023). Work flows through
 - Work in your own worktree on `agent/<lineage>/<task>` (e.g.
   `agent/claude/T-204-placeholder-engine`); **never commit to `main`**
   (protected — PR + green `quality` check + 1 approval).
+- Start every task from a clean worktree cut from the current `origin/main`;
+  never carry uncommitted changes into or between tasks (pre-flight).
 - Small PRs: routine < 300 changed lines; split or stack larger ones.
   Separate mechanical churn from behavioural change.
 - Never force-push. Never amend pushed commits. Never `--no-verify` /
@@ -216,9 +218,16 @@ contract artifacts they pin (`docs/JSON_FORMAT.md`,
 `slide-layouts.catalogue.yaml`) must never be edited to make a gate pass —
 the implementation adapts to the test, not vice versa. Changes require human
 sign-off on the plan PR.
+- **Never silently weaken a failing target** (sibling of the frozen-test rule):
+when a gate or acceptance target fails, do not adjust `DECISIONS.md` targets,
+acceptance criteria, or frozen tests to make it pass — record the regression
+in the task file and the PR, and let a human decide.
 
 ## Working style
 
+- When work is milestone-scoped (docs/BUILD_BRIEF.md), do not start a milestone
+until the previous one's acceptance criteria pass; encode cross-milestone
+ordering as `depends-on`.
 - Work tasks from [`tasks/`](tasks/) in `depends-on` order. Reference task IDs
 (`T-NNN`) in commit messages and PR titles.
 - Prefer editing existing files over creating new ones.

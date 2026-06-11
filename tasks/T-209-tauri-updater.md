@@ -28,6 +28,7 @@ Enable the Tauri updater so shipped apps discover, verify, and install new signe
 ## Meta
 - mode: low
 - risk: high             # end-to-end acceptance needs a hosted feed + installed copy — not fully CI-checkable
-- depends-on: []         # externally blocked: keypair generation decision + stable feed URL; independent of T-208
+- depends-on: []
+- blocked-by: external — updater keypair decision + stable feed URL (independent of T-208)
 - parallel-safe: no      # touches release.yml + src-tauri/src/lib.rs (shared with T-208/T-210/T-211)
 - size budget: < 200 changed lines
