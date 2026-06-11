@@ -363,6 +363,16 @@ quality, or that the layout "looks right." Those are human gates. The output is 
 - The two moments split across the host boundary cleanly: **Moment 1** lives where
   generation runs (skill terminal in v1); **Moment 2** lives in the editor —
   because every flag is persisted in the DocModel.
+- *Candidate in-app mechanic for "later" (not committed — see the "Integrated
+  scaffolding" roadmap entry in `DECISIONS.md`):* run Pass 0–1 by detecting a
+  locally installed agent CLI (Claude Code / Codex) and executing it as a
+  subprocess from the Rust shell — **no *additional* provider API key for Pass
+  0–1** when an already-authenticated CLI is present (the structured passes still
+  use the install's keys per D-11 / D-22 / D-23); the Rust HTTP client stays
+  primary for those passes (2 / 2.5 / 3). The
+  subprocess gotchas (PATH expansion across version managers, prompt via stdin,
+  timeout + kill handle, `which`/`where` detection) have working prior art in
+  erictli/scratch — patterns only, that repo is unlicensed.
 
 ### Trust boundary for externally-refined markdown
 Because the consultant may refine markdown in a tool we don't control, the

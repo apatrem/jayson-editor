@@ -11,7 +11,7 @@
 This is the **decisions log**: each entry captures a decision made during scoping, with its rationale and consequences. When the architecture memo or build brief is unclear, this doc explains *why* a given path was chosen.
 
 - **Decisions** are numbered and grouped by domain.
-- **Roadmap items** are features deliberately deferred — listed at the bottom, with the version they target.
+- **Roadmap items** are features deliberately deferred — listed at the bottom, with the version they target (or in the version-less **Unscheduled** bucket).
 - **Open items** are decisions still pending; they must be resolved before or during v1 build.
 
 When an ambiguity arises, refer here first for the original rationale; if a decision needs revisiting, amend this doc and propagate to the memo + brief.
@@ -58,6 +58,11 @@ The undo stack lives in the editor's memory. It is **discarded when the editor w
 Every editor edit and every individual comment-accept/reject is a separate undo step. Batched comment processing is **not** a single undo entry.
 **Why:** Gives consultants fine-grained control during dozens-of-proposals batches. Aligns with how Word/Google Docs feel.
 **Implication:** The undo stack contains mixed types (text edits, block edits, comment acceptances). UI doesn't need to differentiate — it's just a list of operations.
+
+### D-40 — External-change detection: auto-reload clean, prompt dirty
+A Rust-side file watcher (`notify`) watches the **open doc folder** and the **library root** (the cloud-sync root scanned for doc folders, D-19/D-20). When the on-disk DocModel changes under an open document: if the in-memory doc is **clean** — its latest revision has been **successfully persisted**, with no autosave write pending or failed — reload silently with a toast; otherwise prompt **Reload from disk / Keep mine** and **suspend the queued autosave until the consultant answers**, so a pending write can't overwrite the external bytes mid-prompt. Keep mine resumes autosave so the next write overwrites, with the cloud provider's version history (D-05) as the recovery net. **Deletion or rename of the open on-disk DocModel** is treated the same way — prompt rather than act silently; on Keep mine the next save re-creates the file at its path, but the deletion is always surfaced first so a deliberately deleted document is never silently resurrected. No auto-merge. Library-root events refresh the library index. The shared-data folder (D-20) is **not** watched in v1 — its values (brand tokens, roster, references, shared assets) are read at setup / on open, so an admin's update becomes visible only after an app restart or manual refresh; this staleness is **accepted for v1**, not assumed harmless (stale shared data can affect generated content, so a v1.1 watcher or refresh action may be warranted — see roadmap).
+**Why:** Doc folders live in a cloud-sync root (D-19/D-20), so another machine or an external agent can rewrite files under the app; with mandatory autosave (D-05), a stale in-memory DocModel silently clobbering newer synced bytes is a real data-loss path — and "clean" must mean *persisted*, not *a debounce timer elapsed*, because the autosave path clears its pending buffer before the write completes (`src/editor/autosave.ts`). Same-stack prior art: erictli/scratch (Tauri 2 + notify, 500ms debounce, `file-change` event) — patterns only, the repo is unlicensed.
+**Implication:** New watcher + `file-change` event (create / modify / delete) to add to `docs/TAURI_IPC.md` when implemented. The watcher must ignore its own autosave writes (suppress paths just written / compare a content hash) so a flush doesn't self-trigger a reload. `draft.md` during the free-markdown phase is **out of scope for v1** — that phase has no on-disk DocModel yet (created at Structure — D-19) and the markdown surface has no defined dirty-state; revisit if/when in-app markdown refinement lands (see `docs/GENERATION_PIPELINE.md`).
 
 ---
 
@@ -205,6 +210,11 @@ A native installer using Tauri 2.x. No central server. Files read/written direct
 User name, email, role, cloud-sync paths, and LLM keys are configured by a setup script at install time. The app trusts the local config — single-user-per-machine.
 **Why:** Avoids building auth in v1. Comments are stamped automatically with the local user.
 **Roadmap:** v2 — proper auth (SSO/OAuth) when real-time collaboration arrives.
+
+### D-41 — Single app instance per machine
+The Tauri shell registers `tauri-plugin-single-instance`: a second launch focuses the existing window instead of starting a second process; second-launch arguments are forwarded to the running instance.
+**Why:** Two instances autosaving the same DocModel (D-05) is a silent last-writer-wins data-loss path with no conflict signal. One plugin registration closes it.
+**Implication:** One-line dependency + handler in `src-tauri`; complements the external-change watcher (D-40), which covers the cross-machine variant of the same hazard.
 
 ---
 
@@ -382,11 +392,11 @@ Versions are nominal; actual sequencing depends on v1 outcomes.
 - **Outline-time linked-document split** — when cold-start generation outline exceeds the D-35 envelope, propose splitting into multiple linked DocModels (e.g. one deck per workstream) with consultant override at outline approval; v1 ships single DocModel + size flag only (grilling 2026-06-07)
 - **Full re-structure** — restore `.generation/source-draft.md` to `draft.md`, edit, run **Structure draft** again with explicit confirm (replaces entire DocModel; comments orphaned). v1 is one-way gate + scoped section regeneration only (grilling 2026-06-07)
 - **Consultant-authored custom blocks** beyond the setup pass (email-shared first)
-- **Integrated scaffolding** ("New from template" inside the editor with the questionnaire)
+- **Integrated scaffolding** ("New from template" inside the editor with the questionnaire). *Candidate mechanic (not committed):* detect a locally installed agent CLI (Claude Code / Codex) and run Pass 0–1 as a subprocess from the Rust shell — **no *additional* provider API key for Pass 0–1** when an already-authenticated CLI is present (the structured passes 2/2.5/3 still use the install's keys per D-11/D-22/D-23); the Rust HTTP client stays primary for those passes. Solved gotchas documented by erictli/scratch (patterns only, unlicensed): PATH expansion across nvm/fnm/Homebrew, prompt via stdin, timeout + kill handle, `which`/`where` provider detection. Decide in its own grilling when this is scheduled — CLI availability across ~30 consultant machines is unverified.
 - **Additional languages** (DE, ES) and FR editor UI
 - **Per-language brand tokens** (different fonts/logos by language)
 - **Admin UI** for tweaking brand tokens without YAML editing
-- **Deck path** — 15 slide layouts + DeckRenderer (D-29, D-30)
+- **Deck path** — 15 slide layouts + DeckRenderer (D-29, D-30). *Design prior art for `slide-layouts.catalogue.yaml`:* Slidev's layout system — layouts as components exposing **named slots**, slide content mapped into slots declaratively (`::slot::` sugar), and **cascading layout resolution** (built-in → theme → project). (Prior art only — the v1 slide-layout catalogue is a single closed authority per `slide-layouts.catalogue.yaml`; any layered/override model would be a separate future decision, not implied here.)
 - **Opt-in local telemetry + opt-in shared pilot reports**
 - **Move shared data to a Git repo** (`consultancy-shared-data`) with PR review
 
@@ -396,6 +406,11 @@ Versions are nominal; actual sequencing depends on v1 outcomes.
 - **Synced library** for consultant-shared blocks (replacing email-based sharing)
 - **Proper auth** (SSO/OAuth) for the multi-user/collab era
 - **Central aggregate analytics** with explicit consent (if a clear use case emerges)
+
+### Unscheduled (worth doing, not currently necessary — revisit after pilot feedback)
+- **Library full-text search** — upgrade the library SearchBar from metadata-only filtering (`src/library/filter.ts` filters `Meta` fields) to full-text search over block content via an embedded Tantivy index in the Rust shell; stable block ids let hits deep-link to the block. Same-stack feasibility proven by erictli/scratch (tantivy + Tauri 2, watcher-driven incremental reindex) — patterns only, repo is unlicensed.
+- **Slash-command block insertion** — **upgrade the existing `/` shortcut** (which today opens the BlockPalette, BUILD_BRIEF M7) to a cursor-anchored `/` suggestion menu whose items derive from the **Closed editor schema** (Standard blocks ∪ Installed manifest set), preserving that boundary (ADR-0015). Keyboard-flow insertion at the cursor without leaving the line. Prior art: TipTap `Suggestion` plugin (steven-tey/novel `slash-command.tsx`); item shape with aliases/groups (BlockNote).
+- **Command palette + shortcut registry** — Cmd+K palette (e.g. `cmdk`) over library + editor actions with a discoverable shortcut cheat-sheet. Pure power-user convenience; pick up only if pilot consultants ask for it.
 
 ---
 
