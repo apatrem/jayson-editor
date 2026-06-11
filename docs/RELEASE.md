@@ -154,7 +154,7 @@ re-downloading the installer. It requires two things we don't have yet: an
 OS code-signing certs above) and a **stable feed URL**. Until both exist,
 emitting `latest.json` would ship a feed the app can't validate, so it stays off.
 
-Working reference for when T-108/T-109 unblock: [erictli/scratch](https://github.com/erictli/scratch)
+Working reference for when T-208/T-209 (the active tasks, ex-T-108/T-109) unblock: [erictli/scratch](https://github.com/erictli/scratch)
 ships a current, minimal Tauri 2 `tauri-plugin-updater` setup with a GitHub
 Actions `release.yml` — useful to crib the workflow *shape* from (that repo has
 no LICENSE, so patterns only, no code).

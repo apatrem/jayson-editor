@@ -366,8 +366,10 @@ quality, or that the layout "looks right." Those are human gates. The output is 
 - *Candidate in-app mechanic for "later" (not committed — see the "Integrated
   scaffolding" roadmap entry in `DECISIONS.md`):* run Pass 0–1 by detecting a
   locally installed agent CLI (Claude Code / Codex) and executing it as a
-  subprocess from the Rust shell — no per-seat API-key provisioning; the Rust
-  HTTP client stays primary for the structured passes (2 / 2.5 / 3). The
+  subprocess from the Rust shell — **no *additional* provider API key for Pass
+  0–1** when an already-authenticated CLI is present (the structured passes still
+  use the install's keys per D-11 / D-22 / D-23); the Rust HTTP client stays
+  primary for those passes (2 / 2.5 / 3). The
   subprocess gotchas (PATH expansion across version managers, prompt via stdin,
   timeout + kill handle, `which`/`where` detection) have working prior art in
   erictli/scratch — patterns only, that repo is unlicensed.
