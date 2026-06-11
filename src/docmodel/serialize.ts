@@ -1,11 +1,16 @@
-import { parse, stringify } from "yaml";
+import { parse } from "yaml";
 import type { DocModel } from "../schema/docmodel";
 import { canonicalize } from "./canonicalize";
-import { YAML_PARSE_OPTIONS, YAML_STRINGIFY_OPTIONS } from "./yaml-config";
+import { stringifyDocModelJson } from "./json-config";
+import { YAML_PARSE_OPTIONS } from "./yaml-config";
 
 export function serializeDocModel(doc: DocModel): string {
   const canonical = canonicalize(doc);
-  return stringify(canonical, YAML_STRINGIFY_OPTIONS);
+  return stringifyDocModelJson(canonical);
+}
+
+export function parseDocModelJson(source: string): unknown {
+  return JSON.parse(source) as unknown;
 }
 
 export function parseDocModelYaml(source: string): unknown {

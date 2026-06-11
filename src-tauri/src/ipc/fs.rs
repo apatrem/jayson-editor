@@ -35,6 +35,28 @@ pub async fn write_yaml_file(
     write_yaml_file_to_path(&path, &content, &roots)
 }
 
+/// Reads a DocModel document file (deterministic JSON projection, ADR-0022).
+#[tauri::command]
+pub async fn read_document_file(app: tauri::AppHandle, path: String) -> IpcResult<String> {
+    let roots = asset_scope_roots(&app);
+    read_document_file_from_path(&path, &roots)
+}
+
+/// Atomically writes a DocModel document file (deterministic JSON projection).
+/// Write path: sibling `.tmp` file, fsync, then rename to persist (see
+/// `write_content_to_canonical_path`).
+#[tauri::command]
+pub async fn write_document_file(
+    app: tauri::AppHandle,
+    path: String,
+    content: String,
+) -> IpcResult<()> {
+    let roots = asset_scope_roots(&app);
+    // Atomic write-then-rename: write_content_to_canonical_path uses a .tmp
+    // sibling, fsync, then rename to persist the document file.
+    write_document_file_to_path(&path, &content, &roots)
+}
+
 /// Reads an Authored block file from within the asset scope.
 ///
 /// Allowed extensions: `.tsx`, `.json` (covers the `.tsx` source plus its
@@ -295,6 +317,20 @@ fn write_yaml_file_to_path(path: &str, content: &str, allowed_roots: &[PathBuf])
     write_content_to_canonical_path(&target, content)
 }
 
+fn read_document_file_from_path(path: &str, allowed_roots: &[PathBuf]) -> IpcResult<String> {
+    let path = canonical_document_read_target(path, allowed_roots)?;
+    fs::read_to_string(path).map_err(|e| IpcError::Io(e.to_string()))
+}
+
+fn write_document_file_to_path(
+    path: &str,
+    content: &str,
+    allowed_roots: &[PathBuf],
+) -> IpcResult<()> {
+    let target = canonical_document_write_target(path, allowed_roots)?;
+    write_content_to_canonical_path(&target, content)
+}
+
 /// Atomically writes `content` to an already-validated, in-scope canonical
 /// path via the write-tmp-then-rename pattern (shared by every scoped write
 /// command).  The caller is responsible for extension + scope validation.
@@ -459,6 +495,15 @@ fn canonical_read_target(path: &str, allowed_roots: &[PathBuf]) -> IpcResult<Pat
     })
 }
 
+fn canonical_document_read_target(path: &str, allowed_roots: &[PathBuf]) -> IpcResult<PathBuf> {
+    canonical_scoped_read_target(path, allowed_roots, &["json"]).map_err(|err| match err {
+        IpcError::Invalid(message) if message == "path extension is not allowed" => {
+            IpcError::Invalid("path must end with .json".to_string())
+        }
+        other => other,
+    })
+}
+
 fn canonical_scoped_read_target(
     path: &str,
     allowed_roots: &[PathBuf],
@@ -479,6 +524,11 @@ fn canonical_scoped_read_target(
 
 fn canonical_write_target(path: &str, allowed_roots: &[PathBuf]) -> IpcResult<PathBuf> {
     let raw_path = validate_yaml_target_path(path)?;
+    resolve_canonical_write_target(raw_path, allowed_roots)
+}
+
+fn canonical_document_write_target(path: &str, allowed_roots: &[PathBuf]) -> IpcResult<PathBuf> {
+    let raw_path = validate_document_target_path(path)?;
     resolve_canonical_write_target(raw_path, allowed_roots)
 }
 
@@ -516,6 +566,15 @@ fn validate_yaml_target_path(path: &str) -> IpcResult<PathBuf> {
     validate_scoped_path(path, &["yaml", "yml"]).map_err(|err| match err {
         IpcError::Invalid(message) if message == "path extension is not allowed" => {
             IpcError::Invalid("path must end with .yaml or .yml".to_string())
+        }
+        other => other,
+    })
+}
+
+fn validate_document_target_path(path: &str) -> IpcResult<PathBuf> {
+    validate_scoped_path(path, &["json"]).map_err(|err| match err {
+        IpcError::Invalid(message) if message == "path extension is not allowed" => {
+            IpcError::Invalid("path must end with .json".to_string())
         }
         other => other,
     })

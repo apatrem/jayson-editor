@@ -10,13 +10,13 @@ Everything downstream (editor wiring T-202, generation T-203/T-204) builds on
 this layer.
 
 ## Acceptance criteria  (must be machine-checkable)
-- [ ] `examples/sample-proposal.json` and `examples/sample-deck.json` exist and round-trip byte-stably on second save → `tests/docmodel/json-roundtrip.test.ts`
-- [ ] `src/docmodel/serialize.ts` exports `parseDocModelJson`; `serializeDocModel` emits canonical JSON → same file
-- [ ] Every field in the JSON fixtures is registered in its shape's `KEY_ORDERS` — no insertion-order fallback (closed shapes only; authored-block attrs exempt per ADR-0016) → same file
-- [ ] `docs/JSON_FORMAT.md` documents canonical key order + formatter config (the byte-stability contract; successor to `YAML_FORMAT.md`) → same file
-- [ ] `read_document_file` / `write_document_file` (domain-named per `docs/BUILD_BRIEF.md` — never syntax-named) exist in `src-tauri/src/ipc/fs.rs`, keep the atomic write-then-rename + canonical-path validation contracts, and are documented in `docs/TAURI_IPC.md` → `tests/ipc/fs-json.smoke.test.ts`
-- [ ] gate green: `ruby scripts/check-specs && npm run lint && npm test && npm run build`
-- [ ] This task's frozen tests (`tests/docmodel/json-roundtrip.test.ts` + `tests/ipc/fs-json.smoke.test.ts`) removed from `tests/frozen-acceptance.json` — they now run inside `quality`
+- [x] `examples/sample-proposal.json` and `examples/sample-deck.json` exist and round-trip byte-stably on second save → `tests/docmodel/json-roundtrip.test.ts`
+- [x] `src/docmodel/serialize.ts` exports `parseDocModelJson`; `serializeDocModel` emits canonical JSON → same file
+- [x] Every field in the JSON fixtures is registered in its shape's `KEY_ORDERS` — no insertion-order fallback (closed shapes only; authored-block attrs exempt per ADR-0016) → same file
+- [x] `docs/JSON_FORMAT.md` documents canonical key order + formatter config (the byte-stability contract; successor to `YAML_FORMAT.md`) → same file
+- [x] `read_document_file` / `write_document_file` (domain-named per `docs/BUILD_BRIEF.md` — never syntax-named) exist in `src-tauri/src/ipc/fs.rs`, keep the atomic write-then-rename + canonical-path validation contracts, and are documented in `docs/TAURI_IPC.md` → `tests/ipc/fs-json.smoke.test.ts`
+- [x] gate green: `ruby scripts/check-specs && npm run lint && npm test && npm run build`
+- [x] This task's frozen tests (`tests/docmodel/json-roundtrip.test.ts` + `tests/ipc/fs-json.smoke.test.ts`) removed from `tests/frozen-acceptance.json` — they now run inside `quality`
 
 ## Files likely involved
 - `src/docmodel/serialize.ts`, `src/docmodel/yaml-config.ts` (JSON equivalent or retirement)

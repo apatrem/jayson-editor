@@ -47,6 +47,7 @@ export const KEY_ORDERS: Record<string, string[]> = {
     "palette",
     "showLegend",
     "showDataLabels",
+    "legendPosition",
     "note",
   ],
   table: ["id", "type", "columns", "rows", "caption", "note"],
