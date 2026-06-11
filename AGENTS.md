@@ -17,6 +17,8 @@ working in this repository.
 ├── README.md                       ← short orientation
 ├── brand.example.yaml              ← brand-token reference shape
 ├── blocks.catalogue.yaml           ← 15 pre-built block specs + setup-AI instructions
+├── tasks/                          ← active task files (one unit of work each)
+├── templates/task.template.md      ← the task template (/agentic-workflow:plan output)
 ├── docs/                           ← all design/spec docs
 │   ├── DOCUMENT_SYSTEM_ARCHITECTURE.md  — the "why" memo
 │   ├── BUILD_BRIEF.md                   — milestones M0–M6 + acceptance
@@ -26,30 +28,12 @@ working in this repository.
 │   ├── SETUP_PIPELINE.md                — AI ingestion + code-gen pipeline spec
 │   ├── SETUP_INSTALL_FLOW.md            — per-consultant install CLI wizard
 │   ├── TAURI_IPC.md                     — JS↔Rust command list with signatures
-│   ├── YAML_FORMAT.md                   — byte-stable serialization rules
+│   ├── YAML_FORMAT.md                   — historical byte-stable YAML rules (see ADR-0022)
 │   ├── UI_REVIEW_PANEL.md               — wireframe for the comment-review panel
 │   ├── UI_LIBRARY.md                    — wireframe for the doc library
-│   └── TASKS.md                         — ~112 atomic tasks ≤4h each
+│   └── archive/                         — retired docs (v1 backlog index, completed task bodies, loop state)
 ├── starter/                        ← drop-in project configs (M0 starter pack)
-│   ├── package.json                — pinned dependency versions
-│   ├── tsconfig.json               — strict TS + path aliases
-│   ├── vite.config.ts              — Tauri-aware build config
-│   ├── vitest.config.ts            — happy-dom test config
-│   ├── .eslintrc.cjs               — arch-invariant lint rules
-│   ├── .prettierrc                 — formatting
-│   └── src-tauri/
-│       ├── tauri.conf.json         — CSP + asset-scope + bundle settings
-│       ├── Cargo.toml              — Rust deps incl. keyring
-│       ├── src/lib.rs              — IPC command registration
-│       └── src/main.rs             — native binary entry point
 ├── examples/                       ← valid + invalid YAML/JSON fixtures
-│   ├── sample-proposal.yaml
-│   ├── sample-deck.yaml
-│   ├── sample-block-patch.json
-│   ├── sample-comment-thread.json
-│   ├── sample-llm-batch-request.json
-│   ├── sample-llm-batch-response.json
-│   └── invalid/                    ← each one fails validation in a documented way
 └── reference/                      ← fully-worked code patterns to copy
     ├── primitives/                 — block-primitives: BrandProvider, ProseRenderer, helpers
     ├── callout/                    — reference block: schema + renderer + node + test
@@ -72,12 +56,13 @@ If the brief and the memo conflict, the memo's §2 principle and §3 requirement
 ### Specifications
 
 - [docs/TYPES.md](docs/TYPES.md) — every shared TypeScript type lives here. No type is defined twice.
-- [docs/TASKS.md](docs/TASKS.md) — atomic backlog. Use task IDs (`T-NN`) in commit messages and PRs.
+- [tasks/](tasks/) — the active backlog: one file per task, each with machine-checkable acceptance criteria. (The v1 backlog is archived: index at [docs/archive/TASKS.md](docs/archive/TASKS.md), completed bodies at [docs/archive/TASKS_ARCHIVE.md](docs/archive/TASKS_ARCHIVE.md).)
 - [docs/BLOCK_IMPLEMENTATION_GUIDE.md](docs/BLOCK_IMPLEMENTATION_GUIDE.md) — copy-pattern for the 15 blocks.
 - [docs/SETUP_PIPELINE.md](docs/SETUP_PIPELINE.md) — setup AI pipeline (ingestion + code-gen + lint).
 - [docs/SETUP_INSTALL_FLOW.md](docs/SETUP_INSTALL_FLOW.md) — per-consultant install CLI prompts.
 - [docs/TAURI_IPC.md](docs/TAURI_IPC.md) — every JS↔Rust command with signatures.
-- [docs/YAML_FORMAT.md](docs/YAML_FORMAT.md) — formatter rules that guarantee byte-stable round-trips.
+- [docs/GENERATION_PIPELINE.md](docs/GENERATION_PIPELINE.md) — cold-start generation design.
+- [docs/YAML_FORMAT.md](docs/YAML_FORMAT.md) — historical YAML rules; JSON is canonical (ADR-0022).
 - [docs/UI_REVIEW_PANEL.md](docs/UI_REVIEW_PANEL.md) — wireframe + state model for the comment-review panel.
 - [docs/UI_LIBRARY.md](docs/UI_LIBRARY.md) — wireframe + state model for the doc library.
 
@@ -100,161 +85,87 @@ If the brief and the memo conflict, the memo's §2 principle and §3 requirement
 
 ## Planning workflow
 
-**All non-trivial plans must go through the `grill-me` skill.** Before writing
-code for any new feature, milestone, or refactor:
+**All non-trivial plans must go through the `grill-me` skill** (or
+`/agentic-workflow:architect` for architecture-level work, which wraps
+`grill-with-docs`). Before writing code for any new feature, milestone, or
+refactor:
 
 1. Draft the plan.
 2. Invoke `grill-me` to stress-test it — resolve every branch of the decision
   tree before implementation begins.
-3. Only after the grilling settles should code land.
+3. Decompose the settled plan into task files via `/agentic-workflow:plan`.
+4. Only then does code land.
 
 This applies to anything bigger than a one-file edit or a typo fix.
 
-## Autonomous task loop
+## Workflow (PR-based — ADR-0023)
 
-`docs/TASKS.md` is driven by an autonomous loop. The loop is conservative:
-defaults to halting cleanly when something is wrong rather than charging ahead.
+The autonomous TASKS.md loop is retired (ADR-0023). Work flows through
+**task files + worktrees + PRs + CI**; a human merges every PR.
 
-### Slash commands
+> *LLMs propose. Tools verify. Git isolates. CI decides. Humans merge. Rules remember.*
 
-- `**/next-task`** — one fire of the loop. Reads `docs/TASKS.md`, picks the
-next eligible task, implements + tests + global-gates + commits + pushes,
-then continues to the next task. Runs until a halt rule trips or
-`ALL DONE`. Spec: [.claude/commands/next-task.md](.claude/commands/next-task.md).
-- `**/status`** — read-only snapshot of loop state, recent commits, open
-blockers, CI status. Safe to run anytime. Spec:
-[.claude/commands/status.md](.claude/commands/status.md).
-- `**/skip T-NN <reason>**` — permanently mark a task as deliberately not
-doing. Treated like `[x]` for dependency-eligibility. Spec:
-[.claude/commands/skip.md](.claude/commands/skip.md).
+### Tasks
 
-To drive the loop autonomously, in Claude Code:
+- One unit of work = one file in [`tasks/`](tasks/), named `T-NNN-<slug>.md`,
+  from [templates/task.template.md](templates/task.template.md). Bigger than
+  the old ≤4h backlog atoms — sized to a reviewable PR, with
+  **machine-checkable acceptance criteria** mapped to test files.
+- Acceptance that cannot be a runnable test ⇒ `risk: high` in the task meta.
+- Tasks are created by `/agentic-workflow:plan` after grilling; the human
+  approves task files before implementation fans out.
+- `depends-on` gates start order; `parallel-safe: yes` tasks (disjoint file
+  sets, no shared contract) may run concurrently, one worktree each.
+- A task is **done when its PR merges**. The implementing PR ticks the
+  acceptance boxes in its task file; reference the task ID (`T-NNN`) in commit
+  messages and the PR title.
 
-```
-/loop 45m /next-task
-```
+### Branches, worktrees, PRs
 
-### Status markers in TASKS.md
+- Work in your own worktree on `agent/<lineage>/<task>` (e.g.
+  `agent/claude/T-204-placeholder-engine`); **never commit to `main`**
+  (protected — PR + green `quality` check).
+- Start every task from a clean worktree cut from the current `origin/main`;
+  never carry uncommitted changes into or between tasks (pre-flight).
+- Small PRs: routine < 300 changed lines; split or stack larger ones.
+  Separate mechanical churn from behavioural change.
+- Never force-push. Never amend pushed commits. Never `--no-verify` /
+  `--no-gpg-sign`. Never `git add -A` / `git add .` — stage explicit paths
+  only. (`.cursor/cli.json` denies these for Cursor agents.)
 
-Markers are placed as a **suffix on the task header line**, between the task ID and the `·` separator:
+### The gate (one command)
 
-```
-### T-NN [ ] · Title goes here
-```
-
-
-| Marker          | Meaning                                                                            |
-| --------------- | ---------------------------------------------------------------------------------- |
-| `[ ]`           | Not started — eligible when all `Depends-on:` are `[x]` or `[skip]`                |
-| `[~]`           | In progress (current invocation); leftover from a crashed prior fire is auto-reset |
-| `[x]`           | Done                                                                               |
-| `[?]`           | Needs human input — counts toward halt rules                                       |
-| `[!]`           | Waiting on external dep — doesn't halt; auto-promotes to `[?]` after 3 fires       |
-| `[skip]`        | Deliberately not doing                                                             |
-| `[GATE FAILED]` | On milestone header — halts the loop                                               |
-
-
-Each task carries two distinct dependency-style fields:
-
-- `**Depends-on:**` — comma-separated task IDs (`T-NN`) or `none`. Controls eligibility.
-- `**Reads:**` — file paths, doc references, and `D-NN` decision references the task must consult during implementation. No eligibility role.
-
-The old single `Inputs:` field is deprecated; do not introduce it on new tasks.
-
-### Halt rules (conservative)
-
-The loop halts when ANY of these trip:
-
-1. **A-rule** — 2 consecutive `[?]` tasks (signals systemic rot, not bad luck).
-2. **C-rule** — current milestone has any `[?]` (don't advance past a broken phase).
-3. **Quality gate** — `tsc --noEmit` or `npm run lint` fails after a task; failure counts toward A-rule.
-4. **Milestone gate** — full `npm run build && npm test` fails when entering a new milestone.
-5. **CI failure** on `origin/main` (per the optional CI-poll config below).
-6. **Push conflict** that survives a rebase retry.
-7. **Pre-flight failure** (dirty tree, branch divergence, missing files).
-
-Halts are **self-healing** — the loop's `/loop` interval keeps firing. When
-the human resolves the blocker, the next fire auto-resumes.
-
-### Morning-check ritual (5 minutes)
-
-1. Open `STATUS.md` (auto-regenerated on every fire).
-2. If state is `RUNNING` or `ALL_DONE` → nothing to do.
-3. If state ends in `*HALT` / `*FAILED`:
-  - Read the "What needs your attention" section.
-  - Open `BLOCKERS.md` for full detail on each blocker.
-  - Fix the root cause; edit the relevant marker in `docs/TASKS.md` from
-  `[?]` back to `[ ]`.
-  - Append a `**Resolved:`** line to the BLOCKERS.md entry.
-  - The next loop fire (within 45 min) resumes autonomously.
-
-### Loop configuration
-
-```yaml
-# Consumed by /next-task; edit here to change behavior
-loop:
-  ci-poll: true        # check `gh run list` on origin/main before each task
-  ci-poll-tool: gh     # CLI tool to use; if missing, CI-poll is skipped (warned in STATUS.md, not halted)
+```bash
+ruby scripts/check-specs && npm run lint && npm test && npm run build
 ```
 
-### Model + effort tier
+CI's `quality` check runs exactly this on every PR. Run it locally before
+claiming success — do not invent passing results.
 
-Pick the right combination in your chat app before launching `/loop`:
+`npm test` excludes the frozen acceptance suites listed in
+[`tests/frozen-acceptance.json`](tests/frozen-acceptance.json); they run in the
+**non-required** `frozen-acceptance` CI lane (expected red) until each
+implementing task's PR removes its files from that list — the list may only
+shrink (ADR-0023). Run the frozen lane locally with `npm run test:frozen`. Local hygiene hooks:
+`pipx install pre-commit && pre-commit install` (see `.pre-commit-config.yaml`).
 
+### Effort/review dial (`mode` in the task meta)
 
-| Tier                              | Use for                                                                                                                            | Claude Code                                    | Cursor (Composer) | Codex / ChatGPT    |
-| --------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------- | ----------------- | ------------------ |
-| **Default** (~90% of tasks)       | Mechanical block work, schema, renderers, mapping                                                                                  | Sonnet 4.6 + **high**                          | Auto              | GPT-5.5 High       |
-| **Escalation** (~10%, hard tasks) | Setup AI pipeline (T-41–T-49), watchdog (T-46b), perf benchmarks (T-89c, T-89d), retry of any `[?]` task | Opus 4.7 + **high** (xhigh after failed retry) | GPT-5.5 xHigh     | GPT-5.5 xHigh      |
-| **Avoid**                         | This protocol is too detailed for these                                                                                            | Sonnet medium · Haiku                          | Composer 1        | GPT-4o · GPT-5 low |
+- **`low`** *(default — prefer it, justify higher)*: one implementer + the gate
+  + one adversarial reviewer (blockers only, ≤10 ranked findings).
+- **`medium`**: adds an independent dual review on the PR
+  (`/agentic-workflow:review` — GPT-5.5 xhigh + Claude effort-high, synthesized).
+- **`hard`**: competitive best-of-N across lineages + smart-merge, then the
+  medium dual review.
 
+The engine for spawning workers is external (Superset — see
+`/agentic-workflow:run`); this repo records policy, not engine API.
 
-Full guidance is in `[.claude/commands/next-task.md](.claude/commands/next-task.md)` under "Model and effort tier." The loop self-reports its tier in `STATUS.md` and emits `tier-mismatch` advisories for escalation tasks running on the default tier — informative, not blocking.
+### Lessons → guardrails
 
-### Cursor auto-run (allowlist — no terminal deny-list UI)
-
-Cursor does **not** expose a terminal **deny list** in Settings. Auto-run uses an **allowlist**: only listed command prefixes auto-run without approval; everything else prompts (or runs sandboxed in **Allowlist (with Sandbox)** mode).
-
-**Settings path:** **Cursor Settings → Agents → Auto-Run** (and **Protection** toggles on the same page).
-
-| Control | Purpose |
-| --- | --- |
-| **Auto-Run mode** | `Allowlist` or `Allowlist (with Sandbox)` for `/next-task` |
-| **Command Allowlist** | Safe prefixes: `npm`, `npx`, `tsc`, `vitest`, `eslint`, `prettier`, `cargo`, `bash scripts/`, `gh`, specific `git` subcommands — avoid bare `git` if you want push/commit gated |
-| **File-Deletion Protection** | On — blocks automatic deletes |
-| **Dotfile / External-File Protection** | On as needed |
-
-**Forbidden commands** for this repo (enforced three ways):
-
-1. **`.cursor/cli.json`** — `permissions.deny` (`Shell(...)` tokens; deny beats allow)
-2. **`.cursor/rules/autonomous-loop-terminal-safety.mdc`** — agent must not run them
-3. **Pre-commit hook** — blocks bad commits even if a command slipped through
-
-Do **not** add `git push --force`, `git commit --amend`, `--no-verify`, or `git add -A` / `git add .` to the IDE allowlist.
-
-Optional global file (overrides in-app terminal allowlist when set): `~/.cursor/permissions.json` — see [Cursor permissions.json](https://cursor.com/docs/reference/permissions).
-
-### Hard rules the loop will never violate
-
-- Never force-push. Push rejection → halt to `PUSH-CONFLICT`.
-- Never amend prior commits.
-- Never bypass the pre-commit hook (`--no-verify`, `--no-gpg-sign`). The hook is the safety net.
-- Never use `git add -A` / `git add .` — always explicit paths.
-- Never stage files outside `Outputs:` ∪ allow-list ∪ loop-managed-files. The pre-commit hook fails the commit.
-- Never commit changes to loop-managed files (`docs/TASKS.md`, `STATUS.md`, `BLOCKERS.md`) in isolation — they must be bundled together when any of them is mutated. The hook enforces this.
-- Never silently adjust `DECISIONS.md` targets when a gate fails — file the regression as a blocker.
-- Never delete `BLOCKERS.md` entries (append-only).
-- Never start work without a clean pre-flight.
-
-### Pre-commit hook
-
-`scripts/verify-task-commit.sh` runs as the pre-commit hook on `main` and `bakeoff/`* branches. It enforces:
-
-- Loop-managed files (`docs/TASKS.md`, `STATUS.md`, `BLOCKERS.md`) are staged together when any of them is mutated.
-- Only files in the static allow-list may be staged outside the current task's declared `Outputs:`. See `[.claude/commands/next-task.md](.claude/commands/next-task.md)` for the allow-list.
-- Marker transitions in `docs/TASKS.md` are well-formed (at most one `[ ]→[~]→[x]` or failure-path transition per commit).
-
-Install with: `bash scripts/install-hooks.sh` (also runs automatically from the loop's pre-flight #6).
+Every recurring mistake becomes a test, a lint rule, or a line in this file —
+never just a mental note. The [Review playbook](#review-playbook-conventions-for-code-review--security-audit--test-engineer-agents)
+below is the accumulated set; extend it, don't trim it.
 
 ## Code intelligence
 
@@ -307,13 +218,26 @@ DOCX/PPTX import/export, v1 real-time collab, live-models platform).
 at runtime (the setup-time pipeline is the sole exception).
 - **When uncertain, stop and ask.** Use `TBD` and flag it; do not invent brand
 values, client content, or block types.
+- **Frozen acceptance tests are immutable.** Test files headed
+`FROZEN ACCEPTANCE TESTS` (T-201–T-204, `/agentic-workflow:plan`) and the
+contract artifacts they pin (`docs/JSON_FORMAT.md`,
+`slide-layouts.catalogue.yaml`) must never be edited to make a gate pass —
+the implementation adapts to the test, not vice versa. Changes require human
+sign-off on the plan PR. The exclude list `tests/frozen-acceptance.json` may
+only shrink (an implementing task removing its now-green files); adding an
+entry to mask a failure is forbidden.
+- **Never silently weaken a failing target** (sibling of the frozen-test rule):
+when a gate or acceptance target fails, do not adjust `DECISIONS.md` targets,
+acceptance criteria, or frozen tests to make it pass — record the regression
+in the task file and the PR, and let a human decide.
 
 ## Working style
 
-- Build milestone-by-milestone. Do not start a milestone until the previous
-one's acceptance criteria pass.
-- Work tasks from `docs/TASKS.md` in dependency order. Reference task IDs
-(`T-NN`) in commit messages and PR titles.
+- When work is milestone-scoped (docs/BUILD_BRIEF.md), do not start a milestone
+until the previous one's acceptance criteria pass; encode cross-milestone
+ordering as `depends-on`.
+- Work tasks from [`tasks/`](tasks/) in `depends-on` order. Reference task IDs
+(`T-NNN`) in commit messages and PR titles.
 - Prefer editing existing files over creating new ones.
 - Don't add features, abstractions, or error handling beyond what the task
 requires.
@@ -356,8 +280,8 @@ include these explicit checks in the prompt:
   integration harness uses a synthetic doc, or stubs the renderer/IPC under
   test, automatically flag any "test passes" claim as inconclusive until the
   harness uses the real fixture / real renderer. M7-spike shipped 5 BLOCKERs
-  hidden by this exact pattern (see `BLOCKERS.md [drift-2026-05-26c]` and
-  related entries).
+  hidden by this exact pattern (see `docs/archive/BLOCKERS.md [drift-2026-05-26c]`
+  and related entries).
   **Extension — CI matrix gaps are also synthetic.** A `#[cfg(<os>)]` or
   `if (process.platform === '...')` test that has no corresponding OS in the
   CI matrix is functionally equivalent to a synthetic harness — the test
@@ -403,8 +327,8 @@ include these explicit checks in the prompt:
   audit caught the gap (drift `[drift-2026-05-26l]`). When the operation
   is platform-specific, combine with the synthetic-fixtures convention
   above — both the failure-path tests AND the CI matrix entry that runs
-  them are required, OR the gap should be tracked as a `[!]` BLOCKERS
-  entry until the matrix is wired. Concrete pattern: list every Rust
+  them are required, OR the gap should be tracked in the task file until
+  the matrix is wired. Concrete pattern: list every Rust
   `fn` returning `IpcResult<T>` that does ≥2 filesystem mutations, count
   the corresponding test cases per failure window, flag any function
   with <3 negative-path tests.
@@ -426,4 +350,3 @@ include these explicit checks in the prompt:
   than the JSON shape) reproduce the test-vs-runtime gap the prior
   conventions warn about — mock with the JSON shape instead, mirroring
   `tests/ipc/errors.test.ts`.
-

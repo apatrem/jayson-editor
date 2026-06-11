@@ -1,6 +1,6 @@
 # starter/ — project scaffold files
 
-Drop-in starting point for the M0 (project scaffold) tasks in `docs/TASKS.md` (T-01 through T-09).
+Drop-in starting point for the M0 (project scaffold) tasks in `docs/archive/TASKS.md` (T-01 through T-09).
 
 These files have **pinned versions and architecture-specific config** that match the decisions in `docs/DECISIONS.md`. Do not "upgrade" them speculatively — pin drift is a recurring source of subtle breakage.
 

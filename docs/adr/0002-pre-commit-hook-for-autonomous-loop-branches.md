@@ -1,6 +1,6 @@
 # Pre-commit hook enforces autonomous-loop protocol invariants on `main` and `bakeoff/*` branches
 
-**Status:** accepted
+**Status:** superseded by [ADR-0023](0023-adopt-agentic-workflow-retire-autonomous-loop.md) (loop retired; gate enforcement moved to CI required checks)
 **Date:** 2026-05-21
 
 ## Context

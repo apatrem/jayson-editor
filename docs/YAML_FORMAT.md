@@ -11,7 +11,7 @@
 
 **Audience:** the developer implementing `src/docmodel/serialize.ts`.
 
-**Companion to:** `TYPES.md`, `docs/TASKS.md` (T-40).
+**Companion to:** `TYPES.md`, `docs/archive/TASKS.md` (T-40).
 
 ---
 

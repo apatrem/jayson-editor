@@ -1,6 +1,16 @@
-import { defineConfig } from "vitest/config";
+import { configDefaults, defineConfig } from "vitest/config";
 import react from "@vitejs/plugin-react";
 import { resolve } from "node:path";
+import { readFileSync } from "node:fs";
+
+// Frozen acceptance suites (red by design until their tasks land — ADR-0023).
+// Default runs exclude them (the `quality` gate); FROZEN_ACCEPTANCE=only runs
+// exactly them (the non-required `frozen-acceptance` CI lane / npm run
+// test:frozen). The list may only shrink — see tests/frozen-acceptance.json.
+const frozen: { files: string[] } = JSON.parse(
+  readFileSync(resolve(__dirname, "./tests/frozen-acceptance.json"), "utf8"),
+);
+const frozenOnly = process.env.FROZEN_ACCEPTANCE === "only";
 
 export default defineConfig({
   plugins: [react()],
@@ -42,7 +52,10 @@ export default defineConfig({
         execArgv: ["--max-old-space-size=4096"],
       },
     },
-    include: ["tests/**/*.test.ts", "tests/**/*.test.tsx", "src/**/*.test.ts", "src/**/*.test.tsx"],
+    include: frozenOnly
+      ? frozen.files
+      : ["tests/**/*.test.ts", "tests/**/*.test.tsx", "src/**/*.test.ts", "src/**/*.test.tsx"],
+    exclude: frozenOnly ? [...configDefaults.exclude] : [...configDefaults.exclude, ...frozen.files],
     coverage: {
       provider: "v8",
       reporter: ["text", "html"],

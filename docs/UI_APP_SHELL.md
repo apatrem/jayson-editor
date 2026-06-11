@@ -4,7 +4,7 @@
 
 **Audience:** the developer implementing M7-spike (T-115 → T-123, ~33h total). M8's incremental updates to this spec are tracked by T-124 (see §M8 forward-references below).
 
-**Companion to:** `docs/BUILD_BRIEF.md` §3 (M7 entry), `docs/TASKS.md` Phase 7 (T-115..T-123), `docs/TAURI_IPC.md` (IPC contract), `docs/DECISIONS.md` (D-39 perf budget, D-36 watchdog HOC), `docs/UI_LIBRARY.md` + `docs/UI_REVIEW_PANEL.md` + `docs/SETUP_INSTALL_FLOW.md` (cross-referenced ONLY for what M7-spike defers — none of those surfaces ship in M7-spike).
+**Companion to:** `docs/BUILD_BRIEF.md` §3 (M7 entry), `docs/archive/TASKS.md` Phase 7 (T-115..T-123), `docs/TAURI_IPC.md` (IPC contract), `docs/DECISIONS.md` (D-39 perf budget, D-36 watchdog HOC), `docs/UI_LIBRARY.md` + `docs/UI_REVIEW_PANEL.md` + `docs/SETUP_INSTALL_FLOW.md` (cross-referenced ONLY for what M7-spike defers — none of those surfaces ship in M7-spike).
 
 > **ADR-0022 supersession note:** this spec predates the JSON Document file
 > clean break and still contains many YAML filenames and `read_yaml_file` /
@@ -254,7 +254,7 @@ Standard convention for Save / Save As (per grilling Q10):
 
 The M7-spike design for PDF export is a **two-step UX, zero-packaging** choice. Reasons:
 
-1. **Zero added install surface.** Shipping a one-click in-app PDF requires bundling Playwright + a Node sidecar + a Chromium binary — ~120-180 MB per platform, 2-3 days of packaging engineering. That's a v1.1 task (see `docs/TASKS.md` "Future task note — post-M7 / v1.1") and explicitly outside M7-spike scope.
+1. **Zero added install surface.** Shipping a one-click in-app PDF requires bundling Playwright + a Node sidecar + a Chromium binary — ~120-180 MB per platform, 2-3 days of packaging engineering. That's a v1.1 task (see `docs/archive/TASKS.md` "Future task note — post-M7 / v1.1") and explicitly outside M7-spike scope.
 2. **Deterministic-enough fidelity.** Pre-rendered self-contained HTML + the user's browser print engine produces a result that's "good enough for v1" for proposals and reports. Most consultants already know `Cmd-P` → "Save as PDF" — the UX surprise is minimal.
 3. **Mermaid + ECharts work in the browser without Node.** The existing `Diagram` and `Chart` blocks already render in the renderer process; reusing them via `renderToStaticMarkup` + `mermaid.render()` + `echarts.renderToSVGString()` produces inline SVGs in the exported HTML.
 
@@ -748,7 +748,7 @@ export async function scanCloudSyncRoot(root: string): Promise<LibraryIndex>;
 
 `scanCloudSyncRoot` issues one `list_directory(root, { recursive: true, maxDepth: 4 })` IPC call, then for every folder containing exactly one `*.yaml` file, calls `read_yaml_file` and parses **only** the `meta:` block (not the full doc — too slow at 500 docs). The full-doc parse happens only when the user opens a card.
 
-**Performance budget.** Per `docs/UI_LIBRARY.md:170`, 500-doc index in < 2s. The `verify-gates.sh` test suite doesn't enforce that budget; T-128's acceptance includes a perf assertion: `tests/ui/library/LibraryView.test.tsx` runs against a 100-doc fixture and asserts the scan completes in < 400ms locally (extrapolates to < 2s on 500 docs on a CI-comparable runner).
+**Performance budget.** Per `docs/UI_LIBRARY.md:170`, 500-doc index in < 2s. The gate's test suite doesn't enforce that budget; T-128's acceptance includes a perf assertion: `tests/ui/library/LibraryView.test.tsx` runs against a 100-doc fixture and asserts the scan completes in < 400ms locally (extrapolates to < 2s on 500 docs on a CI-comparable runner).
 
 ## D-107 — "Use Sample" empty-state flow
 
@@ -873,7 +873,7 @@ T-134 ships the gate. Pass criteria:
 2. The full first-launch flow works end-to-end: no config → folder picker → library → "Use Sample" → card → DocumentView → edit → save → reopen → edits preserved → "Create from Template" → new doc visible in library.
 3. BlockPalette shows the 15 standard blocks AND any blocks under `generated-blocks/active/`.
 4. M7-spike happy-path test (T-123) still passes (router refactor invisible to the M7-spike test path).
-5. The full project gates (`verify-gates.sh` = tsc + lint + tests) stay green.
+5. The full project gate (`ruby scripts/check-specs && npm run lint && npm test && npm run build`) stays green.
 
 ## M8 change log
 

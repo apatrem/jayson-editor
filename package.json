@@ -11,6 +11,7 @@
     "lint": "eslint . --ext .ts,.tsx --max-warnings 0",
     "format": "prettier --write \"src/**/*.{ts,tsx,css,md}\"",
     "test": "vitest run",
+    "test:frozen": "FROZEN_ACCEPTANCE=only vitest run",
     "test:perf": "vitest run tests/perf/benchmark.test.ts",
     "test:watch": "vitest",
     "validate": "tsx scripts/validate.ts",
