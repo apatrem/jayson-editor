@@ -38,6 +38,27 @@ jobs:
       - name: Build
         run: npm run build
 
+  # Frozen acceptance tests (committed red on purpose by /agentic-workflow:plan,
+  # tasks/T-201..T-204). NON-REQUIRED lane — expected red until each implementing
+  # task's PR removes its files from tests/frozen-acceptance.json, which moves
+  # them into `quality`. See ADR-0023. Do NOT add this job to required checks
+  # while any frozen suite remains unimplemented.
+  frozen-acceptance:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Frozen acceptance tests (expected red until implemented)
+        run: npm run test:frozen
+
   rust-lockfile-parity:
     runs-on: ubuntu-latest
     steps:

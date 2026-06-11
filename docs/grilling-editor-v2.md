@@ -2,7 +2,7 @@
 
 Working notes for an in-flight `grill-with-docs` session. Captures decisions as
 they settle so the conversation can be compacted without losing state. Fold into
-ADRs / docs/TASKS.md once grilling completes, then delete this file.
+ADRs / tasks/ once grilling completes, then delete this file.
 
 ## Heading numbering (explanation, asked by user)
 
@@ -189,5 +189,5 @@ implementing.
 Roadmap / deferred: two-level outline (sections + headings) in the sidebar;
 configurable numbering separator; "keep with next/together" manual override.
 
-(Fold into docs/TASKS.md + the ADR once implementation starts, then delete this
+(Fold into tasks/ + the ADR once implementation starts, then delete this
 file.)

@@ -15,7 +15,8 @@ silent truncation, no orphan block.
 - [ ] Catalogue layout ids are consistent with the editor's `LAYOUT_SLOTS` (`src/editor/SlideLayoutEditor.tsx`) → same file
 - [ ] `src/generation/layout-fit-check.ts` exports `fitCheckSlide(slide, catalogue)` returning `{ fits, flags }`; an over-capacity slide yields `fits: false` with a `layoutOverflow` flag, and a within-capacity slide yields `fits: true` with no overflow flag (no constant-verdict implementation can pass) → same file
 - [ ] Deterministic: identical inputs ⇒ deep-equal verdicts on repeated calls → same file
-- [ ] gate green: `npm run lint && npm test && npm run build`
+- [ ] gate green: `ruby scripts/check-specs && npm run lint && npm test && npm run build`
+- [ ] This task's frozen tests (`tests/generation/layout-fit-check.test.ts`) removed from `tests/frozen-acceptance.json` — they now run inside `quality`
 - [ ] **HUMAN check (why risk is high):** capacity numbers eyeballed against real rendered slides — not machine-checkable; the reviewer signs this off in the PR
 
 ## Files likely involved
@@ -35,8 +36,8 @@ silent truncation, no orphan block.
 
 ## Meta
 - risk: high                  # capacity-metadata fidelity needs human eyes — never auto-merge eligible
-- mode: competitive           # deterministic authority over every generated deck; best-of-N + smart-merge + dual review (workflow `hard` tier)
-- depends-on: T-192           # D-30 is a decision, not a task — see Files/contract sources
+- mode: hard                  # deterministic authority over every generated deck; best-of-N + smart-merge + dual review (was: competitive)
+- depends-on: [T-207]         # generation schema fields (absorbs legacy T-192 + T-193); D-30 is a decision, not a task
 - parallel-safe: yes          # new files + read-only editor reference
 - frozen-tests: `tests/generation/layout-fit-check.test.ts`
 - size budget: < 300 changed lines

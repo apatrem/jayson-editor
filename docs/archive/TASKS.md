@@ -1,13 +1,11 @@
 # Implementation Tasks — Jayson Editor v1
 
-> **System change (2026-06-09, `/agentic-workflow:plan`):** this file is now a
-> **milestone index + remaining legacy backlog**. New work is specified in
-> [`../tasks/`](../tasks/) as coarse tasks with frozen acceptance tests and
-> human-approved plan PRs — do not add tasks here. Completed task bodies moved
-> to [TASKS_ARCHIVE.md](TASKS_ARCHIVE.md); their `[x]`/`[skip]` header stubs
-> remain below so dependency resolution and the loop's marker grammar keep
-> working.
-
+> **Archived (ADR-0023, 2026-06-10).** The autonomous loop is retired; this file
+> is the v1 backlog's **milestone index + final legacy state**. Completed task
+> bodies live in [TASKS_ARCHIVE.md](TASKS_ARCHIVE.md); the legacy entries still
+> open at archive time (T-181, T-108/T-109, T-191–T-194) are re-grouped into
+> [`tasks/`](../../tasks/) (T-205–T-211, alongside the PR #5 plan's T-201–T-204).
+> Do not add tasks here.
 **Purpose:** decompose `BUILD_BRIEF.md` milestones (M0–M6) into atomic tasks of ≤4 hours each.
 
 **How to use this doc:**
@@ -540,15 +538,15 @@ Decisions: ADR-0004, ADR-0005, ADR-0006, ADR-0007, ADR-0009 (identity), ADR-0010
 
 ## Phase 12 — JSON canonical format + generation pipeline (ADR-0021/0022)
 
-Depends on ADR-0022 (JSON on disk) and [JSON_MIGRATION_INVENTORY.md](JSON_MIGRATION_INVENTORY.md). JSON migration tasks (T-183–T-189) should land before or in parallel with generation implementation (T-190+). Generation skill (Pass 0–1) can ship while structuring (Pass 2+) is built in-app.
+Depends on ADR-0022 (JSON on disk) and [JSON_MIGRATION_INVENTORY.md](../JSON_MIGRATION_INVENTORY.md). JSON migration tasks (T-183–T-189) should land before or in parallel with generation implementation (T-190+). Generation skill (Pass 0–1) can ship while structuring (Pass 2+) is built in-app.
 
-> **Coarse re-plan (2026-06-09, `/agentic-workflow:plan`):** the not-started tasks below are consolidated into coarser tasks with frozen acceptance tests under [`tasks/`](../tasks/): **T-201** (JSON persistence core ← T-183 + T-184), **T-202** (app on JSON ← T-185 + T-186 + T-187), **T-203** (markdown→ProseMirror ← T-195), **T-204** (deck layout fit-check ← T-196). Work them from `tasks/T-20x-*.md`, **not** from the entries below. In-flight T-191–T-194 are unchanged.
+> **Coarse re-plan (2026-06-09, `/agentic-workflow:plan`):** the not-started tasks below are consolidated into coarser tasks with frozen acceptance tests under [`tasks/`](../../tasks/): **T-201** (JSON persistence core ← T-183 + T-184), **T-202** (app on JSON ← T-185 + T-186 + T-187), **T-203** (markdown→ProseMirror ← T-195), **T-204** (deck layout fit-check ← T-196). Work them from `tasks/T-20x-*.md`, **not** from the entries below. In-flight T-191–T-194 are unchanged.
 
 ### T-182 [x] · Write YAML→JSON migration inventory
 
 ### T-183 [skip] · JSON_FORMAT.md + deterministic JSON serializer
 
-> Consolidated into [tasks/T-201-json-persistence-core.md](../tasks/T-201-json-persistence-core.md) — do not start from this entry.
+> Consolidated into [tasks/T-201-json-persistence-core.md](../../tasks/T-201-json-persistence-core.md) — do not start from this entry.
 - **Depends-on:** T-182
 - **Reads:** `docs/YAML_FORMAT.md`, `src/docmodel/{serialize,canonicalize,yaml-config}.ts`, ADR-0022
 - **Outputs:** `docs/JSON_FORMAT.md`, `src/docmodel/json-config.ts` (or equivalent), migrate `serialize.ts` to JSON (`parseDocModelJson`), `tests/docmodel/json-roundtrip.test.ts`
@@ -557,7 +555,7 @@ Depends on ADR-0022 (JSON on disk) and [JSON_MIGRATION_INVENTORY.md](JSON_MIGRAT
 
 ### T-184 [skip] · read_json_file + write_json_file IPC
 
-> Consolidated into [tasks/T-201-json-persistence-core.md](../tasks/T-201-json-persistence-core.md) — do not start from this entry.
+> Consolidated into [tasks/T-201-json-persistence-core.md](../../tasks/T-201-json-persistence-core.md) — do not start from this entry.
 - **Depends-on:** T-183
 - **Reads:** `src-tauri/src/ipc/fs.rs`, `docs/TAURI_IPC.md`, `tests/ipc/fs.smoke.test.ts`
 - **Outputs:** JSON IPC commands (rename or add alongside YAML during transition — decide in T-182 §9), updated TAURI_IPC.md, smoke tests
@@ -566,7 +564,7 @@ Depends on ADR-0022 (JSON on disk) and [JSON_MIGRATION_INVENTORY.md](JSON_MIGRAT
 
 ### T-185 [skip] · Wire editor open/save/autosave to JSON
 
-> Consolidated into [tasks/T-202-app-on-json.md](../tasks/T-202-app-on-json.md) — do not start from this entry.
+> Consolidated into [tasks/T-202-app-on-json.md](../../tasks/T-202-app-on-json.md) — do not start from this entry.
 - **Depends-on:** T-184
 - **Reads:** `src/editor/{file-open,file-save,autosave}.ts`, `src/ui/menu/FileMenu.tsx`, `docs/UI_APP_SHELL.md`
 - **Outputs:** Editor + file menu use JSON IPC + `.json` dialog filters
@@ -575,7 +573,7 @@ Depends on ADR-0022 (JSON on disk) and [JSON_MIGRATION_INVENTORY.md](JSON_MIGRAT
 
 ### T-186 [skip] · Migrate library scan + templates to JSON
 
-> Consolidated into [tasks/T-202-app-on-json.md](../tasks/T-202-app-on-json.md) — do not start from this entry.
+> Consolidated into [tasks/T-202-app-on-json.md](../../tasks/T-202-app-on-json.md) — do not start from this entry.
 - **Depends-on:** T-185
 - **Reads:** `src/library/index-builder.ts`, `templates/*.yaml`, `src/ui/library/CreateFromTemplateModal.tsx`, `docs/UI_LIBRARY.md`
 - **Outputs:** `templates/*.json`, library scans `*.json`, create-from-template clones JSON; update integration tests
@@ -584,7 +582,7 @@ Depends on ADR-0022 (JSON on disk) and [JSON_MIGRATION_INVENTORY.md](JSON_MIGRAT
 
 ### T-187 [skip] · Doc/spec sweep for JSON canonical format
 
-> Consolidated into [tasks/T-202-app-on-json.md](../tasks/T-202-app-on-json.md) — do not start from this entry.
+> Consolidated into [tasks/T-202-app-on-json.md](../../tasks/T-202-app-on-json.md) — do not start from this entry.
 - **Depends-on:** T-186
 - **Reads:** `docs/TYPES.md`, `AUTHORING.md`, `docs/DECISIONS.md` (D-05, D-19), `docs/BUILD_BRIEF.md`, `AGENTS.md`
 - **Outputs:** Updated specs; D-05/D-19 text amended (`proposal.json`); optional one-release YAML import shim (if decided in T-182 §9)
@@ -623,7 +621,7 @@ Depends on ADR-0022 (JSON on disk) and [JSON_MIGRATION_INVENTORY.md](JSON_MIGRAT
 
 ### T-195 [skip] · Deterministic markdown → ProseMirror converter (structuring prose path)
 
-> Consolidated into [tasks/T-203-markdown-to-prosemirror.md](../tasks/T-203-markdown-to-prosemirror.md) — do not start from this entry.
+> Consolidated into [tasks/T-203-markdown-to-prosemirror.md](../../tasks/T-203-markdown-to-prosemirror.md) — do not start from this entry.
 - **Depends-on:** T-191
 - **Reads:** editor PM schema, `docs/GENERATION_PIPELINE.md` §4
 - **Outputs:** `src/generation/markdown-to-prosemirror.ts`, tests for allowed mark/node set + coercion logging
@@ -632,7 +630,7 @@ Depends on ADR-0022 (JSON on disk) and [JSON_MIGRATION_INVENTORY.md](JSON_MIGRAT
 
 ### T-196 [skip] · Deck layout fit-check engine (Pass 2.5)
 
-> Consolidated into [tasks/T-204-deck-layout-fit-check.md](../tasks/T-204-deck-layout-fit-check.md) — do not start from this entry.
+> Consolidated into [tasks/T-204-deck-layout-fit-check.md](../../tasks/T-204-deck-layout-fit-check.md) — do not start from this entry.
 - **Depends-on:** T-192, D-30 slide layouts
 - **Reads:** `docs/GENERATION_PIPELINE.md` §5, slide layout components
 - **Outputs:** `slide-layouts.catalogue.yaml`, layout capacity metadata spec + `src/generation/layout-fit-check.ts` + tests; validate editor `LAYOUT_SLOTS` against catalogue
@@ -705,4 +703,4 @@ These numbers match the architecture memo's §11 estimate of "6–12 months comm
 
 This is a backlog, not a contract. Reorder freely as you learn — but always against the BUILD_BRIEF acceptance gates, which are the real targets.
 
-**New work (Phase 12 onward):** specify via `/agentic-workflow:plan` into [`../tasks/`](../tasks/) — this list only tracks the remaining legacy entries to completion.
+**New work (Phase 12 onward):** specify via `/agentic-workflow:plan` into [`../tasks/`](../../tasks/) — this list only tracks the remaining legacy entries to completion.

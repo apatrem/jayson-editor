@@ -1,5 +1,7 @@
 # Loop status — auto-generated; do not edit
 
+> **Archived (ADR-0023, 2026-06-10).** Final auto-generated status of the retired autonomous loop. The M9b acceptance-gate review it requests is still a pending human action item.
+
 **Last fire:** 2026-05-27T20:35:00Z
 **State:** BLOCKED-NO-ELIGIBLE
 **Running on:** Composer at default

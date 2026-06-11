@@ -132,7 +132,7 @@ describe("Editor deck navigation", () => {
   });
 
   it("forces read-only mode for decks even when editable=true is passed (M6 limitation)", () => {
-    // Until a deck->DocModel round-trip exists (see BLOCKERS.md drift entry),
+    // Until a deck->DocModel round-trip exists (see docs/archive/BLOCKERS.md drift entry),
     // edits to a deck slide cannot be persisted back. Force read-only at the
     // Editor boundary so passing editable={true} can't silently lose input.
     render(<Editor docModel={twoSlideDeck} editable={true} />);

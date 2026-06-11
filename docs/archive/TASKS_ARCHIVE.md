@@ -465,7 +465,7 @@ full bodies for history. **Do not work tasks from this file.**
 - **Acceptance:** Given a comment with a multi-round thread, produces the correctly-ordered `thread[]` array of `{role, content}` for the LLM request. Matches `examples/sample-llm-batch-request.json` structure.
 - **est.** 2h
 
-> **Cost ledger removed (2026-05-29, [ADR-0019](adr/0019-drop-cost-ledger.md)).** Tasks T-67–T-72 built the cost ledger, which was deleted before release — the app no longer meters or caps LLM spend. They stay `[x]` for history; do **not** rebuild the ledger from them.
+> **Cost ledger removed (2026-05-29, [ADR-0019](../adr/0019-drop-cost-ledger.md)).** Tasks T-67–T-72 built the cost ledger, which was deleted before release — the app no longer meters or caps LLM spend. They stay `[x]` for history; do **not** rebuild the ledger from them.
 
 ### T-67 [x] · Set up SQLite for cost ledger
 - **Depends-on:** none
@@ -510,7 +510,7 @@ full bodies for history. **Do not work tasks from this file.**
 - **est.** 2h
 
 ### T-73 [x] · Install CLI flow + privacy notice + cost-tracking toggle
-> **Partially superseded ([ADR-0019](adr/0019-drop-cost-ledger.md)):** the cost-tracking toggle and the cost-ledger SQLite init are removed; the install CLI flow + privacy-notice consent remain. Kept `[x]` for history.
+> **Partially superseded ([ADR-0019](../adr/0019-drop-cost-ledger.md)):** the cost-tracking toggle and the cost-ledger SQLite init are removed; the install CLI flow + privacy-notice consent remain. Kept `[x]` for history.
 - **Depends-on:** none
 - **Reads:** `docs/SETUP_INSTALL_FLOW.md`, D-34
 - **Outputs:** `src/setup/install.ts` implementing all 7 steps; cost-tracking enable/disable toggle in Settings; non-interactive mode via CLI flags + env vars.
@@ -1892,7 +1892,7 @@ Already done in commit `ebe84b9` (pre-M9a). Listed here for protocol/audit compl
 - **Acceptance:** install flow provisions and validates the frontier key; missing/invalid key produces a clear actionable error.
 - **est.** 3h
 
-> **Cost ledger removed ([ADR-0019](adr/0019-drop-cost-ledger.md)).** T-176/T-177 extended the cost ledger, which was deleted before release. They stay `[x]` for history; do **not** rebuild.
+> **Cost ledger removed ([ADR-0019](../adr/0019-drop-cost-ledger.md)).** T-176/T-177 extended the cost ledger, which was deleted before release. They stay `[x]` for history; do **not** rebuild.
 
 ### T-176 [x] · Cost ledger — new `authored-block-generation` category
 - **Depends-on:** T-175

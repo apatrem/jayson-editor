@@ -23,7 +23,7 @@ Key ideas:
 ```bash
 git clone <repo-url> jayson-editor && cd jayson-editor
 npm ci
-bash scripts/install-hooks.sh   # pre-commit hook for the autonomous task loop
+pipx install pre-commit && pre-commit install   # local hygiene hooks
 ```
 
 ## Dev loop
@@ -68,11 +68,11 @@ starter/            # pinned drop-in configs for greenfield init
 
 | Topic | File |
 |---|---|
-| Agent / loop rules | [`AGENTS.md`](AGENTS.md) |
+| Agent workflow & rules | [`AGENTS.md`](AGENTS.md) |
 | Architecture (why) | [`docs/DOCUMENT_SYSTEM_ARCHITECTURE.md`](docs/DOCUMENT_SYSTEM_ARCHITECTURE.md) |
 | Build plan & milestones | [`docs/BUILD_BRIEF.md`](docs/BUILD_BRIEF.md) |
 | Settled decisions | [`docs/DECISIONS.md`](docs/DECISIONS.md) |
-| Task backlog | [`docs/TASKS.md`](docs/TASKS.md) |
+| Task backlog | [`tasks/`](tasks/) — archived v1 backlog: [`docs/archive/TASKS.md`](docs/archive/TASKS.md) |
 | Shared TypeScript types | [`docs/TYPES.md`](docs/TYPES.md) |
 | Block implementation | [`docs/BLOCK_IMPLEMENTATION_GUIDE.md`](docs/BLOCK_IMPLEMENTATION_GUIDE.md) |
 | Setup AI pipeline | [`docs/SETUP_PIPELINE.md`](docs/SETUP_PIPELINE.md) |
