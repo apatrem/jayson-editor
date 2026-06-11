@@ -4,8 +4,13 @@ import { parseDocModelYaml } from "../../src/docmodel/serialize";
 import { DocModelSchema, type DocModel } from "../../src/schema/docmodel";
 import { renderM7SpikeHarness, sampleProposalPath } from "./m7-spike-harness";
 
+// Format-agnostic: the harness baseline is still YAML (`type: callout`) while the
+// save path now emits JSON (`"type": "callout"`). Matching both keeps the real
+// before/after delta (1 → 2) intact during the YAML→JSON transition; a JSON-only
+// regex would score the YAML baseline as 0 and collapse the assertion to ">0",
+// which a pre-existing callout satisfies even if the insert never persisted.
 function countCallouts(serialized: string): number {
-  return serialized.match(/"type"\s*:\s*"callout"/gu)?.length ?? 0;
+  return serialized.match(/(?:"type"\s*:\s*"callout"|type:\s*"?callout"?)/gu)?.length ?? 0;
 }
 
 describe("M7 spike happy path", () => {
