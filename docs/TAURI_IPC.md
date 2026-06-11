@@ -81,9 +81,11 @@ scoped UTF-8 text.
 
 ```rust
 #[tauri::command]
-pub async fn read_document_file(path: String) -> IpcResult<String> {
-    let validated = validate_path_in_scope(&path)?;
-    std::fs::read_to_string(&validated).map_err(|e| IpcError::Io(e.to_string()))
+pub async fn read_document_file(app: tauri::AppHandle, path: String) -> IpcResult<String> {
+    let roots = asset_scope_roots(&app);
+    // canonical_document_read_target enforces `.json` + canonical-path scope
+    // (extension re-checked after symlink resolution), then reads.
+    read_document_file_from_path(&path, &roots)
 }
 ```
 
