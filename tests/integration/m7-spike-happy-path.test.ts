@@ -4,8 +4,8 @@ import { parseDocModelYaml } from "../../src/docmodel/serialize";
 import { DocModelSchema, type DocModel } from "../../src/schema/docmodel";
 import { renderM7SpikeHarness, sampleProposalPath } from "./m7-spike-harness";
 
-function countCallouts(yaml: string): number {
-  return yaml.match(/type:\s*"?callout"?/gu)?.length ?? 0;
+function countCallouts(serialized: string): number {
+  return serialized.match(/"type"\s*:\s*"callout"/gu)?.length ?? 0;
 }
 
 describe("M7 spike happy path", () => {
@@ -49,7 +49,7 @@ describe("M7 spike happy path", () => {
     await waitFor(() => {
       expect(harness.writeYamlFile).toHaveBeenCalledWith(
         sampleProposalPath,
-        expect.stringContaining("type: callout"),
+        expect.stringContaining('"type": "callout"'),
       );
     });
 
