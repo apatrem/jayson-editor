@@ -50,6 +50,24 @@ function withMarks(marks: MarkType[]): Array<{ type: string }> | undefined {
   return marks.map((type) => ({ type }));
 }
 
+function pushCodeSpan(
+  inner: string,
+  outerMarks: MarkType[],
+  construct: string,
+  nodes: PmTextNode[],
+  warnings: CoercionWarning[],
+): void {
+  if (inner.length === 0) return;
+  const conflicting = outerMarks.filter((mark) => mark !== "code");
+  if (conflicting.length > 0) {
+    warnings.push({
+      construct,
+      action: `dropped conflicting marks: ${[...conflicting].sort().join(",")}`,
+    });
+  }
+  nodes.push({ type: "text", text: inner, marks: [{ type: "code" }] });
+}
+
 function mergeTextNodes(nodes: PmTextNode[]): PmTextNode[] {
   const merged: PmTextNode[] = [];
   for (const node of nodes) {
@@ -117,7 +135,11 @@ function parseInline(
 
         const markType = HTML_MARK_MAP[tagName];
         if (markType && !selfClosing) {
-          nodes.push(...parseInline(inner, [...marks, markType as MarkType], warnings));
+          if (markType === "code") {
+            pushCodeSpan(inner, marks, tagSource, nodes, warnings);
+          } else {
+            nodes.push(...parseInline(inner, [...marks, markType as MarkType], warnings));
+          }
           i = nextIdx;
           continue;
         }
@@ -146,7 +168,7 @@ function parseInline(
         break;
       }
       const inner = text.slice(i + 1, close);
-      nodes.push(...parseInline(inner, [...marks, "code"], warnings));
+      pushCodeSpan(inner, marks, text.slice(i, close + 1), nodes, warnings);
       i = close + 1;
       continue;
     }
