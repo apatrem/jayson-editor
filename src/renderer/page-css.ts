@@ -50,7 +50,11 @@ export function buildPageCss(brand: BrandTokens, opts: PageChromeOptions): strin
   const { size, orientation, margins } = brand.page;
   const title = opts.title.trim();
   const showPageNumbers = opts.showPageNumbers ?? true;
-  const footerColor = "#64748B";
+  // Header/footer chrome text uses a muted brand neutral. `neutral` is an open
+  // record (no schema-guaranteed keys), so fall back to the prior literal if a
+  // consultancy's brand omits the standard 0–900 scale — never crash the
+  // stylesheet on a missing token.
+  const footerColor = brand.colors.neutral["500"] ?? "#64748B";
 
   const headerBox = title
     ? `@top-center { content: "${cssEscape(title)}"; font-size: 9pt; color: ${footerColor}; }`
