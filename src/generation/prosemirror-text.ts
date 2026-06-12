@@ -4,16 +4,17 @@
  */
 
 export function fragmentToPlainText(fragment: unknown): string {
-  const parts: string[] = [];
-  const walk = (node: unknown): void => {
-    if (node === null || typeof node !== "object") return;
-    const n = node as { text?: unknown; content?: unknown };
+  const read = (node: unknown): string => {
+    if (node === null || typeof node !== "object") return "";
+    const n = node as { type?: unknown; text?: unknown; content?: unknown };
     if (typeof n.text === "string") {
-      parts.push(n.text);
-      return;
+      return n.text;
     }
-    if (Array.isArray(n.content)) n.content.forEach(walk);
+    if (n.type === "hardBreak" || n.type === "hard_break") return " ";
+    if (!Array.isArray(n.content)) return "";
+
+    const separator = n.type === "doc" ? " " : "";
+    return n.content.map(read).join(separator);
   };
-  walk(fragment);
-  return parts.join("");
+  return read(fragment);
 }
