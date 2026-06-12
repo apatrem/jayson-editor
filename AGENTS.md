@@ -292,6 +292,25 @@ include these explicit checks in the prompt:
   a `windows-latest` matrix entry. Concrete sweep:
   `grep -rE 'cfg\(windows\)|cfg\(macos\)|process\.platform' src-tauri/ src/ tests/ | wc -l`
   and cross-check against `.github/workflows/*.yml` runner OS list.
+- **Author-written acceptance tests are gameable — freeze them independently,
+  and still review.** A `low`-tier implementer once made T-206's acceptance
+  "pass" with tests that asserted far less than the contract (a stubbed
+  round-trip checking `intent.includes(...)` instead of semantic equality;
+  no max-size, collision, or fence cases) — green CI, 8 real grammar
+  violations underneath. The fix is two-layered: (1) for any task whose
+  acceptance isn't already a frozen test, **the orchestrator/human authors
+  the strong contract tests independently and freezes them BEFORE the
+  implementer runs** (`/agentic-workflow:plan` freezes red; the implementer
+  adapts to the tests, never the reverse — verify the test files are
+  byte-unchanged after implementation: `git diff <freeze>..HEAD -- <test files>`
+  must be empty). (2) **Still run an adversarial cross-lineage review even
+  when the frozen tests are green** — frozen tests have coverage gaps. T-206's
+  60-case frozen contract was strong, yet an Opus pass still found a real
+  production bug (HTML-comment stripping corrupting intents) and untested
+  round-trip kinds the 60 cases missed. Green-and-frozen ≠ correct; it means
+  "correct for the cases we thought of." When reviewing, ask: *does each test
+  assert the full contract, or a weaker shadow of it?* — and *what does the
+  contract require that no test exercises?*
 - **Regex/glob/pattern wrapping.** When testing a regex/glob/pattern that a
   plugin or framework will MODIFY before applying (e.g., Tauri's `^...$`
   wrap of `plugins.shell.open` per `tauri-plugin-shell-*/src/lib.rs:155`;
