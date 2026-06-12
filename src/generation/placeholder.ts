@@ -527,6 +527,11 @@ function unescapeIntent(raw: string): string {
   return value;
 }
 
+// INVARIANT: when used to reconstruct a (≤ MAX_INTENT_LENGTH) intent for the
+// structurePlaceholder round-trip, the `lengths` array MUST sum to at least
+// MAX_INTENT_LENGTH (500) — current callers do (chart 520, kpi 600, roadmap 560).
+// A shorter sum silently drops the tail of a max-length intent and breaks the
+// §6.2 round-trip. If MAX_INTENT_LENGTH is ever raised, widen these arrays too.
 function splitByLengths(value: string, lengths: number[]): string[] {
   const chunks: string[] = [];
   let offset = 0;
