@@ -57,9 +57,21 @@ export function lintMarkdownPlaceholders(markdown: string): ImportLintResult {
       continue;
     }
 
-    const stripped = stripHtmlComments(line, inHtmlComment);
-    inHtmlComment = stripped.inComment;
-    const visibleLine = stripped.visible;
+    const rawParsed =
+      !inHtmlComment && PLACEHOLDER_SUBSTRING.test(line)
+        ? parsePlaceholderLineDetailed(line)
+        : null;
+    const rawPlaceholder =
+      rawParsed && "placeholder" in rawParsed ? rawParsed : null;
+
+    let visibleLine: string;
+    if (rawPlaceholder) {
+      visibleLine = line;
+    } else {
+      const stripped = stripHtmlComments(line, inHtmlComment);
+      inHtmlComment = stripped.inComment;
+      visibleLine = stripped.visible;
+    }
     const fence = parseFence(visibleLine);
 
     if (fence) {
@@ -78,7 +90,7 @@ export function lintMarkdownPlaceholders(markdown: string): ImportLintResult {
       continue;
     }
 
-    const parsed = parsePlaceholderLineDetailed(visibleLine);
+    const parsed = rawPlaceholder ?? parsePlaceholderLineDetailed(visibleLine);
     if (!("placeholder" in parsed)) {
       errors.push({ line: lineNo, message: parsed.message });
       continue;

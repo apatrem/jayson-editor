@@ -64,7 +64,7 @@ export function parsePlaceholderLineDetailed(
   if (!trimmed.includes("[[block:")) {
     return { message: "Line does not contain a placeholder marker." };
   }
-  if (trimmed !== line.trim() || !trimmed.startsWith("[[block:")) {
+  if (!trimmed.startsWith("[[block:")) {
     return {
       message: "Placeholder must occupy its own line without surrounding text.",
     };
@@ -256,6 +256,14 @@ function toPlaceholderTimeline(block: TimelineBlock): Placeholder {
 }
 
 function toPlaceholderRoadmap(block: RoadmapBlock): Placeholder {
+  if (isStructuredRoadmap(block)) {
+    return makePlaceholder(
+      "roadmap",
+      block.workstreams.map((workstream) => workstream.label).join(""),
+      block.id,
+    );
+  }
+
   const lanes = block.workstreams.map((w) => w.label).join(", ");
   const milestones = (block.milestones ?? []).map((m) => m.label).join(", ");
   const intent = milestones ? `${lanes} — milestones: ${milestones}` : lanes;
@@ -305,6 +313,10 @@ function isStructuredKpiCards(block: KpiCardsBlock): boolean {
 
 function isStructuredTimeline(block: TimelineBlock): boolean {
   return block.phases.at(-1)?.label === STRUCTURE_SENTINEL;
+}
+
+function isStructuredRoadmap(block: RoadmapBlock): boolean {
+  return block.milestones?.at(-1)?.label === STRUCTURE_SENTINEL;
 }
 
 /**
@@ -412,6 +424,56 @@ export function structurePlaceholder(p: Placeholder): DocBlock {
       phases,
       orientation: "vertical",
       connector: "none",
+    };
+  }
+
+  if (kind === "roadmap") {
+    const startDate = "2000-01-01";
+    const endDate = "2000-12-31";
+    const labels = splitByLengths(intent, [80, 80, 80, 80, 80, 80, 80]);
+    return {
+      id,
+      type: "roadmap",
+      timeUnit: "month",
+      startDate,
+      endDate,
+      workstreams: labels.map((label) => ({
+        label,
+        startDate,
+        endDate,
+        color: "auto",
+      })),
+      milestones: [{ label: STRUCTURE_SENTINEL, date: endDate }],
+    };
+  }
+
+  if (kind === "team") {
+    return {
+      id,
+      type: "team",
+      layout: "grid",
+      members: [{ name: intent, role: "Member" }],
+    };
+  }
+
+  if (kind === "diagram") {
+    return {
+      id,
+      type: "diagram",
+      source: "graph TD; A-->B;",
+      caption: intent,
+      width: "large",
+    };
+  }
+
+  if (kind === "image") {
+    return {
+      id,
+      type: "image",
+      src: "assets/placeholder.png",
+      alt: intent,
+      width: "medium",
+      align: "center",
     };
   }
 
