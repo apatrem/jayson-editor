@@ -156,6 +156,41 @@ describe("import-lint excludes placeholders in prohibited contexts (§2.3)", () 
 });
 
 // ─────────────────────────────────────────────────────────────────────────────
+// HTML-comment-vs-intent (review #1) — §1 allows `<!--`/`-->`/`<`/`!` inside the
+// quoted intent string; only \" and \\ are escapes. Comment stripping must NOT
+// run across a placeholder's quoted intent. Contrast with the existing case
+// where a WHOLE placeholder line sits inside a real <!-- ... --> block (excluded).
+// ─────────────────────────────────────────────────────────────────────────────
+
+describe("import-lint distinguishes intent text from real HTML comments (§1)", () => {
+  it("keeps a closed comment span that lives inside a placeholder's intent string", () => {
+    const result = lintMarkdownPlaceholders(
+      '[[block: chart | intent: "renders <!-- legacy --> markup" | id: legacy]]',
+    );
+    expect(result.ok).toBe(true);
+    expect(result.errors).toHaveLength(0);
+    const legacy = result.placeholders.find((p) => p.localId === "legacy");
+    // The `<!-- legacy -->` span is part of the intent per §1 — it must survive
+    // verbatim, NOT be deleted as if it were a markdown HTML comment.
+    expect(legacy?.intent).toBe("renders <!-- legacy --> markup");
+  });
+
+  it("does not let a bare `<!--` inside an intent swallow a later valid placeholder", () => {
+    const result = lintMarkdownPlaceholders(
+      md(
+        '[[block: callout | intent: "see <!-- note" | id: noted]]',
+        "",
+        '[[block: table | intent: "Summary metrics" | id: metrics-table]]',
+      ),
+    );
+    // The unclosed `<!--` belongs to the first placeholder's intent, not to a
+    // markdown comment that runs to EOF — so the second, well-formed placeholder
+    // must still be collected.
+    expect(result.placeholders.map((p) => p.localId)).toContain("metrics-table");
+  });
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
 // Structural / placement errors (§5) — kept strict
 // ─────────────────────────────────────────────────────────────────────────────
 

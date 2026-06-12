@@ -432,6 +432,59 @@ describe("§6.2 round-trip: toPlaceholder(structure(p)) ≈ p", () => {
 });
 
 // ─────────────────────────────────────────────────────────────────────────────
+// §6.2 round-trip — extended kinds (review #2): roadmap, team, diagram, image.
+// structurePlaceholder currently lacks branches for these and falls through to a
+// prose block (src/generation/placeholder.ts:418), whose toPlaceholder returns
+// null (src/generation/placeholder.ts:162–167) → the round-trip must hold once a
+// faithful structuring branch exists, so these are RED today.
+//
+// NOTE: risk-matrix is intentionally EXEMPT from the round-trip. Its §4
+// derivation (axis labels → intent, e.g. "Likelihood / Impact") is lossy and has
+// no faithful inverse — there is no way to reconstruct the two axis labels from a
+// free-text intent — so a structure-stub round-trip cannot hold (maintainer-
+// confirmed scope). It is exercised only by the §4 derivation test above.
+// ─────────────────────────────────────────────────────────────────────────────
+
+describe("§6.2 round-trip: extended kinds toPlaceholder(structure(p)) ≈ p", () => {
+  const cases: ReadonlyArray<{ name: string; line: string }> = [
+    {
+      name: "roadmap",
+      line: '[[block: roadmap | intent: "Platform and Mobile lanes with Beta and GA milestones" | id: delivery-plan]]',
+    },
+    {
+      name: "team",
+      line: '[[block: team | intent: "Alice Martin and Bob Chen" | id: core-squad]]',
+    },
+    {
+      name: "diagram",
+      line: '[[block: diagram | intent: "Process flow — onboarding steps" | id: flow-diagram]]',
+    },
+    {
+      name: "image",
+      line: '[[block: image | intent: "Quarterly dashboard screenshot — captured Q3" | id: dash-shot]]',
+    },
+  ];
+
+  for (const { name, line } of cases) {
+    it(`holds with full semantic equality for ${name}`, () => {
+      const original = parseOrThrow(line);
+      const block = structurePlaceholder(original);
+      const roundTripped = toPlaceholder(block);
+      expect(
+        roundTripped,
+        `${name}: structure(p) must down-convert back to a placeholder`,
+      ).not.toBeNull();
+      // STRICT: same id, same kind, normalized-whitespace-equal intent.
+      // A prose-fallthrough stub returns null here → fails. Substring checks forbidden.
+      expect(
+        placeholdersSemanticallyEqual(roundTripped!, original),
+        `${name}: expected ${JSON.stringify(roundTripped)} ≈ ${JSON.stringify(original)}`,
+      ).toBe(true);
+    });
+  }
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
 // BUG AREA 2 — toPlaceholder output is always grammar-valid (intent ≤ 500)
 // Build MAXIMUM-size valid blocks; derived placeholder must still parse + round-trip.
 // ─────────────────────────────────────────────────────────────────────────────
