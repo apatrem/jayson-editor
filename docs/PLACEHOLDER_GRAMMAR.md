@@ -109,17 +109,26 @@ Down-conversion is **deterministic, no LLM**. Implement in `src/generation/place
 | `chart` | `title` + `chartType` + series names + optional `axes.xTitle`/`yTitle` + optional `takeaway` |
 | `table` | caption (if any) + column headers |
 | `kpi-cards` | each card `label: value` joined |
-| `timeline` | `title` + phase labels |
-| `roadmap` | `title` + lane/phase labels |
+| `timeline` | phase labels (+ optional phase subtitles) |
+| `roadmap` | lane labels + item/phase labels |
 | `callout` | variant + optional title + plain text from `body` fragment |
 | `prose` | *No placeholder* — markdown paragraph(s) |
 | `bullet-list` / `numbered-list` | *No placeholder* — native markdown lists |
 | `heading` | *No placeholder* — markdown headings |
 | `image` | alt text + caption |
-| `diagram` | title + description |
-| `team` | section title + member names |
-| `risk-matrix` | title + axis labels |
+| `diagram` | optional `title` + optional `caption` |
+| `team` | member names |
+| `risk-matrix` | axis labels |
 | `divider` | *No placeholder* — `---` horizontal rule |
+
+> **No-title blocks (design note).** `timeline`, `roadmap`, `team`, and
+> `risk-matrix` have **no title field** in their schemas — by design, their
+> heading is a separate adjacent `heading` block, not an in-block field. Earlier
+> revisions of this table derived intent from a non-existent `title`/`section
+> title`; the rows above are corrected to derive only from fields these blocks
+> actually expose (`src/blocks/<type>/schema.ts`). `diagram` derives from
+> `title` + `caption` (the schema has no `description`). `toPlaceholder` reads
+> these **current** fields only — never `sourceIntent`.
 
 **Callout example:** variant `warning`, title "Risk", body "Supply chain exposure in Q3" →
 

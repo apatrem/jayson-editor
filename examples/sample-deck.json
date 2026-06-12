@@ -1,0 +1,388 @@
+{
+  "kind": "deck",
+  "schemaVersion": "1.0.0",
+  "meta": {
+    "client": "Acme Industrial",
+    "project": "SMR Heat Strategy — Board readout",
+    "docKind": "deck",
+    "sector": "energy",
+    "tags": [
+      "nuclear",
+      "board"
+    ],
+    "language": "en",
+    "status": "draft",
+    "archived": false,
+    "confidentialityLevel": "high",
+    "owner": "j.smith@boutique.example",
+    "reviewers": [
+      "p.dubois@boutique.example"
+    ],
+    "createdAt": "2026-05-21T10:00:00Z",
+    "updatedAt": "2026-05-21T15:00:00Z",
+    "brandRef": "$brand:default"
+  },
+  "slides": [
+    {
+      "id": "s1-cover",
+      "layout": "cover",
+      "blocks": [],
+      "notes": "Pause 10s before clicking through. Acknowledge board members."
+    },
+    {
+      "id": "s2-agenda",
+      "layout": "agenda",
+      "blocks": [
+        {
+          "id": "s2-bullets",
+          "type": "numbered-list",
+          "items": [
+            {
+              "text": {
+                "type": "doc",
+                "content": [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Why now"
+                      }
+                    ]
+                  }
+                ]
+              }
+            },
+            {
+              "text": {
+                "type": "doc",
+                "content": [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "The business case"
+                      }
+                    ]
+                  }
+                ]
+              }
+            },
+            {
+              "text": {
+                "type": "doc",
+                "content": [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Risks & mitigations"
+                      }
+                    ]
+                  }
+                ]
+              }
+            },
+            {
+              "text": {
+                "type": "doc",
+                "content": [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Recommendation"
+                      }
+                    ]
+                  }
+                ]
+              }
+            },
+            {
+              "text": {
+                "type": "doc",
+                "content": [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Next steps"
+                      }
+                    ]
+                  }
+                ]
+              }
+            }
+          ],
+          "startAt": 1
+        }
+      ]
+    },
+    {
+      "id": "s3-divider",
+      "layout": "section-divider",
+      "blocks": []
+    },
+    {
+      "id": "s4-kpis",
+      "layout": "kpis",
+      "blocks": [
+        {
+          "id": "s4-kpi-cards",
+          "type": "kpi-cards",
+          "cards": [
+            {
+              "value": "€42M",
+              "label": "Annual fuel-cost exposure",
+              "trend": "none",
+              "emphasis": "negative"
+            },
+            {
+              "value": "-72%",
+              "label": "CO₂ reduction potential",
+              "trend": "none",
+              "emphasis": "positive"
+            },
+            {
+              "value": "12 wk",
+              "label": "Time to recommendation",
+              "trend": "none",
+              "emphasis": "brand"
+            },
+            {
+              "value": "2",
+              "label": "Vendor partnerships identified",
+              "trend": "none",
+              "emphasis": "neutral"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "s5-chart-commentary",
+      "layout": "chart-commentary",
+      "blocks": [
+        {
+          "id": "s5-chart",
+          "type": "chart",
+          "chartType": "stacked-bar",
+          "title": "Annual OPEX by scenario",
+          "takeaway": "SMR scenario reduces OPEX by 38% by year 5.",
+          "data": {
+            "series": [
+              {
+                "name": "Fuel",
+                "values": [
+                  42,
+                  44,
+                  46,
+                  48,
+                  50
+                ]
+              },
+              {
+                "name": "Carbon",
+                "values": [
+                  3,
+                  5,
+                  7,
+                  11,
+                  16
+                ]
+              },
+              {
+                "name": "Maintenance",
+                "values": [
+                  8,
+                  8,
+                  8,
+                  8,
+                  8
+                ]
+              }
+            ],
+            "xLabels": [
+              "2026",
+              "2027",
+              "2028",
+              "2029",
+              "2030"
+            ],
+            "unit": "€M"
+          },
+          "palette": "qualitative",
+          "showLegend": true,
+          "showDataLabels": false,
+          "legendPosition": "bottom"
+        },
+        {
+          "id": "s5-bullets",
+          "type": "bullet-list",
+          "items": [
+            {
+              "text": {
+                "type": "doc",
+                "content": [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Fuel cost diverges sharply post-2027 under status quo"
+                      }
+                    ]
+                  }
+                ]
+              }
+            },
+            {
+              "text": {
+                "type": "doc",
+                "content": [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "ETS exposure quadruples by 2030 (€3M → €16M)"
+                      }
+                    ]
+                  }
+                ]
+              }
+            },
+            {
+              "text": {
+                "type": "doc",
+                "content": [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "SMR breakeven by year 4; positive NPV thereafter"
+                      }
+                    ]
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "s6-twocol",
+      "layout": "two-column",
+      "blocks": [
+        {
+          "id": "s6-callout-left",
+          "type": "callout",
+          "variant": "success",
+          "title": "Upside",
+          "body": {
+            "type": "doc",
+            "content": [
+              {
+                "type": "paragraph",
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "First-mover tax credits available through Q4 2027. Decision by Q1 2027 secures pricing for the full 25-year offtake."
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "id": "s6-callout-right",
+          "type": "callout",
+          "variant": "warning",
+          "title": "Risk",
+          "body": {
+            "type": "doc",
+            "content": [
+              {
+                "type": "paragraph",
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "SMR vendor licensing timelines in EU remain 18–24 months. A late go-decision compresses delivery to first-of-a-kind levels."
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "s7-closing",
+      "layout": "closing",
+      "blocks": [
+        {
+          "id": "s7-bullets",
+          "type": "numbered-list",
+          "items": [
+            {
+              "text": {
+                "type": "doc",
+                "content": [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Approve 12-week scoping engagement (€440k)"
+                      }
+                    ]
+                  }
+                ]
+              }
+            },
+            {
+              "text": {
+                "type": "doc",
+                "content": [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Designate executive sponsor by week 1"
+                      }
+                    ]
+                  }
+                ]
+              }
+            },
+            {
+              "text": {
+                "type": "doc",
+                "content": [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Schedule mid-engagement review (week 6) with board sub-committee"
+                      }
+                    ]
+                  }
+                ]
+              }
+            }
+          ],
+          "startAt": 1
+        }
+      ]
+    }
+  ],
+  "comments": []
+}

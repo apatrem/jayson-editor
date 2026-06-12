@@ -155,7 +155,7 @@ describe("M8 happy path", () => {
       () => {
         expect(harness.writeYamlFile).toHaveBeenCalledWith(
           `${CLOUD_SYNC_ROOT}/Single Section.yaml`,
-          expect.stringContaining("type: callout"),
+          expect.stringContaining('"type": "callout"'),
         );
       },
       { timeout: 5000 },
