@@ -10,7 +10,7 @@
 
 import { describe, expect, it } from "vitest";
 import { DocModelSchema, type DocModel } from "../../src/schema/docmodel";
-import { parseDocModelYaml, serializeDocModel } from "../../src/docmodel/serialize";
+import { parseDocModelJson, serializeDocModel } from "../../src/docmodel/serialize";
 
 const SENDER = "alice@firm.example";
 
@@ -98,7 +98,7 @@ describe("DocModel accepts Authored blocks (ADR-0016)", () => {
     );
 
     const yaml = serializeDocModel(doc);
-    const reparsed = DocModelSchema.parse(parseDocModelYaml(yaml));
+    const reparsed = DocModelSchema.parse(parseDocModelJson(yaml));
 
     expect(reparsed).toEqual(doc);
     // Serializing the reparsed doc is byte-identical (stable round-trip).

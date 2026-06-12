@@ -27,15 +27,15 @@ import { FilterSidebar } from "../../library/FilterSidebar";
 import { SearchBar } from "../../library/SearchBar";
 import { formatErrorMessage } from "../../ipc/errors";
 import { EmptyLibraryState } from "./EmptyLibraryState";
-import sampleProposalYaml from "../../../examples/sample-proposal.yaml?raw";
+import sampleProposalJson from "../../../examples/sample-proposal.json?raw";
 
 type IpcDirectoryEntry = { name: string; path: string; is_dir: boolean };
 
 export interface LibraryViewDeps {
   readAppConfig: () => Promise<{ paths: { cloudSyncRoot: string } }>;
   listDirectory: (path: string) => Promise<IpcDirectoryEntry[]>;
-  readYamlFile: (path: string) => Promise<string>;
-  writeYamlFile: (path: string, content: string) => Promise<void>;
+  readDocumentFile: (path: string) => Promise<string>;
+  writeDocumentFile: (path: string, content: string) => Promise<void>;
   // T-165 — quarantine panel dependencies
   deleteFile?: (path: string) => Promise<void>;
   importAuthoredBlock?: (path: string) => Promise<AuthoredReceiveResult>;
@@ -44,7 +44,7 @@ export interface LibraryViewDeps {
 }
 
 export interface LibraryViewProps {
-  onOpenDoc: (yamlPath: string) => Promise<void>;
+  onOpenDoc: (jsonPath: string) => Promise<void>;
   currentUserEmail?: string;
   deps?: Partial<LibraryViewDeps>;
 }
@@ -70,7 +70,7 @@ export function LibraryView({ onOpenDoc, currentUserEmail = "", deps = {} }: Lib
   });
 
   const scan = useCallback(async (root: string): Promise<void> => {
-    const readYamlFile = deps.readYamlFile ?? readYamlFileDefault;
+    const readDocumentFile = deps.readDocumentFile ?? readDocumentFileDefault;
     const listDirectory = deps.listDirectory ?? listDirectoryDefault;
     setStatus("loading");
     const ipcFs = {
@@ -82,13 +82,13 @@ export function LibraryView({ onOpenDoc, currentUserEmail = "", deps = {} }: Lib
           kind: e.is_dir ? ("directory" as const) : ("file" as const),
         }));
       },
-      readText: readYamlFile,
+      readText: readDocumentFile,
       stat: (_path: string) => Promise.resolve({ size: 0, mtimeMs: 0 }),
     };
     const index = await buildLibraryIndex(root, ipcFs);
     setEntries(index.entries);
     setStatus(index.entries.length === 0 ? "empty" : "loaded");
-  }, [deps.listDirectory, deps.readYamlFile]);
+  }, [deps.listDirectory, deps.readDocumentFile]);
 
   useEffect(() => {
     const readAppConfig = deps.readAppConfig ?? readAppConfigDefault;
@@ -107,14 +107,14 @@ export function LibraryView({ onOpenDoc, currentUserEmail = "", deps = {} }: Lib
 
   const handleUseSample = useCallback(async (): Promise<void> => {
     try {
-      const writeYamlFile = deps.writeYamlFile ?? writeYamlFileDefault;
-      const samplePath = joinPath(cloudSyncRoot, "Sample Proposal.yaml");
-      await writeYamlFile(samplePath, sampleProposalYaml);
+      const writeDocumentFile = deps.writeDocumentFile ?? writeDocumentFileDefault;
+      const samplePath = joinPath(cloudSyncRoot, "Sample Proposal.json");
+      await writeDocumentFile(samplePath, sampleProposalJson);
       await scan(cloudSyncRoot);
     } catch (e) {
       setError(formatErrorMessage(e));
     }
-  }, [cloudSyncRoot, deps.writeYamlFile, scan]);
+  }, [cloudSyncRoot, deps.writeDocumentFile, scan]);
 
   const visibleEntries = useMemo(
     () => applySort(applyFilters(entries, filters, currentUserEmail), filters.sort),
@@ -150,7 +150,7 @@ export function LibraryView({ onOpenDoc, currentUserEmail = "", deps = {} }: Lib
 
   const quarantineDeps: QuarantinePanelDeps = {
     listDirectory: deps.listDirectory ?? listDirectoryDefault,
-    readFile: deps.readYamlFile ?? readYamlFileDefault,
+    readFile: deps.readDocumentFile ?? readDocumentFileDefault,
     deleteFile: deps.deleteFile ?? deleteFileDefault,
     importAuthoredBlock: deps.importAuthoredBlock ?? importAuthoredBlockDefault,
   };
@@ -165,13 +165,15 @@ export function LibraryView({ onOpenDoc, currentUserEmail = "", deps = {} }: Lib
   const modal = modalOpen ? (
     <CreateFromTemplateModal
       cloudSyncRoot={cloudSyncRoot}
-      onConfirm={async (yamlPath) => {
+      onConfirm={async (jsonPath) => {
         setModalOpen(false);
-        await onOpenDoc(yamlPath);
+        await onOpenDoc(jsonPath);
       }}
       onCancel={() => setModalOpen(false)}
       deps={
-        deps.writeYamlFile !== undefined ? { writeYamlFile: deps.writeYamlFile } : {}
+        deps.writeDocumentFile !== undefined
+          ? { writeDocumentFile: deps.writeDocumentFile }
+          : {}
       }
     />
   ) : null;
@@ -268,7 +270,7 @@ export function LibraryView({ onOpenDoc, currentUserEmail = "", deps = {} }: Lib
             view={filters.view}
             onResetFilters={() => setFilters(DEFAULT_LIBRARY_FILTER_STATE)}
             onOpen={(e) => {
-              void onOpenDoc(joinPath(e.path, e.yamlFilename));
+              void onOpenDoc(joinPath(e.path, e.jsonFilename));
             }}
             onOpenAsReviewer={noop}
             onDuplicate={noop}
@@ -293,12 +295,12 @@ async function listDirectoryDefault(path: string): Promise<IpcDirectoryEntry[]> 
   return invoke<IpcDirectoryEntry[]>("list_directory", { path });
 }
 
-async function readYamlFileDefault(path: string): Promise<string> {
-  return invoke<string>("read_yaml_file", { path });
+async function readDocumentFileDefault(path: string): Promise<string> {
+  return invoke<string>("read_document_file", { path });
 }
 
-async function writeYamlFileDefault(path: string, content: string): Promise<void> {
-  await invoke("write_yaml_file", { path, content });
+async function writeDocumentFileDefault(path: string, content: string): Promise<void> {
+  await invoke("write_document_file", { path, content });
 }
 
 async function deleteFileDefault(path: string): Promise<void> {
@@ -313,7 +315,7 @@ async function importAuthoredBlockDefault(
   const root = config.paths.cloudSyncRoot.endsWith("/")
     ? config.paths.cloudSyncRoot
     : `${config.paths.cloudSyncRoot}/`;
-  const source = await invoke<string>("read_yaml_file", { path });
+  const source = await invoke<string>("read_authored_block_file", { path });
   const filename = path.split("/").at(-1) ?? "block.tsx";
   const { receiveAuthoredBlock } = await import("../../ipc/authored-block");
   return receiveAuthoredBlock(

@@ -23,40 +23,24 @@ const makeMeta = (overrides: Record<string, unknown> = {}) => ({
   ...overrides,
 });
 
-function makeYaml(meta: Record<string, unknown> = {}) {
+function makeJson(meta: Record<string, unknown> = {}) {
   const m = { ...makeMeta(), ...meta };
-  return `kind: document
-schemaVersion: "1.0.0"
-meta:
-  client: ${m.client}
-  project: ${m.project}
-  docKind: ${m.docKind}
-  sector: ${m.sector}
-  tags: []
-  language: ${m.language}
-  status: ${m.status}
-  archived: ${m.archived}
-  confidentialityLevel: ${m.confidentialityLevel}
-  owner: ${m.owner}
-  reviewers: []
-  createdAt: "${m.createdAt}"
-  updatedAt: "${m.updatedAt}"
-  brandRef: "${m.brandRef}"
-sections:
-  - id: s1
-    title: Overview
-    blocks: []
-`;
+  return JSON.stringify({
+    kind: "document",
+    schemaVersion: "1.0.0",
+    meta: m,
+    sections: [{ id: "s1", title: "Overview", blocks: [] }],
+  });
 }
 
-const acmeYaml = makeYaml({ client: "Acme Corp", project: "Q1 Strategy", docKind: "proposal", status: "draft", language: "en", updatedAt: "2026-05-20T00:00:00Z" });
-const betaYaml = makeYaml({ client: "Beta Energy", project: "Wind Farm", docKind: "report", status: "sent", language: "fr", updatedAt: "2026-03-01T00:00:00Z" });
+const acmeJson = makeJson({ client: "Acme Corp", project: "Q1 Strategy", docKind: "proposal", status: "draft", language: "en", updatedAt: "2026-05-20T00:00:00Z" });
+const betaJson = makeJson({ client: "Beta Energy", project: "Wind Farm", docKind: "report", status: "sent", language: "fr", updatedAt: "2026-03-01T00:00:00Z" });
 
 function makeMultiDeps() {
   const acmeDir = { name: "Acme", path: `${CLOUD_ROOT}/Acme`, is_dir: true };
-  const acmeFile = { name: "proposal.yaml", path: `${CLOUD_ROOT}/Acme/proposal.yaml`, is_dir: false };
+  const acmeFile = { name: "proposal.json", path: `${CLOUD_ROOT}/Acme/proposal.json`, is_dir: false };
   const betaDir = { name: "Beta", path: `${CLOUD_ROOT}/Beta`, is_dir: true };
-  const betaFile = { name: "report.yaml", path: `${CLOUD_ROOT}/Beta/report.yaml`, is_dir: false };
+  const betaFile = { name: "report.json", path: `${CLOUD_ROOT}/Beta/report.json`, is_dir: false };
 
   return {
     readAppConfig: vi.fn(() => Promise.resolve({ paths: { cloudSyncRoot: CLOUD_ROOT } })),
@@ -66,12 +50,12 @@ function makeMultiDeps() {
       if (path === betaDir.path) return Promise.resolve([betaFile]);
       return Promise.resolve([]);
     }),
-    readYamlFile: vi.fn((path: string) => {
-      if (path.includes("Acme")) return Promise.resolve(acmeYaml);
-      if (path.includes("Beta")) return Promise.resolve(betaYaml);
-      return Promise.resolve(acmeYaml);
+    readDocumentFile: vi.fn((path: string) => {
+      if (path.includes("Acme")) return Promise.resolve(acmeJson);
+      if (path.includes("Beta")) return Promise.resolve(betaJson);
+      return Promise.resolve(acmeJson);
     }),
-    writeYamlFile: vi.fn(() => Promise.resolve()),
+    writeDocumentFile: vi.fn(() => Promise.resolve()),
   };
 }
 

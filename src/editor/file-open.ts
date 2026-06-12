@@ -1,4 +1,4 @@
-import { parseDocModelYaml } from "../docmodel/serialize";
+import { parseDocModelJson } from "../docmodel/serialize";
 import { DocModelSchema, type DocModel } from "../schema/docmodel";
 
 export interface OpenFileSystem {
@@ -8,7 +8,7 @@ export interface OpenFileSystem {
 
 export interface OpenDocumentTarget {
   folderPath: string;
-  yamlPath: string;
+  jsonPath: string;
   doc: DocModel;
   needsWrapPrompt: boolean;
 }
@@ -20,38 +20,40 @@ export async function openDocumentTarget(
 ): Promise<OpenDocumentTarget> {
   const normalizedInput = trimTrailingSlash(inputPath);
   const normalizedRoot = trimTrailingSlash(cloudSyncRoot);
-  const isYaml = normalizedInput.endsWith(".yaml");
-  const folderPath = isYaml ? parentPath(normalizedInput) : normalizedInput;
-  const yamlPath = isYaml
+  const isJson = normalizedInput.endsWith(".json");
+  const folderPath = isJson ? parentPath(normalizedInput) : normalizedInput;
+  const jsonPath = isJson
     ? normalizedInput
-    : await findYamlInFolder(normalizedInput, fileSystem);
-  const raw = await fileSystem.readTextFile(yamlPath);
-  const doc = DocModelSchema.parse(parseDocModelYaml(raw));
+    : await findJsonInFolder(normalizedInput, fileSystem);
+  const raw = await fileSystem.readTextFile(jsonPath);
+  const doc = DocModelSchema.parse(parseDocModelJson(raw));
   return {
     folderPath,
-    yamlPath,
+    jsonPath,
     doc,
-    needsWrapPrompt: isYaml && folderPath === normalizedRoot,
+    needsWrapPrompt: isJson && folderPath === normalizedRoot,
   };
 }
 
-async function findYamlInFolder(
+async function findJsonInFolder(
   folderPath: string,
   fileSystem: OpenFileSystem,
 ): Promise<string> {
-  const yamlFiles = (await fileSystem.listDirectory(folderPath)).filter(
-    (entry) => entry.kind === "file" && entry.name.endsWith(".yaml"),
+  const jsonFiles = (await fileSystem.listDirectory(folderPath)).filter(
+    (entry) => entry.kind === "file" && entry.name.endsWith(".json"),
   );
-  if (yamlFiles.length === 0) {
-    throw new Error("No YAML document found in selected folder");
+  if (jsonFiles.length === 0) {
+    throw new Error("No JSON document found in selected folder");
   }
-  if (yamlFiles.length > 1) {
-    const docYaml = yamlFiles.find((entry) => entry.name === "doc.yaml");
-    if (docYaml !== undefined) {
-      return docYaml.path;
+  if (jsonFiles.length > 1) {
+    const folderName = folderPath.split("/").at(-1) ?? "";
+    const expectedName = folderName.length > 0 ? `${folderName}.json` : "";
+    const docJson = jsonFiles.find((entry) => entry.name === expectedName);
+    if (docJson !== undefined) {
+      return docJson.path;
     }
   }
-  return yamlFiles[0]?.path ?? "";
+  return jsonFiles[0]?.path ?? "";
 }
 
 function parentPath(path: string): string {

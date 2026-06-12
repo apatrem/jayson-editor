@@ -2,11 +2,11 @@ import { readFileSync } from "node:fs";
 import { invoke } from "@tauri-apps/api/core";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
-async function readYamlFile(path: string): Promise<string> {
+async function readDocumentFile(path: string): Promise<string> {
   return invoke<string>("read_yaml_file", { path });
 }
 
-async function writeYamlFile(path: string, content: string): Promise<void> {
+async function writeDocumentFile(path: string, content: string): Promise<void> {
   await invoke("write_yaml_file", { path, content });
 }
 
@@ -36,11 +36,11 @@ describe("fs IPC smoke contract", () => {
       value: { invoke: invokeMock },
     });
 
-    await expect(readYamlFile("/Users/me/Documents/doc.yaml")).resolves.toBe(
+    await expect(readDocumentFile("/Users/me/Documents/doc.yaml")).resolves.toBe(
       "kind: document\n",
     );
     await expect(
-      writeYamlFile("/Users/me/Documents/doc.yaml", "kind: document\n"),
+      writeDocumentFile("/Users/me/Documents/doc.yaml", "kind: document\n"),
     ).resolves.toBeUndefined();
 
     expect(invokeMock).toHaveBeenNthCalledWith(
@@ -73,7 +73,7 @@ describe("fs IPC smoke contract", () => {
       },
     });
 
-    await expect(readYamlFile("/tmp/outside.yaml")).rejects.toMatchObject(error);
+    await expect(readDocumentFile("/tmp/outside.yaml")).rejects.toMatchObject(error);
   });
 
   it("confirms M8 filesystem commands are registered in the Tauri invoke surface (T-125)", () => {

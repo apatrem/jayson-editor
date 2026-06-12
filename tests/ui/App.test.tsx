@@ -65,7 +65,7 @@ describe("App shell", () => {
         bootStrategy={welcomeBootStrategy}
         fileActions={{
           selectOpenPath: () => Promise.resolve("/Users/me/Documents/proposal.yaml"),
-          readYamlFile: vi.fn(() => Promise.resolve(docYaml)),
+          readDocumentFile: vi.fn(() => Promise.resolve(docYaml)),
         }}
       />,
     );
@@ -108,7 +108,7 @@ describe("App shell", () => {
         fileActions={{
           selectOpenPath: () =>
             Promise.resolve("/Users/me/Documents/multi-section.yaml"),
-          readYamlFile: () => Promise.resolve(multiSectionYaml),
+          readDocumentFile: () => Promise.resolve(multiSectionYaml),
         }}
       />,
     );

@@ -14,7 +14,8 @@ import { invoke } from "@tauri-apps/api/core";
 import { defaultBrand } from "../../brand/defaultBrand";
 import { BrandProvider } from "../../brand-tokens/BrandProvider";
 import { withRenderWatchdog } from "../../block-primitives/RenderWatchdog";
-import { parseDocModelYaml, serializeDocModel } from "../../docmodel/serialize";
+import { parseDocModelJson, serializeDocModel } from "../../docmodel/serialize";
+import { DOCUMENT_OPEN_FILTER, DOCUMENT_SAVE_FILTER } from "../menu/FileMenu";
 import { renderStaticHtmlForExport } from "../../export/render-static-html";
 import { formatErrorMessage } from "../../ipc/errors";
 import { type AuthoredReceiveResult, receiveAuthoredBlock } from "../../ipc/authored-block";
@@ -49,8 +50,8 @@ interface ExportHandoff {
 export interface FileActionDeps {
   selectOpenPath: () => Promise<string | null>;
   selectSavePath: (defaultPath: string) => Promise<string | null>;
-  readYamlFile: (path: string) => Promise<string>;
-  writeYamlFile: (path: string, yaml: string) => Promise<void>;
+  readDocumentFile: (path: string) => Promise<string>;
+  writeDocumentFile: (path: string, json: string) => Promise<void>;
   exportPdf: (input: { html: string; suggestedName: string }) => Promise<ExportHandoff>;
   openPath: (path: string) => Promise<void>;
   renderHtmlForExport: typeof renderStaticHtmlForExport;
@@ -207,8 +208,8 @@ export function Routes({
     try {
       const path = await (fileActions.selectOpenPath ?? selectOpenPathDefault)();
       if (path === null) return;
-      const raw = await (fileActions.readYamlFile ?? readYamlFileDefault)(path);
-      const doc = DocModelSchema.parse(parseDocModelYaml(raw));
+      const raw = await (fileActions.readDocumentFile ?? readDocumentFileDefault)(path);
+      const doc = DocModelSchema.parse(parseDocModelJson(raw));
       setDocContent({ path, doc, dirty: false, paletteOpen: false });
       dispatch({ intent: "open-document", path });
     } catch (error) {
@@ -220,8 +221,8 @@ export function Routes({
     setActionError(null);
     setStatusMessage(null);
     try {
-      const raw = await (fileActions.readYamlFile ?? readYamlFileDefault)(path);
-      const doc = DocModelSchema.parse(parseDocModelYaml(raw));
+      const raw = await (fileActions.readDocumentFile ?? readDocumentFileDefault)(path);
+      const doc = DocModelSchema.parse(parseDocModelJson(raw));
       setDocContent({ path, doc, dirty: false, paletteOpen: false });
       dispatch({ intent: "open-document", path });
     } catch (error) {
@@ -233,7 +234,7 @@ export function Routes({
     if (docContent === null) return;
     setActionError(null);
     try {
-      await (fileActions.writeYamlFile ?? writeYamlFileDefault)(
+      await (fileActions.writeDocumentFile ?? writeDocumentFileDefault)(
         docContent.path,
         serializeDocModel(docContent.doc),
       );
@@ -253,7 +254,7 @@ export function Routes({
         ((defaultPath) => selectSavePathDefault(defaultPath));
       const selected = await selectSave(docContent.path);
       if (selected === null) return;
-      await (fileActions.writeYamlFile ?? writeYamlFileDefault)(
+      await (fileActions.writeDocumentFile ?? writeDocumentFileDefault)(
         selected,
         serializeDocModel(docContent.doc),
       );
@@ -270,8 +271,8 @@ export function Routes({
 
   const reopenCurrentDocument = useCallback(async (): Promise<void> => {
     if (docContent === null) return;
-    const raw = await (fileActions.readYamlFile ?? readYamlFileDefault)(docContent.path);
-    const doc = DocModelSchema.parse(parseDocModelYaml(raw));
+    const raw = await (fileActions.readDocumentFile ?? readDocumentFileDefault)(docContent.path);
+    const doc = DocModelSchema.parse(parseDocModelJson(raw));
     setDocContent({ ...docContent, doc, dirty: false });
     setBoundaryResetVersion((v) => v + 1);
   }, [docContent, fileActions]);
@@ -387,11 +388,11 @@ export function Routes({
             ...(fileActions.listDirectory !== undefined
               ? { listDirectory: fileActions.listDirectory }
               : {}),
-            ...(fileActions.readYamlFile !== undefined
-              ? { readYamlFile: fileActions.readYamlFile }
+            ...(fileActions.readDocumentFile !== undefined
+              ? { readDocumentFile: fileActions.readDocumentFile }
               : {}),
-            ...(fileActions.writeYamlFile !== undefined
-              ? { writeYamlFile: fileActions.writeYamlFile }
+            ...(fileActions.writeDocumentFile !== undefined
+              ? { writeDocumentFile: fileActions.writeDocumentFile }
               : {}),
           }}
         />
@@ -414,12 +415,12 @@ export function Routes({
                     path={docContent.path}
                     initialDoc={docContent.doc}
                     dirty={docContent.dirty}
-                    {...(fileActions.readYamlFile === undefined
+                    {...(fileActions.readDocumentFile === undefined
                       ? {}
-                      : { readYamlFile: fileActions.readYamlFile })}
-                    {...(fileActions.writeYamlFile === undefined
+                      : { readDocumentFile: fileActions.readDocumentFile })}
+                    {...(fileActions.writeDocumentFile === undefined
                       ? {}
-                      : { writeYamlFile: fileActions.writeYamlFile })}
+                      : { writeDocumentFile: fileActions.writeDocumentFile })}
                     {...(fileActions.callLlm === undefined
                       ? {}
                       : { callLlm: fileActions.callLlm })}
@@ -458,7 +459,7 @@ async function importAuthoredBlockDefault(path: string): Promise<AuthoredReceive
   const root = config.paths.cloudSyncRoot.endsWith("/")
     ? config.paths.cloudSyncRoot
     : `${config.paths.cloudSyncRoot}/`;
-  const source = await invoke<string>("read_yaml_file", { path });
+  const source = await invoke<string>("read_authored_block_file", { path });
   const filename = path.split("/").at(-1) ?? "block.tsx";
   const activeDir = `${root}generated-blocks/active`;
   const quarantineDir = `${root}generated-blocks/quarantine`;
@@ -476,7 +477,7 @@ async function selectImportPathDefault(): Promise<string | null> {
 async function selectOpenPathDefault(): Promise<string | null> {
   const selected = await openDialog({
     multiple: false,
-    filters: [{ name: "YAML", extensions: ["yaml", "yml"] }],
+    filters: [DOCUMENT_OPEN_FILTER],
   });
   return typeof selected === "string" ? selected : null;
 }
@@ -484,17 +485,17 @@ async function selectOpenPathDefault(): Promise<string | null> {
 async function selectSavePathDefault(defaultPath: string): Promise<string | null> {
   const selected = await saveDialog({
     defaultPath,
-    filters: [{ name: "YAML", extensions: ["yaml"] }],
+    filters: [DOCUMENT_SAVE_FILTER],
   });
   return typeof selected === "string" ? selected : null;
 }
 
-async function readYamlFileDefault(path: string): Promise<string> {
-  return invoke<string>("read_yaml_file", { path });
+async function readDocumentFileDefault(path: string): Promise<string> {
+  return invoke<string>("read_document_file", { path });
 }
 
-async function writeYamlFileDefault(path: string, yaml: string): Promise<void> {
-  await invoke("write_yaml_file", { path, content: yaml });
+async function writeDocumentFileDefault(path: string, json: string): Promise<void> {
+  await invoke("write_document_file", { path, content: json });
 }
 
 function basename(path: string): string {

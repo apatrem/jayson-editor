@@ -1,4 +1,4 @@
-import { parse } from "yaml";
+import { parseDocModelJson } from "../docmodel/serialize";
 import type { LibraryEntry, LibraryIndex } from "./filter";
 import { MetaSchema } from "../schema/meta";
 import { dirname, joinPath } from "./path";
@@ -39,11 +39,11 @@ async function scanDirectory(
     return;
   }
   const children = await fileSystem.listDirectory(current);
-  const yamlFile = children.find(
-    (child) => child.kind === "file" && child.name.endsWith(".yaml"),
+  const jsonFile = children.find(
+    (child) => child.kind === "file" && child.name.endsWith(".json"),
   );
-  if (yamlFile !== undefined) {
-    const entry = await entryFromYaml(yamlFile, fileSystem);
+  if (jsonFile !== undefined) {
+    const entry = await entryFromJson(jsonFile, fileSystem);
     if (entry !== null) {
       entries.push(entry);
     }
@@ -57,20 +57,22 @@ async function scanDirectory(
   );
 }
 
-async function entryFromYaml(
-  yamlFile: DirectoryEntry,
+async function entryFromJson(
+  jsonFile: DirectoryEntry,
   fileSystem: LibraryFileSystem,
 ): Promise<LibraryEntry | null> {
-  const parsed = parse(await fileSystem.readText(yamlFile.path)) as { meta?: unknown };
+  const parsed = parseDocModelJson(await fileSystem.readText(jsonFile.path)) as {
+    meta?: unknown;
+  };
   const metaResult = MetaSchema.safeParse(parsed.meta);
   if (!metaResult.success) {
     return null;
   }
-  const stats = await fileSystem.stat(yamlFile.path);
-  const folder = dirname(yamlFile.path);
+  const stats = await fileSystem.stat(jsonFile.path);
+  const folder = dirname(jsonFile.path);
   return {
     path: folder,
-    yamlFilename: yamlFile.name,
+    jsonFilename: jsonFile.name,
     meta: metaResult.data,
     thumbnailUri: null,
     fileSize: stats.size,

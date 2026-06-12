@@ -3,8 +3,8 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import {
   CLOUD_SYNC_ROOT,
   makeM8Harness,
-  sampleProposalYaml,
-  singleSectionYaml,
+  sampleProposalJson,
+  singleSectionJson,
 } from "./m8-harness";
 
 describe("M8 happy path", () => {
@@ -53,17 +53,16 @@ describe("M8 happy path", () => {
     await waitFor(() => {
       expect(screen.getByText("Acme Industrial")).toBeTruthy();
     });
-    // writeYamlFile should have been called with the sample YAML
-    expect(harness.writeYamlFile).toHaveBeenCalledWith(
-      `${CLOUD_SYNC_ROOT}/Sample Proposal.yaml`,
-      expect.stringContaining("kind: document"),
+    expect(harness.writeDocumentFile).toHaveBeenCalledWith(
+      `${CLOUD_SYNC_ROOT}/Sample Proposal.json`,
+      expect.stringContaining('"kind": "document"'),
     );
   });
 
-  it("(e) Create from Template writes YAML and navigates to DocumentView", async () => {
+  it("(e) Create from Template writes JSON and navigates to DocumentView", async () => {
     const harness = makeM8Harness({
       // Start with sample already present so library shows loaded state
-      initialFiles: [[`${CLOUD_SYNC_ROOT}/Sample Proposal.yaml`, sampleProposalYaml]],
+      initialFiles: [[`${CLOUD_SYNC_ROOT}/Sample Proposal.json`, sampleProposalJson]],
     });
 
     await waitFor(() => {
@@ -84,7 +83,7 @@ describe("M8 happy path", () => {
 
     await waitFor(() => {
       // Template was written to the filesystem
-      expect(harness.files.has(`${CLOUD_SYNC_ROOT}/Acme Q3 Proposal.yaml`)).toBe(true);
+      expect(harness.files.has(`${CLOUD_SYNC_ROOT}/Acme Q3 Proposal.json`)).toBe(true);
     });
 
     // App navigated to DocumentView after onConfirm
@@ -97,8 +96,8 @@ describe("M8 happy path", () => {
     // Docs must be in separate subdirectories so buildLibraryIndex creates one entry per dir
     makeM8Harness({
       initialFiles: [
-        [`${CLOUD_SYNC_ROOT}/doc-a/Sample Proposal.yaml`, sampleProposalYaml],
-        [`${CLOUD_SYNC_ROOT}/doc-b/Single Section.yaml`, singleSectionYaml],
+        [`${CLOUD_SYNC_ROOT}/doc-a/Sample Proposal.json`, sampleProposalJson],
+        [`${CLOUD_SYNC_ROOT}/doc-b/Single Section.json`, singleSectionJson],
       ],
     });
 
@@ -122,7 +121,7 @@ describe("M8 happy path", () => {
   it("(g) single-section document: edit → autosave preserves content", async () => {
     const harness = makeM8Harness({
       initialFiles: [
-        [`${CLOUD_SYNC_ROOT}/Single Section.yaml`, singleSectionYaml],
+        [`${CLOUD_SYNC_ROOT}/Single Section.json`, singleSectionJson],
       ],
     });
 
@@ -153,8 +152,8 @@ describe("M8 happy path", () => {
     fireEvent.click(screen.getByRole("menuitem", { name: "Save" }));
     await waitFor(
       () => {
-        expect(harness.writeYamlFile).toHaveBeenCalledWith(
-          `${CLOUD_SYNC_ROOT}/Single Section.yaml`,
+        expect(harness.writeDocumentFile).toHaveBeenCalledWith(
+          `${CLOUD_SYNC_ROOT}/Single Section.json`,
           expect.stringContaining('"type": "callout"'),
         );
       },
@@ -173,7 +172,7 @@ describe("M8 happy path", () => {
 
     makeM8Harness({
       initialFiles: [
-        [`${CLOUD_SYNC_ROOT}/Single Section.yaml`, singleSectionYaml],
+        [`${CLOUD_SYNC_ROOT}/Single Section.json`, singleSectionJson],
       ],
       loadGeneratedBlocks: (_root: string) =>
         Promise.resolve([generatedBlock]),
@@ -208,7 +207,7 @@ describe("M8 happy path", () => {
   it("(i) Export PDF works end-to-end from DocumentView", async () => {
     const harness = makeM8Harness({
       initialFiles: [
-        [`${CLOUD_SYNC_ROOT}/Single Section.yaml`, singleSectionYaml],
+        [`${CLOUD_SYNC_ROOT}/Single Section.json`, singleSectionJson],
       ],
     });
 

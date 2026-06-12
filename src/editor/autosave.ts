@@ -3,7 +3,7 @@ import { serializeDocModel } from "../docmodel/serialize";
 
 export interface AutosaveOptions {
   debounceMs: number;
-  writeYaml: (yaml: string) => Promise<void> | void;
+  writeJson: (json: string) => Promise<void> | void;
   setTimeoutFn?: typeof setTimeout;
   clearTimeoutFn?: typeof clearTimeout;
 }
@@ -28,7 +28,7 @@ export function createAutosaveController(options: AutosaveOptions): AutosaveCont
     }
     const doc = pendingDoc;
     pendingDoc = undefined;
-    await options.writeYaml(serializeDocModel(doc));
+    await options.writeJson(serializeDocModel(doc));
   }
 
   return {

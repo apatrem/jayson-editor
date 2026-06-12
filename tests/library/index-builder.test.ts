@@ -74,7 +74,7 @@ function makeFileSystem(root: MockDirectory): LibraryFileSystem {
   };
 }
 
-function validMetaYaml(overrides: Partial<Meta> = {}): string {
+function validMetaJson(overrides: Partial<Meta> = {}): string {
   const meta: Meta = {
     client: "Acme",
     project: "Q1 Review",
@@ -91,23 +91,7 @@ function validMetaYaml(overrides: Partial<Meta> = {}): string {
     brandRef: "$brand:default",
     ...overrides,
   };
-  const yamlLines = [
-    "meta:",
-    `  client: "${meta.client}"`,
-    `  project: "${meta.project}"`,
-    `  docKind: "${meta.docKind}"`,
-    `  tags: [${meta.tags.map((t) => `"${t}"`).join(", ")}]`,
-    `  language: "${meta.language}"`,
-    `  status: "${meta.status}"`,
-    `  archived: ${String(meta.archived)}`,
-    `  confidentialityLevel: "${meta.confidentialityLevel}"`,
-    `  owner: "${meta.owner}"`,
-    `  reviewers: [${meta.reviewers.map((r) => `"${r}"`).join(", ")}]`,
-    `  createdAt: "${meta.createdAt}"`,
-    `  updatedAt: "${meta.updatedAt}"`,
-    `  brandRef: "${meta.brandRef}"`,
-  ];
-  return yamlLines.join("\n") + "\n";
+  return `${JSON.stringify({ meta }, null, 2)}\n`;
 }
 
 // ── buildLibraryIndex ─────────────────────────────────────────────────────
@@ -119,27 +103,27 @@ describe("buildLibraryIndex", () => {
     expect(index.entries).toEqual([]);
   });
 
-  it("finds a YAML in a single nested folder", async () => {
+  it("finds a JSON document in a single nested folder", async () => {
     const fs = makeFileSystem(
       dir({
         "acme-q1": dir({
-          "document.yaml": file(validMetaYaml({ client: "Acme", project: "Q1 Review" })),
+          "document.json": file(validMetaJson({ client: "Acme", project: "Q1 Review" })),
         }),
       }),
     );
     const index = await buildLibraryIndex("/", fs);
     expect(index.entries).toHaveLength(1);
     expect(index.entries[0]?.meta.client).toBe("Acme");
-    expect(index.entries[0]?.yamlFilename).toBe("document.yaml");
+    expect(index.entries[0]?.jsonFilename).toBe("document.json");
     expect(index.entries[0]?.path).toBe("/acme-q1");
   });
 
-  it("finds YAMLs across multiple sibling folders", async () => {
+  it("finds JSON documents across multiple sibling folders", async () => {
     const fs = makeFileSystem(
       dir({
-        "client-a": dir({ "doc.yaml": file(validMetaYaml({ client: "Alpha" })) }),
-        "client-b": dir({ "doc.yaml": file(validMetaYaml({ client: "Beta" })) }),
-        "client-c": dir({ "doc.yaml": file(validMetaYaml({ client: "Charlie" })) }),
+        "client-a": dir({ "doc.json": file(validMetaJson({ client: "Alpha" })) }),
+        "client-b": dir({ "doc.json": file(validMetaJson({ client: "Beta" })) }),
+        "client-c": dir({ "doc.json": file(validMetaJson({ client: "Charlie" })) }),
       }),
     );
     const index = await buildLibraryIndex("/", fs);
@@ -148,22 +132,22 @@ describe("buildLibraryIndex", () => {
     ).toEqual(["Alpha", "Beta", "Charlie"]);
   });
 
-  it("skips YAMLs whose meta fails schema validation", async () => {
+  it("skips JSON documents whose meta fails schema validation", async () => {
     const fs = makeFileSystem(
       dir({
-        good: dir({ "doc.yaml": file(validMetaYaml({ client: "Good" })) }),
-        bad: dir({ "doc.yaml": file("meta:\n  client: 1\n") }),
+        good: dir({ "doc.json": file(validMetaJson({ client: "Good" })) }),
+        bad: dir({ "doc.json": file('{"meta":{"client":1}}\n') }),
       }),
     );
     const index = await buildLibraryIndex("/", fs);
     expect(index.entries.map((e) => e.meta.client)).toEqual(["Good"]);
   });
 
-  it("ignores folders with no YAML", async () => {
+  it("ignores folders with no JSON document", async () => {
     const fs = makeFileSystem(
       dir({
         empty: dir({ "notes.txt": file("nothing") }),
-        live: dir({ "doc.yaml": file(validMetaYaml({ client: "Live" })) }),
+        live: dir({ "doc.json": file(validMetaJson({ client: "Live" })) }),
       }),
     );
     const index = await buildLibraryIndex("/", fs);
@@ -176,7 +160,7 @@ describe("buildLibraryIndex", () => {
         "level-1": dir({
           "level-2": dir({
             "level-3": dir({
-              "deep.yaml": file(validMetaYaml({ client: "Deep" })),
+              "deep.json": file(validMetaJson({ client: "Deep" })),
             }),
           }),
         }),
@@ -187,7 +171,7 @@ describe("buildLibraryIndex", () => {
     const shallow = await buildLibraryIndex("/", fs, { maxDepth: 2 });
     expect(shallow.entries).toEqual([]);
     // At depth=5 the recursion has budget to reach /level-1/level-2/level-3
-    // where deep.yaml is found.
+    // where deep.json is found.
     const deep = await buildLibraryIndex("/", fs, { maxDepth: 5 });
     expect(deep.entries.map((e) => e.meta.client)).toEqual(["Deep"]);
   });
@@ -199,14 +183,14 @@ describe("buildLibraryIndex", () => {
   });
 
   it("captures fileSize and fileMtime from stat()", async () => {
-    const yaml = validMetaYaml({ client: "Stats" });
+    const json = validMetaJson({ client: "Stats" });
     const fs = makeFileSystem(
       dir({
-        only: dir({ "doc.yaml": file(yaml, 9_999_999) }),
+        only: dir({ "doc.json": file(json, 9_999_999) }),
       }),
     );
     const index = await buildLibraryIndex("/", fs);
-    expect(index.entries[0]?.fileSize).toBe(yaml.length);
+    expect(index.entries[0]?.fileSize).toBe(json.length);
     expect(index.entries[0]?.fileMtime).toBe(9_999_999);
   });
 });
@@ -217,7 +201,7 @@ describe("updateLibraryEntry", () => {
   function entryAt(path: string, client: string): LibraryEntry {
     return {
       path,
-      yamlFilename: "doc.yaml",
+      jsonFilename: "doc.json",
       meta: {
         client,
         project: "Project",

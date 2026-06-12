@@ -1,0 +1,176 @@
+{
+  "kind": "document",
+  "schemaVersion": "1.0.0",
+  "meta": {
+    "client": "Acme Industrial",
+    "project": "SMR Heat Strategy Assessment",
+    "docKind": "proposal",
+    "sector": "energy",
+    "tags": [
+      "nuclear",
+      "industrial heat",
+      "decarbonization"
+    ],
+    "language": "en",
+    "status": "draft",
+    "archived": false,
+    "confidentialityLevel": "high",
+    "owner": "j.smith@boutique.example",
+    "reviewers": [
+      "p.dubois@boutique.example"
+    ],
+    "createdAt": "2026-05-21T09:00:00Z",
+    "updatedAt": "2026-05-21T14:32:00Z",
+    "brandRef": "$brand:default"
+  },
+  "sections": [
+    {
+      "id": "m7-executive-summary",
+      "title": "Executive summary",
+      "blocks": [
+        {
+          "id": "b1-prose-01",
+          "type": "prose",
+          "content": {
+            "type": "doc",
+            "content": [
+              {
+                "type": "paragraph",
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "Acme Industrial is evaluating SMR process-heat applications for its European sites."
+                  }
+                ]
+              }
+            ]
+          },
+          "align": "left"
+        },
+        {
+          "id": "b1-kpi-01",
+          "type": "kpi-cards",
+          "cards": [
+            {
+              "value": "EUR42M",
+              "label": "Annual fuel-cost exposure",
+              "sublabel": "Across 3 sites (2025 baseline)",
+              "trend": "up",
+              "emphasis": "negative"
+            },
+            {
+              "value": "-72%",
+              "label": "Potential emissions reduction",
+              "sublabel": "Via SMR-supplied process heat",
+              "trend": "down",
+              "emphasis": "positive"
+            },
+            {
+              "value": "12 wk",
+              "label": "Engagement duration",
+              "sublabel": "End-to-end recommendation",
+              "trend": "none",
+              "emphasis": "brand"
+            }
+          ]
+        },
+        {
+          "id": "b1-callout-01",
+          "type": "callout",
+          "variant": "info",
+          "title": "Why now",
+          "body": {
+            "type": "doc",
+            "content": [
+              {
+                "type": "paragraph",
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "A go-decision by Q1 2027 is needed to secure first-mover pricing."
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "id": "b3-chart-01",
+          "type": "chart",
+          "chartType": "stacked-bar",
+          "title": "Projected annual OPEX by scenario",
+          "takeaway": "SMR scenario reduces OPEX by 38% by year 5 vs status quo.",
+          "data": {
+            "series": [
+              {
+                "name": "Fuel",
+                "values": [
+                  42,
+                  44,
+                  46,
+                  48,
+                  50
+                ]
+              },
+              {
+                "name": "Carbon",
+                "values": [
+                  3,
+                  5,
+                  7,
+                  11,
+                  16
+                ]
+              },
+              {
+                "name": "Maintenance",
+                "values": [
+                  8,
+                  8,
+                  8,
+                  8,
+                  8
+                ]
+              }
+            ],
+            "xLabels": [
+              "2026",
+              "2027",
+              "2028",
+              "2029",
+              "2030"
+            ],
+            "unit": "EURM"
+          },
+          "axes": {
+            "xTitle": "Year",
+            "yTitle": "Annual OPEX",
+            "ySuffix": "M"
+          },
+          "palette": "qualitative",
+          "showLegend": true,
+          "showDataLabels": false,
+          "legendPosition": "bottom"
+        },
+        {
+          "id": "b4-image-01",
+          "type": "image",
+          "src": "assets/team-meeting.jpg",
+          "alt": "Three team members reviewing site plans at a whiteboard.",
+          "caption": "Kickoff workshop, May 2026.",
+          "width": "large",
+          "align": "center"
+        },
+        {
+          "id": "b4-diagram-01",
+          "type": "diagram",
+          "source": "graph TD\n  A[Discovery] --> B[Site model]\n  B --> C[Recommendation]",
+          "title": "Engagement flow",
+          "caption": "M7 fixture diagram for export SSR.",
+          "width": "large"
+        }
+      ]
+    }
+  ],
+  "comments": []
+}

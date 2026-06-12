@@ -22,12 +22,12 @@ vi.mock("echarts", async () => {
 });
 
 export const CLOUD_SYNC_ROOT = "/Users/me/Documents";
-export const sampleProposalYaml = readFileSync(
-  "examples/sample-proposal.yaml",
+export const sampleProposalJson = readFileSync(
+  "examples/sample-proposal.json",
   "utf8",
 );
-export const singleSectionYaml = readFileSync(
-  "tests/fixtures/m7-single-section-proposal.yaml",
+export const singleSectionJson = readFileSync(
+  "tests/fixtures/m7-single-section-proposal.json",
   "utf8",
 );
 
@@ -71,12 +71,10 @@ export function makeM8Harness(options: M8HarnessOptions = {}) {
       const relative = filePath.slice(prefix.length);
       const slashIdx = relative.indexOf("/");
       if (slashIdx === -1) {
-        // Direct child file
-        if (relative.endsWith(".yaml")) {
+        if (relative.endsWith(".json")) {
           entries.push({ name: relative, path: filePath, is_dir: false });
         }
       } else {
-        // Subdirectory entry
         const dirName = relative.slice(0, slashIdx);
         if (!seenDirs.has(dirName)) {
           seenDirs.add(dirName);
@@ -91,7 +89,7 @@ export function makeM8Harness(options: M8HarnessOptions = {}) {
     return Promise.resolve(entries);
   });
 
-  const readYamlFile = vi.fn((path: string): Promise<string> => {
+  const readDocumentFile = vi.fn((path: string): Promise<string> => {
     const content = files.get(path);
     if (content === undefined) {
       return Promise.reject(new Error(`file not found: ${path}`));
@@ -99,7 +97,7 @@ export function makeM8Harness(options: M8HarnessOptions = {}) {
     return Promise.resolve(content);
   });
 
-  const writeYamlFile = vi.fn((path: string, content: string): Promise<void> => {
+  const writeDocumentFile = vi.fn((path: string, content: string): Promise<void> => {
     files.set(path, content);
     return Promise.resolve();
   });
@@ -119,7 +117,6 @@ export function makeM8Harness(options: M8HarnessOptions = {}) {
     options.loadGeneratedBlocks ?? ((_r: string) => Promise.resolve([])),
   );
 
-  // Minimal __TAURI_INTERNALS__ stub for any remaining direct invoke calls
   const invokeMock = vi.fn((cmd: string) => {
     if (cmd === "read_binary_file") return Promise.resolve("/9j/");
     if (cmd === "plugin:shell|open") return Promise.resolve();
@@ -145,8 +142,8 @@ export function makeM8Harness(options: M8HarnessOptions = {}) {
         writeAppConfig,
         readAppConfig,
         listDirectory,
-        readYamlFile,
-        writeYamlFile,
+        readDocumentFile,
+        writeDocumentFile,
         exportPdf,
         openPath,
         selectOpenPath: () => Promise.resolve(null),
@@ -161,8 +158,8 @@ export function makeM8Harness(options: M8HarnessOptions = {}) {
     selectFolder,
     writeAppConfig,
     listDirectory,
-    readYamlFile,
-    writeYamlFile,
+    readDocumentFile,
+    writeDocumentFile,
     exportPdf,
     openPath,
     loadGeneratedBlocks,

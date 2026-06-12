@@ -10,7 +10,7 @@ import {
   readBaseAttrsFromPm,
   withBaseAttrsOnPm,
 } from "../../src/editor/base-block-attrs";
-import { serializeDocModel, parseDocModelYaml } from "../../src/docmodel/serialize";
+import { serializeDocModel, parseDocModelJson } from "../../src/docmodel/serialize";
 import { DocModelSchema, type DocModel } from "../../src/schema/docmodel";
 
 function loadSampleDoc(): Extract<DocModel, { kind: "document" }> {
@@ -95,7 +95,7 @@ describe("BlockBase layout overrides survive DocModel↔ProseMirror↔YAML", () 
     block.spaceBefore = 5;
     const modified = DocModelSchema.parse(doc);
 
-    const reparsed = DocModelSchema.parse(parseDocModelYaml(serializeDocModel(modified)));
+    const reparsed = DocModelSchema.parse(parseDocModelJson(serializeDocModel(modified)));
     expect(reparsed).toEqual(modified);
   });
 });

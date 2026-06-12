@@ -2,7 +2,7 @@ import { cleanup, fireEvent, screen, waitFor } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import {
   renderM7SpikeHarness,
-  sampleProposalYaml,
+  sampleProposalJson,
   singleSectionProposalDoc,
 } from "./m7-spike-harness";
 
@@ -15,7 +15,7 @@ describe("M7 spike error paths", () => {
 
   it("shows an error when opening a missing file", async () => {
     renderM7SpikeHarness({
-      readYamlFile: () => Promise.reject(new Error("file not found")),
+      readDocumentFile: () => Promise.reject(new Error("file not found")),
     });
 
     fireEvent.click(screen.getByRole("menuitem", { name: "Open" }));
@@ -27,7 +27,7 @@ describe("M7 spike error paths", () => {
 
   it("shows an error when opening malformed YAML", async () => {
     renderM7SpikeHarness({
-      readYamlFile: () => Promise.resolve("kind: ["),
+      readDocumentFile: () => Promise.resolve("kind: ["),
     });
 
     fireEvent.click(screen.getByRole("menuitem", { name: "Open" }));
@@ -40,10 +40,10 @@ describe("M7 spike error paths", () => {
   it("shows an error when saving fails", async () => {
     renderM7SpikeHarness({
       initialDocument: {
-        path: "/Users/me/Documents/sample-proposal.yaml",
+        path: "/Users/me/Documents/sample-proposal.json",
         doc: singleSectionProposalDoc,
       },
-      writeYamlFile: () => Promise.reject(new Error("write failed")),
+      writeDocumentFile: () => Promise.reject(new Error("write failed")),
     });
 
     fireEvent.click(screen.getByRole("menuitem", { name: "Save" }));
@@ -56,7 +56,7 @@ describe("M7 spike error paths", () => {
 
   it("opens the real multi-section sample proposal in the editor", async () => {
     renderM7SpikeHarness({
-      initialYaml: sampleProposalYaml,
+      initialJson: sampleProposalJson,
     });
 
     fireEvent.click(screen.getByRole("menuitem", { name: "Open" }));
