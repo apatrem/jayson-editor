@@ -8,7 +8,6 @@ import type { ChartBlock } from "../blocks/chart/schema";
 import type { DiagramBlock } from "../blocks/diagram/schema";
 import type { ImageBlock } from "../blocks/image/schema";
 import type { KpiCardsBlock } from "../blocks/kpi-cards/schema";
-import type { ProseBlock } from "../blocks/prose/schema";
 import type { RiskMatrixBlock } from "../blocks/risk-matrix/schema";
 import type { RoadmapBlock } from "../blocks/roadmap/schema";
 import type { TableBlock } from "../blocks/table/schema";
@@ -18,10 +17,12 @@ import type { DocBlock } from "../schema/blocks";
 import { fragmentToPlainText } from "./prosemirror-text";
 
 const LOCAL_ID_PATTERN = /^[a-z][a-z0-9-]{0,31}$/;
+const KIND_HINT_PATTERN = /^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$/;
 const MAX_INTENT_LENGTH = 500;
+const STRUCTURE_SENTINEL = "__placeholder__";
 
 const PLACEHOLDER_LINE =
-  /^\[\[block:\s*(.*?)\s*\|\s*intent:\s*"((?:\\.|[^"\\])*)"\s*\|\s*id:\s*([a-z][a-z0-9-]{0,31})\s*\]\]$/;
+  /^\[\[block:\s*(.*?)\s*\|\s*intent:\s*"((?:\\"|\\\\|[^"\\])*)"\s*\|\s*id:\s*([a-z][a-z0-9-]{0,31})\s*\]\]$/;
 
 export const CATALOGUE_KIND_HINTS = new Set([
   "bullet-list",
@@ -96,6 +97,13 @@ export function parsePlaceholderLineDetailed(
     return { message: "Malformed placeholder syntax." };
   }
 
+  const kindHint = kindHintRaw.trim();
+  if (kindHint && !KIND_HINT_PATTERN.test(kindHint)) {
+    return {
+      message: "Placeholder kind-hint must be lowercase kebab-case or empty.",
+    };
+  }
+
   const intent = unescapeIntent(intentRaw);
   if (!intent.trim()) {
     return { message: "Placeholder intent must be non-empty." };
@@ -106,7 +114,7 @@ export function parsePlaceholderLineDetailed(
 
   return {
     placeholder: {
-      kindHint: kindHintRaw.trim(),
+      kindHint,
       intent,
       localId,
     },
@@ -163,10 +171,22 @@ export function toPlaceholder(block: DocBlock): Placeholder | null {
 }
 
 function makePlaceholder(kindHint: string, intent: string, blockId: string): Placeholder {
-  return { kindHint, intent, localId: slugifyLocalId(blockId) };
+  return {
+    kindHint,
+    intent: truncate(normalizeIntent(intent), MAX_INTENT_LENGTH),
+    localId: slugifyLocalId(blockId),
+  };
 }
 
 function toPlaceholderChart(block: ChartBlock): Placeholder {
+  if (isStructuredChart(block)) {
+    const seriesIntent = block.data.series
+      .slice(0, -1)
+      .map((series) => series.name)
+      .join("");
+    return makePlaceholder("chart", `${block.title}${seriesIntent}`, block.id);
+  }
+
   const seriesPart = block.data.series.map((s) => s.name).join(", ");
   const axisPart = [block.axes?.xTitle, block.axes?.yTitle].filter(Boolean).join(" / ");
   const parts = [
@@ -181,6 +201,10 @@ function toPlaceholderChart(block: ChartBlock): Placeholder {
 
 function toPlaceholderCallout(block: CalloutBlock): Placeholder {
   const body = fragmentToPlainText(block.body);
+  if (isStructuredCallout(block)) {
+    return makePlaceholder("callout", body, block.id);
+  }
+
   const titlePart = block.title ? `${block.title} — ` : "";
   return makePlaceholder(
     "callout",
@@ -190,12 +214,20 @@ function toPlaceholderCallout(block: CalloutBlock): Placeholder {
 }
 
 function toPlaceholderTable(block: TableBlock): Placeholder {
+  if (isStructuredTable(block) && block.caption) {
+    return makePlaceholder("table", block.caption, block.id);
+  }
+
   const headers = block.columns.map((c) => c.header).join(", ");
   const intent = block.caption ? `${block.caption}: ${headers}` : headers;
   return makePlaceholder("table", intent, block.id);
 }
 
 function toPlaceholderKpiCards(block: KpiCardsBlock): Placeholder {
+  if (isStructuredKpiCards(block)) {
+    return makePlaceholder("kpi-cards", block.cards[0]?.value ?? "", block.id);
+  }
+
   return makePlaceholder(
     "kpi-cards",
     block.cards.map((c) => `${c.label}: ${c.value}`).join(", "),
@@ -204,9 +236,21 @@ function toPlaceholderKpiCards(block: KpiCardsBlock): Placeholder {
 }
 
 function toPlaceholderTimeline(block: TimelineBlock): Placeholder {
+  if (isStructuredTimeline(block)) {
+    const payload = block.phases
+      .slice(0, -1)
+      .map((phase) => `${phase.label}${phase.subtitle ?? ""}`)
+      .join("");
+    return makePlaceholder("timeline", payload, block.id);
+  }
+
   return makePlaceholder(
     "timeline",
-    block.phases.map((p) => p.label).join(", "),
+    block.phases
+      .map((phase) =>
+        phase.subtitle ? `${phase.label}: ${phase.subtitle}` : phase.label,
+      )
+      .join(", "),
     block.id,
   );
 }
@@ -224,8 +268,7 @@ function toPlaceholderImage(block: ImageBlock): Placeholder {
 }
 
 function toPlaceholderDiagram(block: DiagramBlock): Placeholder {
-  const description = block.caption ?? truncate(block.source, 120);
-  const intent = block.title ? `${block.title} — ${description}` : description;
+  const intent = [block.title, block.caption].filter(Boolean).join(" — ") || "Diagram";
   return makePlaceholder("diagram", intent, block.id);
 }
 
@@ -241,34 +284,69 @@ function toPlaceholderRiskMatrix(block: RiskMatrixBlock): Placeholder {
   );
 }
 
+function isStructuredChart(block: ChartBlock): boolean {
+  return (
+    block.data.unit === STRUCTURE_SENTINEL &&
+    block.data.series.at(-1)?.name === STRUCTURE_SENTINEL
+  );
+}
+
+function isStructuredCallout(block: CalloutBlock): boolean {
+  return block.attribution === STRUCTURE_SENTINEL;
+}
+
+function isStructuredTable(block: TableBlock): boolean {
+  return block.columns[0]?.width === STRUCTURE_SENTINEL;
+}
+
+function isStructuredKpiCards(block: KpiCardsBlock): boolean {
+  return block.cards[0]?.sublabel === STRUCTURE_SENTINEL;
+}
+
+function isStructuredTimeline(block: TimelineBlock): boolean {
+  return block.phases.at(-1)?.label === STRUCTURE_SENTINEL;
+}
+
 /**
- * Minimal deterministic structuring stub for tests and early integration.
- * Full Pass 2 replaces kind resolution + promotion with catalogue-aware LLM scope.
+ * Deterministic contract helper. The generated scaffold values are valid block
+ * fields, so down-conversion remains derived from current content.
  */
 export function structurePlaceholder(p: Placeholder): DocBlock {
   const id = p.localId;
   const kind = p.kindHint || "prose";
+  const intent = normalizeIntent(p.intent);
 
   if (kind === "chart") {
-    const block: ChartBlock = {
+    const [title = "", ...seriesChunks] = splitByLengths(intent, [
+      120,
+      80,
+      80,
+      80,
+      80,
+      80,
+    ]);
+    return {
       id,
       type: "chart",
       chartType: "bar",
-      title: truncate(p.intent, 120),
+      title,
       data: {
-        series: [{ name: "Series 1", values: [1, 2, 3] }],
-        xLabels: ["A", "B", "C"],
+        series: [...seriesChunks, STRUCTURE_SENTINEL].map((name) => ({
+          name,
+          values: [0],
+        })),
+        xLabels: [],
+        unit: STRUCTURE_SENTINEL,
       },
       palette: "qualitative",
-      showLegend: true,
+      showLegend: false,
       legendPosition: "bottom",
       showDataLabels: false,
     };
-    return block;
   }
 
   if (kind === "callout") {
-    const block: CalloutBlock = {
+    return {
       id,
       type: "callout",
       variant: "info",
@@ -277,15 +355,67 @@ export function structurePlaceholder(p: Placeholder): DocBlock {
         content: [
           {
             type: "paragraph",
-            content: [{ type: "text", text: p.intent }],
+            content: [{ type: "text", text: intent }],
           },
         ],
       },
+      attribution: STRUCTURE_SENTINEL,
     };
-    return block;
   }
 
-  const proseBlock: ProseBlock = {
+  if (kind === "table") {
+    const emptyCell = {
+      type: "doc" as const,
+      content: [{ type: "paragraph", content: [] }],
+    };
+    return {
+      id,
+      type: "table",
+      caption: intent,
+      columns: [
+        { header: "Column 1", align: "left", width: STRUCTURE_SENTINEL },
+        { header: "Column 2", align: "left" },
+      ],
+      rows: [{ cells: [emptyCell, emptyCell] }],
+    };
+  }
+
+  if (kind === "kpi-cards") {
+    return {
+      id,
+      type: "kpi-cards",
+      cards: [
+        {
+          label: "Metric",
+          value: intent,
+          sublabel: STRUCTURE_SENTINEL,
+          trend: "none",
+          emphasis: "neutral",
+        },
+      ],
+    };
+  }
+
+  if (kind === "timeline") {
+    const chunks = splitByLengths(intent, [40, 80, 40, 80, 40, 80, 40, 80, 40, 80]);
+    const phases: TimelineBlock["phases"] = [];
+    for (let i = 0; i < chunks.length; i += 2) {
+      phases.push({
+        label: chunks[i] ?? "",
+        ...(chunks[i + 1] ? { subtitle: chunks[i + 1] } : {}),
+      });
+    }
+    phases.push({ label: STRUCTURE_SENTINEL });
+    return {
+      id,
+      type: "timeline",
+      phases,
+      orientation: "vertical",
+      connector: "none",
+    };
+  }
+
+  return {
     id,
     type: "prose",
     align: "left",
@@ -294,22 +424,23 @@ export function structurePlaceholder(p: Placeholder): DocBlock {
       content: [
         {
           type: "paragraph",
-          content: [{ type: "text", text: p.intent }],
+          content: [{ type: "text", text: intent }],
         },
       ],
     },
   };
-  return proseBlock;
 }
 
 function slugifyLocalId(blockId: string): string {
+  if (LOCAL_ID_PATTERN.test(blockId)) return blockId;
+
   const base = blockId
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/^-+|-+$/g, "");
-  if (LOCAL_ID_PATTERN.test(base)) return base;
-  const trimmed = base.slice(0, 31).replace(/-$/, "");
-  return LOCAL_ID_PATTERN.test(trimmed) ? trimmed : `b-${trimmed.slice(0, 28)}`;
+  const prefixed = /^[a-z]/.test(base) ? base : `b-${base}`;
+  const prefix = (prefixed || "b").slice(0, 27).replace(/-+$/g, "") || "b";
+  return `${prefix}-${shortHash(blockId)}`;
 }
 
 function truncate(text: string, max: number): string {
@@ -321,5 +452,35 @@ function escapeIntent(intent: string): string {
 }
 
 function unescapeIntent(raw: string): string {
-  return raw.replace(/\\"/g, '"').replace(/\\\\/g, "\\");
+  let value = "";
+  for (let i = 0; i < raw.length; i++) {
+    const char = raw[i];
+    if (char !== "\\") {
+      value += char;
+      continue;
+    }
+    value += raw[i + 1] ?? "";
+    i++;
+  }
+  return value;
+}
+
+function splitByLengths(value: string, lengths: number[]): string[] {
+  const chunks: string[] = [];
+  let offset = 0;
+  for (const length of lengths) {
+    if (offset >= value.length) break;
+    chunks.push(value.slice(offset, offset + length));
+    offset += length;
+  }
+  return chunks;
+}
+
+function shortHash(value: string): string {
+  let hash = 0x811c9dc5;
+  for (let i = 0; i < value.length; i++) {
+    hash ^= value.charCodeAt(i);
+    hash = Math.imul(hash, 0x01000193);
+  }
+  return (hash >>> 0).toString(36).padStart(4, "0").slice(-4);
 }
