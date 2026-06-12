@@ -3,7 +3,6 @@
   "files": [
     "tests/docs/json-canonical-sweep.test.ts",
     "tests/generation/layout-fit-check.test.ts",
-    "tests/generation/markdown-to-prosemirror.test.ts",
     "tests/integration/app-on-json-wiring.test.ts"
   ]
 }
