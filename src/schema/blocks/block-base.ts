@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { GenerationBlockFlagsSchema } from "../generation";
 import { StableIdSchema } from "../stable-id";
 import { BlockTypeStringSchema } from "./block-type-string";
 
@@ -26,6 +27,7 @@ export const BlockBaseSchema = z
     breakBefore: z.boolean().optional(),
     spaceBefore: z.number().min(0).max(40).optional(),
   })
+  .merge(GenerationBlockFlagsSchema)
   .strict();
 
 export type BlockBase = z.infer<typeof BlockBaseSchema>;

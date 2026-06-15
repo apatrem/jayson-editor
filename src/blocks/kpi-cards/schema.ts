@@ -7,6 +7,7 @@
 
 import { z } from "zod";
 import { BlockBaseSchema } from "../../schema/blocks/block-base";
+import { GenerationDataFieldsSchema } from "../../schema/generation";
 
 export const KpiTrendSchema = z.enum(["up", "down", "flat", "none"]);
 export type KpiTrend = z.infer<typeof KpiTrendSchema>;
@@ -34,7 +35,9 @@ export type KpiCard = z.infer<typeof KpiCardSchema>;
 export const KpiCardsBlockSchema = BlockBaseSchema.extend({
   type: z.literal("kpi-cards"),
   cards: z.array(KpiCardSchema).min(1).max(4),
-}).strict();
+})
+  .merge(GenerationDataFieldsSchema)
+  .strict();
 
 export type KpiCardsBlock = z.infer<typeof KpiCardsBlockSchema>;
 

@@ -1,5 +1,28 @@
 import type { DocModel } from "../schema/docmodel";
 import { AUTHORED_TYPE_RE } from "../schema/blocks/block-type-string";
+import {
+  DATA_FIELD_KEYS,
+  GENERATION_FLAG_KEYS,
+} from "../schema/generation";
+
+const GEN_FLAGS = [...GENERATION_FLAG_KEYS];
+const DATA_FIELDS = [...DATA_FIELD_KEYS];
+
+function blockOrder(
+  base: string[],
+  dataBearing = false,
+): string[] {
+  const withoutNote = base.filter((k) => k !== "note");
+  const note = base.includes("note") ? ["note"] : [];
+  return [
+    ...withoutNote,
+    ...(dataBearing ? DATA_FIELDS : []),
+    ...GEN_FLAGS,
+    "breakBefore",
+    "spaceBefore",
+    ...note,
+  ];
+}
 
 export const KEY_ORDERS: Record<string, string[]> = {
   DocModel: ["kind", "schemaVersion", "meta", "sections", "slides", "comments"],
@@ -30,29 +53,32 @@ export const KEY_ORDERS: Record<string, string[]> = {
   // remaining fields (attrs, note, body) follow in object order.
   AuthoredBlock: ["id", "type"],
 
-  prose: ["id", "type", "content", "align", "note"],
-  heading: ["id", "type", "level", "text", "numbered", "note"],
-  "bullet-list": ["id", "type", "items", "note"],
-  "numbered-list": ["id", "type", "items", "startAt", "note"],
-  callout: ["id", "type", "variant", "title", "body", "attribution", "note"],
-  "kpi-cards": ["id", "type", "cards", "note"],
-  chart: [
-    "id",
-    "type",
-    "chartType",
-    "title",
-    "takeaway",
-    "data",
-    "axes",
-    "palette",
-    "showLegend",
-    "showDataLabels",
-    "legendPosition",
-    "note",
-  ],
-  table: ["id", "type", "columns", "rows", "caption", "note"],
-  timeline: ["id", "type", "orientation", "connector", "phases", "note"],
-  roadmap: [
+  prose: blockOrder(["id", "type", "content", "align", "note"]),
+  heading: blockOrder(["id", "type", "level", "text", "numbered", "note"]),
+  "bullet-list": blockOrder(["id", "type", "items", "note"]),
+  "numbered-list": blockOrder(["id", "type", "items", "startAt", "note"]),
+  callout: blockOrder(["id", "type", "variant", "title", "body", "attribution", "note"]),
+  "kpi-cards": blockOrder(["id", "type", "cards", "note"], true),
+  chart: blockOrder(
+    [
+      "id",
+      "type",
+      "chartType",
+      "title",
+      "takeaway",
+      "data",
+      "axes",
+      "palette",
+      "showLegend",
+      "showDataLabels",
+      "legendPosition",
+      "note",
+    ],
+    true,
+  ),
+  table: blockOrder(["id", "type", "columns", "rows", "caption", "note"], true),
+  timeline: blockOrder(["id", "type", "orientation", "connector", "phases", "note"]),
+  roadmap: blockOrder([
     "id",
     "type",
     "timeUnit",
@@ -61,8 +87,8 @@ export const KEY_ORDERS: Record<string, string[]> = {
     "workstreams",
     "milestones",
     "note",
-  ],
-  "risk-matrix": [
+  ]),
+  "risk-matrix": blockOrder([
     "id",
     "type",
     "gridSize",
@@ -70,11 +96,13 @@ export const KEY_ORDERS: Record<string, string[]> = {
     "yAxisLabel",
     "risks",
     "note",
-  ],
-  team: ["id", "type", "layout", "members", "note"],
-  image: ["id", "type", "src", "alt", "caption", "width", "align", "note"],
-  diagram: ["id", "type", "source", "title", "caption", "width", "note"],
-  divider: ["id", "type", "label", "subtitle", "numbering", "note"],
+  ]),
+  team: blockOrder(["id", "type", "layout", "members", "note"]),
+  image: blockOrder(["id", "type", "src", "alt", "caption", "width", "align", "note"]),
+  diagram: blockOrder(["id", "type", "source", "title", "caption", "width", "note"]),
+  divider: blockOrder(["id", "type", "label", "subtitle", "numbering", "note"]),
+
+  DataSource: ["name", "link"],
 
   Comment: [
     "id",
@@ -117,6 +145,21 @@ export const KEY_ORDERS: Record<string, string[]> = {
   TeamMember: ["name", "role", "photo", "allocation", "bio"],
   BlockPatch: ["blockId", "path", "value"],
 };
+
+export function resolveChildShape(
+  parentShape: string,
+  key: string,
+  value: unknown,
+): string {
+  return childShapeFor(parentShape, key, value);
+}
+
+export function resolveArrayItemShape(
+  parentArrayShape: string,
+  item: unknown,
+): string {
+  return inferShapeForArrayItem(parentArrayShape, item);
+}
 
 export function canonicalize<T>(value: T): T {
   return canonicalizeValue(value, "DocModel") as T;
@@ -168,6 +211,14 @@ function childShapeFor(
 
   if (parentShape === "chart" && key === "data") return "ChartData";
   if (parentShape === "chart" && key === "axes") return "ChartAxes";
+  if (
+    (parentShape === "chart" ||
+      parentShape === "table" ||
+      parentShape === "kpi-cards") &&
+    key === "source"
+  ) {
+    return "DataSource";
+  }
   if (parentShape === "ChartData" && key === "series") return "_arrayOfChartSeries";
 
   if (parentShape === "table" && key === "columns") return "_arrayOfTableColumn";

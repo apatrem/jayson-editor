@@ -2,7 +2,13 @@ import { existsSync, readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
-import { KEY_ORDERS } from "../../src/docmodel/canonicalize";
+import { z } from "zod";
+import {
+  KEY_ORDERS,
+  resolveArrayItemShape,
+  resolveChildShape,
+} from "../../src/docmodel/canonicalize";
+import { loadAllSchemas } from "../../src/blocks/schema-registry";
 import { validateDocModel } from "../../src/schema/validate";
 
 // ─── FROZEN ACCEPTANCE TESTS · T-201 (plan/phase12-coarse) ──────────────────
@@ -34,6 +40,59 @@ async function loadSerialize(): Promise<{
   };
 }
 
+function zodObjectKeys(schema: z.ZodTypeAny): string[] {
+  if (schema instanceof z.ZodEffects) {
+    return zodObjectKeys(schema._def.schema as z.ZodTypeAny);
+  }
+  if (schema instanceof z.ZodObject) {
+    return Object.keys(schema.shape as Record<string, unknown>);
+  }
+  return [];
+}
+
+function assertKeyOrderCoverage(
+  shape: string,
+  value: unknown,
+  where: string,
+  violations: string[],
+): void {
+  if (value === null || value === undefined || typeof value !== "object") return;
+  if (Array.isArray(value)) return;
+
+  const order = KEY_ORDERS[shape];
+  if (!order) {
+    violations.push(`${where}: no KEY_ORDERS entry for shape "${shape}"`);
+    return;
+  }
+
+  const obj = value as Record<string, unknown>;
+  for (const key of Object.keys(obj)) {
+    if (!order.includes(key)) {
+      violations.push(
+        `${where}: field "${key}" missing from KEY_ORDERS["${shape}"] — ` +
+          "it would serialize in insertion order and break byte-stability (ADR-0022)",
+      );
+    }
+    const child = obj[key];
+    const childShape = resolveChildShape(shape, key, child);
+    if (childShape.startsWith("_arrayOf") && Array.isArray(child)) {
+      for (let i = 0; i < child.length; i++) {
+        const itemShape = resolveArrayItemShape(childShape, child[i]);
+        if (itemShape !== "_unknown") {
+          assertKeyOrderCoverage(
+            itemShape,
+            child[i],
+            `${where}.${key}[${i}]`,
+            violations,
+          );
+        }
+      }
+    } else if (childShape !== "_unknown" && !childShape.startsWith("_arrayOf")) {
+      assertKeyOrderCoverage(childShape, child, `${where}.${key}`, violations);
+    }
+  }
+}
+
 describe("T-201 · JSON DocModel round-trip is byte-stable and lossless", () => {
   it.each(fixtures)("examples/%s exists (one-time conversion, ADR-0022)", (name) => {
     expect(existsSync(join(repoRoot, "examples", name))).toBe(true);
@@ -62,25 +121,10 @@ describe("T-201 · JSON DocModel round-trip is byte-stable and lossless", () => 
       const doc = JSON.parse(readFileSync(path, "utf8")) as Record<string, unknown>;
       const violations: string[] = [];
 
-      const check = (shape: string, value: unknown, where: string): void => {
-        if (value === null || typeof value !== "object" || Array.isArray(value)) return;
-        const order = KEY_ORDERS[shape];
-        if (!order) {
-          violations.push(`${where}: no KEY_ORDERS entry for shape "${shape}"`);
-          return;
-        }
-        for (const key of Object.keys(value)) {
-          if (!order.includes(key)) {
-            violations.push(
-              `${where}: field "${key}" missing from KEY_ORDERS["${shape}"] — ` +
-                "it would serialize in insertion order and break byte-stability (ADR-0022)",
-            );
-          }
-        }
-      };
-
-      check("DocModel", doc, name);
-      check("Meta", doc.meta, `${name} meta`);
+      assertKeyOrderCoverage("DocModel", doc, name, violations);
+      if (doc.meta !== undefined) {
+        assertKeyOrderCoverage("Meta", doc.meta, `${name} meta`, violations);
+      }
 
       const containers: Array<[string, unknown]> = [
         ["Section", doc.sections],
@@ -90,22 +134,52 @@ describe("T-201 · JSON DocModel round-trip is byte-stable and lossless", () => 
         if (!Array.isArray(list)) continue;
         for (const container of list as Array<Record<string, unknown>>) {
           const containerId = String(container.id ?? "?");
-          check(shape, container, `${name} ${shape} ${containerId}`);
+          assertKeyOrderCoverage(shape, container, `${name} ${shape} ${containerId}`, violations);
           const blocks = container.blocks;
           if (!Array.isArray(blocks)) continue;
           for (const block of blocks as Array<Record<string, unknown>>) {
             const type = String(block.type ?? "?");
-            // Authored blocks carry per-manifest dynamic attrs (ADR-0016) —
-            // only closed shapes are required to be fully key-ordered.
             if (type.includes(":")) continue;
-            check(type, block, `${name} block ${String(block.id ?? "?")} (${type})`);
+            assertKeyOrderCoverage(
+              type,
+              block,
+              `${name} block ${String(block.id ?? "?")} (${type})`,
+              violations,
+            );
           }
+        }
+      }
+
+      if (Array.isArray(doc.comments)) {
+        for (const comment of doc.comments as Array<Record<string, unknown>>) {
+          assertKeyOrderCoverage(
+            "Comment",
+            comment,
+            `${name} comment ${String(comment.id ?? "?")}`,
+            violations,
+          );
         }
       }
 
       expect(violations).toEqual([]);
     },
   );
+
+  it("every Standard block schema key is registered in KEY_ORDERS", () => {
+    const violations: string[] = [];
+    for (const entry of loadAllSchemas()) {
+      const keys = zodObjectKeys(entry.schema);
+      const order = KEY_ORDERS[entry.schemaName];
+      for (const key of keys) {
+        if (!order?.includes(key)) {
+          violations.push(
+            `${entry.schemaName}: schema field "${key}" missing from KEY_ORDERS`,
+          );
+        }
+      }
+    }
+    expect(violations).toEqual([]);
+  });
 
   it("docs/JSON_FORMAT.md documents the deterministic serialization contract", () => {
     const path = join(repoRoot, "docs/JSON_FORMAT.md");

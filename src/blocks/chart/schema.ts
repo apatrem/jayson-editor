@@ -7,6 +7,7 @@
 
 import { z } from "zod";
 import { BlockBaseSchema } from "../../schema/blocks/block-base";
+import { GenerationDataFieldsSchema } from "../../schema/generation";
 
 // ── Chart types ──────────────────────────────────────────────────────────────
 
@@ -73,7 +74,9 @@ export const ChartBlockDataSchema = BlockBaseSchema.extend({
   showLegend: z.boolean().default(true),
   legendPosition: z.enum(["bottom", "right", "top"]).default("bottom"),
   showDataLabels: z.boolean().default(false),
-}).strict();
+})
+  .merge(GenerationDataFieldsSchema)
+  .strict();
 
 function validateChartCrossFields(
   block: z.infer<typeof ChartBlockDataSchema>,

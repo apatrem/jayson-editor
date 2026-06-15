@@ -15,7 +15,11 @@ export type BlockerKind =
   | "degraded-to-prose"
   | "layout-overflow"
   | "contradiction"
-  | "missing-source-for-verify";
+  | "missing-source-for-verify"
+  | "size-exceeds-envelope";
+
+/** D-35 anchor: block count above this triggers a document-level size flag. */
+export const PERF_ENVELOPE_MAX_BLOCKS = 200;
 
 export interface ReadinessBlocker {
   kind: BlockerKind;
@@ -89,6 +93,17 @@ export function collectReadinessBlockers(doc: DocModel): ReadinessBlocker[] {
         message: "Block marked confirmed but has no human-provided source.",
       });
     }
+  }
+
+  const blockCount = blocks.length;
+  if (blockCount > PERF_ENVELOPE_MAX_BLOCKS) {
+    blockers.push({
+      kind: "size-exceeds-envelope",
+      blockId: "",
+      blockType: doc.kind,
+      message:
+        `Document has ${blockCount} blocks — exceeds D-35 perf envelope (${PERF_ENVELOPE_MAX_BLOCKS}).`,
+    });
   }
 
   return blockers;
