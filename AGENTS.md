@@ -170,7 +170,7 @@ shrink (ADR-0023). Run the frozen lane locally with `npm run test:frozen`. Local
     replacement (terminal-safety rules; `.cursor/cli.json` denies)
   - the gate or CI config itself (`ruby scripts/check-specs`,
     `.github/workflows/`, `tests/frozen-acceptance.json`)
-  - lockfiles / dependency manifests (`package-lock.json`, `Cargo.lock`, new
+  - lockfiles / dependency manifests (`package-lock.json`, `src-tauri/Cargo.lock`, new
     dependencies without justification)
   - migrations · schema · data-shape changes (DocModel contract,
     `docs/JSON_FORMAT.md`, block schema)
@@ -191,7 +191,7 @@ After review produces a blockers-only punch-list:
 - **Default re-check:** targeted re-verify — hand each blocker back to the
   reviewer that raised it for RESOLVED / NOT-RESOLVED. Uncapped; not counted
   toward the review-round cap.
-- **Excess findings:** when blocker count exceeds tier threshold, reviewers mark
+- **Excess findings:** when the blocker count meets or exceeds the per-tier threshold N (low 3 / medium 4 / hard 5), reviewers mark
   the diff systemically shaky, or remediation touched far beyond the punch-list —
   escalate one tier (`low→medium→hard`) and run a **full fresh review round**
   on the remediated diff.
@@ -279,7 +279,7 @@ ordering as `depends-on`.
 (`T-NNN`) in commit messages and PR titles.
 - **Smallest correct change, via the ladder** (AW-0011): needed at all? →
   stdlib → platform feature → already-installed dep → one line → minimal code.
-  No unrequested abstractions; no new dependencies without asking.
+  No unrequested abstractions; no new dependencies without justification.
 - **Minimalism has a floor** (AW-0011) — never cut: input validation at trust
   boundaries, error handling that prevents data loss, security, accessibility.
   Reject invalid input; never auto-"fix" it — fail loudly.
