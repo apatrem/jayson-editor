@@ -191,40 +191,47 @@ describe("Routes — multi-doc-ready shape (D-105)", () => {
 
 describe("Routes — open document from welcome state", () => {
   it("transitions from welcome to document when file is selected via menu", async () => {
-    const sampleYaml = `
-kind: document
-schemaVersion: "1.0.0"
-meta:
-  client: Test
-  project: Test
-  docKind: proposal
-  tags: []
-  language: en
-  status: draft
-  archived: false
-  confidentialityLevel: medium
-  owner: test@example.com
-  reviewers: []
-  createdAt: "2026-01-01T00:00:00Z"
-  updatedAt: "2026-01-01T00:00:00Z"
-  brandRef: "$brand:default"
-sections:
-  - id: section-1
-    title: Overview
-    blocks:
-      - id: block-1
-        type: heading
-        level: 1
-        text: Test Heading
-        numbered: false
-`;
-    const readYamlFile = vi.fn(() => Promise.resolve(sampleYaml));
+    const sampleJson = JSON.stringify({
+      kind: "document",
+      schemaVersion: "1.0.0",
+      meta: {
+        client: "Test",
+        project: "Test",
+        docKind: "proposal",
+        tags: [],
+        language: "en",
+        status: "draft",
+        archived: false,
+        confidentialityLevel: "medium",
+        owner: "test@example.com",
+        reviewers: [],
+        createdAt: "2026-01-01T00:00:00Z",
+        updatedAt: "2026-01-01T00:00:00Z",
+        brandRef: "$brand:default",
+      },
+      sections: [
+        {
+          id: "section-1",
+          title: "Overview",
+          blocks: [
+            {
+              id: "block-1",
+              type: "heading",
+              level: 1,
+              text: "Test Heading",
+              numbered: false,
+            },
+          ],
+        },
+      ],
+    });
+    const readDocumentFile = vi.fn(() => Promise.resolve(sampleJson));
     render(
       createElement(App, {
         bootStrategy: welcomeStrategy,
         fileActions: {
-          selectOpenPath: () => Promise.resolve("/docs/sample.yaml"),
-          readYamlFile,
+          selectOpenPath: () => Promise.resolve("/docs/sample.json"),
+          readDocumentFile,
         },
       }),
     );
@@ -238,6 +245,6 @@ sections:
     await waitFor(() => {
       expect(screen.getByLabelText("Document shell")).toBeTruthy();
     });
-    expect(readYamlFile).toHaveBeenCalledWith("/docs/sample.yaml");
+    expect(readDocumentFile).toHaveBeenCalledWith("/docs/sample.json");
   });
 });

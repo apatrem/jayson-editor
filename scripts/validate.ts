@@ -1,11 +1,11 @@
 #!/usr/bin/env tsx
 import { readFileSync } from "node:fs";
-import { parseDocModelYaml } from "../src/docmodel/serialize";
+import { parseDocModelJson } from "../src/docmodel/serialize";
 import { validateDocModel } from "../src/schema/validate";
 
 const path = process.argv[2];
 if (!path) {
-  console.error("usage: npm run validate <path-to-doc.yaml>");
+  console.error("usage: npm run validate <path-to-doc.json>");
   process.exit(2);
 }
 
@@ -30,9 +30,9 @@ if (placeholderLines.length > 0) {
 
 let parsed: unknown;
 try {
-  parsed = parseDocModelYaml(source);
+  parsed = parseDocModelJson(source);
 } catch (e) {
-  console.error(`${path}: YAML parse error: ${(e as Error).message}`);
+  console.error(`${path}: JSON parse error: ${(e as Error).message}`);
   process.exit(1);
 }
 

@@ -7,8 +7,8 @@
  * `invoke()` rejects with, so `isIpcError` / `formatErrorMessage` work
  * identically against the stub and the real shell.
  *
- * Templates under `/templates/**.yaml` are bundled at build time via
- * `import.meta.glob` and served by `read_yaml_file` so the dev surface can
+ * Templates under `/templates/**.json` are bundled at build time via
+ * `import.meta.glob` and served by `read_document_file` so the dev surface can
  * load real document fixtures without filesystem access.
  *
  * Not shipped to production: callers must gate behind `import.meta.env.DEV`.
@@ -26,7 +26,7 @@ const ipcError = (kind: IpcError["kind"], message: string): IpcError => ({
 });
 
 const bundledDocs: Record<string, string> = import.meta.glob(
-  ["/templates/**/*.yaml", "/documents/**/*.yaml"],
+  ["/templates/**/*.json", "/documents/**/*.json"],
   { query: "?raw", import: "default", eager: true },
 );
 
@@ -56,7 +56,7 @@ const handlers: Record<string, Handler> = {
 
   list_directory: () => Promise.resolve([]),
 
-  read_yaml_file: (args) => {
+  read_document_file: (args) => {
     const path = String(args["path"] ?? "");
     const cached = writtenFiles.get(path);
     if (cached !== undefined) return Promise.resolve(cached);
@@ -67,13 +67,13 @@ const handlers: Record<string, Handler> = {
     return Promise.reject(ipcError("not-found", `File not found in stub: ${path}`));
   },
 
-  write_yaml_file: (args) => {
+  write_document_file: (args) => {
     const path = String(args["path"] ?? "");
     const content = String(args["content"] ?? "");
     writtenFiles.set(path, content);
     // eslint-disable-next-line no-console
     console.info(
-      `[browser-ipc-stub] write_yaml_file: ${path} (${content.length} bytes — held in memory only)`,
+      `[browser-ipc-stub] write_document_file: ${path} (${content.length} bytes — held in memory only)`,
     );
     return Promise.resolve(null);
   },
@@ -148,7 +148,7 @@ export function installBrowserIpcStub(): void {
   // eslint-disable-next-line no-console
   console.info(
     "[browser-ipc-stub] Installed. Use ?doc=<path> to open a fixture, " +
-      `e.g. ?doc=/templates/commercial-proposal.yaml. ` +
+      `e.g. ?doc=/templates/commercial-proposal.json. ` +
       `Bundled docs: ${Object.keys(bundledDocs).join(", ")}`,
   );
 }

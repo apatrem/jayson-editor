@@ -2,7 +2,7 @@ import type { Meta } from "../schema/meta";
 
 export interface LibraryEntry {
   path: string;
-  yamlFilename: string;
+  jsonFilename: string;
   meta: Meta;
   thumbnailUri: string | null;
   fileSize: number;

@@ -1,0 +1,572 @@
+{
+  "kind": "document",
+  "schemaVersion": "1.0.0",
+  "meta": {
+    "client": "[REPLACE: Client name]",
+    "project": "[REPLACE: Project name]",
+    "docKind": "proposal",
+    "sector": "[REPLACE: energy | mobility | circular | other]",
+    "tags": [],
+    "language": "en",
+    "status": "draft",
+    "archived": false,
+    "confidentialityLevel": "high",
+    "owner": "replace@example.com",
+    "reviewers": [],
+    "createdAt": "2026-01-01T00:00:00Z",
+    "updatedAt": "2026-01-01T00:00:00Z",
+    "brandRef": "$brand:default"
+  },
+  "sections": [
+    {
+      "id": "cover",
+      "title": "Cover",
+      "blocks": [
+        {
+          "id": "cover-heading",
+          "type": "heading",
+          "level": 1,
+          "text": "[REPLACE: Proposal title]",
+          "numbered": false
+        },
+        {
+          "id": "cover-prose",
+          "type": "prose",
+          "content": {
+            "type": "doc",
+            "content": [
+              {
+                "type": "paragraph",
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "Prepared for [REPLACE: Client name] · [REPLACE: Month YYYY]"
+                  }
+                ]
+              }
+            ]
+          },
+          "align": "left"
+        }
+      ]
+    },
+    {
+      "id": "exec-summary",
+      "title": "Executive summary",
+      "blocks": [
+        {
+          "id": "exec-heading",
+          "type": "heading",
+          "level": 2,
+          "text": "Executive summary",
+          "numbered": true
+        },
+        {
+          "id": "exec-prose",
+          "type": "prose",
+          "content": {
+            "type": "doc",
+            "content": [
+              {
+                "type": "paragraph",
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "[REPLACE: 2–3 sentence summary — the client situation, the proposed approach, and the key outcome you are promising.]"
+                  }
+                ]
+              }
+            ]
+          },
+          "align": "left"
+        },
+        {
+          "id": "exec-kpi",
+          "type": "kpi-cards",
+          "cards": [
+            {
+              "value": "[REPLACE: €0M]",
+              "label": "[REPLACE: Key metric 1]",
+              "sublabel": "[REPLACE: Context for metric 1]",
+              "trend": "none",
+              "emphasis": "brand"
+            },
+            {
+              "value": "[REPLACE: 0%]",
+              "label": "[REPLACE: Key metric 2]",
+              "sublabel": "[REPLACE: Context for metric 2]",
+              "trend": "none",
+              "emphasis": "neutral"
+            },
+            {
+              "value": "[REPLACE: 0 wk]",
+              "label": "[REPLACE: Engagement duration]",
+              "sublabel": "[REPLACE: Context]",
+              "trend": "none",
+              "emphasis": "neutral"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "client-situation",
+      "title": "Client situation",
+      "blocks": [
+        {
+          "id": "sit-heading",
+          "type": "heading",
+          "level": 2,
+          "text": "[REPLACE: The challenge]",
+          "numbered": false
+        },
+        {
+          "id": "sit-prose",
+          "type": "prose",
+          "content": {
+            "type": "doc",
+            "content": [
+              {
+                "type": "paragraph",
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "[REPLACE: Describe the client's current situation and the problem they face. Be specific — use data where available. Explain why this problem matters now.]"
+                  }
+                ]
+              }
+            ]
+          },
+          "align": "left"
+        },
+        {
+          "id": "sit-callout",
+          "type": "callout",
+          "variant": "warning",
+          "title": "[REPLACE: Key risk if unaddressed]",
+          "body": {
+            "type": "doc",
+            "content": [
+              {
+                "type": "paragraph",
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "[REPLACE: One-line statement of what happens if the client does nothing.]"
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "proposed-approach",
+      "title": "Proposed approach",
+      "blocks": [
+        {
+          "id": "approach-heading",
+          "type": "heading",
+          "level": 2,
+          "text": "Our approach",
+          "numbered": false
+        },
+        {
+          "id": "approach-prose",
+          "type": "prose",
+          "content": {
+            "type": "doc",
+            "content": [
+              {
+                "type": "paragraph",
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "[REPLACE: Describe the methodology and approach you will use.]"
+                  }
+                ]
+              }
+            ]
+          },
+          "align": "left"
+        },
+        {
+          "id": "approach-bullets",
+          "type": "bullet-list",
+          "items": [
+            {
+              "text": {
+                "type": "doc",
+                "content": [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "[REPLACE: Phase 1 — Name]: ",
+                        "marks": [
+                          {
+                            "type": "strong"
+                          }
+                        ]
+                      },
+                      {
+                        "type": "text",
+                        "text": "[REPLACE: Description of phase 1]"
+                      }
+                    ]
+                  }
+                ]
+              }
+            },
+            {
+              "text": {
+                "type": "doc",
+                "content": [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "[REPLACE: Phase 2 — Name]: ",
+                        "marks": [
+                          {
+                            "type": "strong"
+                          }
+                        ]
+                      },
+                      {
+                        "type": "text",
+                        "text": "[REPLACE: Description of phase 2]"
+                      }
+                    ]
+                  }
+                ]
+              }
+            },
+            {
+              "text": {
+                "type": "doc",
+                "content": [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "[REPLACE: Phase 3 — Name]: ",
+                        "marks": [
+                          {
+                            "type": "strong"
+                          }
+                        ]
+                      },
+                      {
+                        "type": "text",
+                        "text": "[REPLACE: Description of phase 3]"
+                      }
+                    ]
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "deliverables-timeline",
+      "title": "Deliverables + timeline",
+      "blocks": [
+        {
+          "id": "deliv-heading",
+          "type": "heading",
+          "level": 2,
+          "text": "What you will receive",
+          "numbered": false
+        },
+        {
+          "id": "deliv-timeline",
+          "type": "timeline",
+          "orientation": "horizontal",
+          "connector": "arrow",
+          "phases": [
+            {
+              "label": "[REPLACE: Phase 1]",
+              "subtitle": "[REPLACE: Week 1–2]",
+              "body": "[REPLACE: Deliverable 1 — brief description]",
+              "duration": "[REPLACE: 2 weeks]"
+            },
+            {
+              "label": "[REPLACE: Phase 2]",
+              "subtitle": "[REPLACE: Week 3–6]",
+              "body": "[REPLACE: Deliverable 2 — brief description]",
+              "duration": "[REPLACE: 4 weeks]"
+            },
+            {
+              "label": "[REPLACE: Phase 3]",
+              "subtitle": "[REPLACE: Week 7–10]",
+              "body": "[REPLACE: Deliverable 3 — brief description]",
+              "duration": "[REPLACE: 4 weeks]"
+            },
+            {
+              "label": "[REPLACE: Final delivery]",
+              "subtitle": "[REPLACE: Week 11–12]",
+              "body": "[REPLACE: Final deliverable and sign-off]",
+              "duration": "[REPLACE: 2 weeks]"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "team",
+      "title": "Team",
+      "blocks": [
+        {
+          "id": "team-heading",
+          "type": "heading",
+          "level": 2,
+          "text": "Your team",
+          "numbered": false
+        },
+        {
+          "id": "team-grid",
+          "type": "team",
+          "layout": "grid",
+          "members": [
+            {
+              "name": "[REPLACE: Lead name]",
+              "role": "[REPLACE: Engagement Lead]",
+              "bio": "[REPLACE: 1–2 sentences on relevant experience]"
+            },
+            {
+              "name": "[REPLACE: Expert name]",
+              "role": "[REPLACE: Subject-matter expert]",
+              "bio": "[REPLACE: 1–2 sentences on relevant experience]"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "pricing",
+      "title": "Pricing",
+      "blocks": [
+        {
+          "id": "pricing-heading",
+          "type": "heading",
+          "level": 2,
+          "text": "Investment",
+          "numbered": false
+        },
+        {
+          "id": "pricing-table",
+          "type": "table",
+          "columns": [
+            {
+              "header": "Item",
+              "align": "left"
+            },
+            {
+              "header": "Scope",
+              "align": "left"
+            },
+            {
+              "header": "Fee",
+              "align": "left"
+            }
+          ],
+          "rows": [
+            {
+              "cells": [
+                {
+                  "type": "doc",
+                  "content": [
+                    {
+                      "type": "paragraph",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "[REPLACE: Phase 1]"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "doc",
+                  "content": [
+                    {
+                      "type": "paragraph",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "[REPLACE: Scope description]"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "doc",
+                  "content": [
+                    {
+                      "type": "paragraph",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "[REPLACE: €0,000]"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "cells": [
+                {
+                  "type": "doc",
+                  "content": [
+                    {
+                      "type": "paragraph",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "[REPLACE: Phase 2]"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "doc",
+                  "content": [
+                    {
+                      "type": "paragraph",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "[REPLACE: Scope description]"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "doc",
+                  "content": [
+                    {
+                      "type": "paragraph",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "[REPLACE: €0,000]"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "cells": [
+                {
+                  "type": "doc",
+                  "content": [
+                    {
+                      "type": "paragraph",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "Total"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "doc",
+                  "content": [
+                    {
+                      "type": "paragraph",
+                      "content": []
+                    }
+                  ]
+                },
+                {
+                  "type": "doc",
+                  "content": [
+                    {
+                      "type": "paragraph",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "[REPLACE: €0,000]"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "pricing-prose",
+          "type": "prose",
+          "content": {
+            "type": "doc",
+            "content": [
+              {
+                "type": "paragraph",
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "[REPLACE: Payment terms and any relevant notes on the pricing structure.]"
+                  }
+                ]
+              }
+            ]
+          },
+          "align": "left"
+        }
+      ]
+    },
+    {
+      "id": "appendix",
+      "title": "Appendix",
+      "blocks": [
+        {
+          "id": "app-heading",
+          "type": "heading",
+          "level": 2,
+          "text": "Appendix",
+          "numbered": true,
+          "breakBefore": true
+        },
+        {
+          "id": "app-prose",
+          "type": "prose",
+          "content": {
+            "type": "doc",
+            "content": [
+              {
+                "type": "paragraph",
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "[REPLACE: Supporting data, references, or supplementary analysis goes here.]"
+                  }
+                ]
+              }
+            ]
+          },
+          "align": "left"
+        }
+      ]
+    }
+  ],
+  "comments": []
+}

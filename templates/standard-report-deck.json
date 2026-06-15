@@ -1,0 +1,608 @@
+{
+  "kind": "deck",
+  "schemaVersion": "1.0.0",
+  "meta": {
+    "client": "[REPLACE: Client name]",
+    "project": "[REPLACE: Project name]",
+    "docKind": "deck",
+    "sector": "[REPLACE: energy | mobility | circular | other]",
+    "tags": [],
+    "language": "en",
+    "status": "draft",
+    "archived": false,
+    "confidentialityLevel": "high",
+    "owner": "replace@example.com",
+    "reviewers": [],
+    "createdAt": "2026-01-01T00:00:00Z",
+    "updatedAt": "2026-01-01T00:00:00Z",
+    "brandRef": "$brand:default"
+  },
+  "slides": [
+    {
+      "id": "s1-cover",
+      "layout": "cover",
+      "blocks": [
+        {
+          "id": "s1-title",
+          "type": "heading",
+          "level": 1,
+          "text": "[REPLACE: Report title]",
+          "numbered": false
+        },
+        {
+          "id": "s1-subtitle",
+          "type": "prose",
+          "content": {
+            "type": "doc",
+            "content": [
+              {
+                "type": "paragraph",
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "Prepared for [REPLACE: Client name] · [REPLACE: Month YYYY]"
+                  }
+                ]
+              }
+            ]
+          },
+          "align": "left"
+        }
+      ],
+      "notes": "[REPLACE: Opening — acknowledge audience, set context]"
+    },
+    {
+      "id": "s2-agenda",
+      "layout": "agenda",
+      "blocks": [
+        {
+          "id": "s2-items",
+          "type": "numbered-list",
+          "items": [
+            {
+              "text": {
+                "type": "doc",
+                "content": [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Executive summary"
+                      }
+                    ]
+                  }
+                ]
+              }
+            },
+            {
+              "text": {
+                "type": "doc",
+                "content": [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Methodology"
+                      }
+                    ]
+                  }
+                ]
+              }
+            },
+            {
+              "text": {
+                "type": "doc",
+                "content": [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Key findings"
+                      }
+                    ]
+                  }
+                ]
+              }
+            },
+            {
+              "text": {
+                "type": "doc",
+                "content": [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Recommendations"
+                      }
+                    ]
+                  }
+                ]
+              }
+            },
+            {
+              "text": {
+                "type": "doc",
+                "content": [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Risks"
+                      }
+                    ]
+                  }
+                ]
+              }
+            },
+            {
+              "text": {
+                "type": "doc",
+                "content": [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Closing"
+                      }
+                    ]
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      ],
+      "notes": ""
+    },
+    {
+      "id": "s3-exec",
+      "layout": "kpis",
+      "blocks": [
+        {
+          "id": "s3-heading",
+          "type": "heading",
+          "level": 2,
+          "text": "Executive summary",
+          "numbered": false
+        },
+        {
+          "id": "s3-kpis",
+          "type": "kpi-cards",
+          "cards": [
+            {
+              "value": "[REPLACE: Key finding 1]",
+              "label": "[REPLACE: Metric or theme]",
+              "sublabel": "[REPLACE: Context]",
+              "trend": "none",
+              "emphasis": "brand"
+            },
+            {
+              "value": "[REPLACE: Key finding 2]",
+              "label": "[REPLACE: Metric or theme]",
+              "sublabel": "[REPLACE: Context]",
+              "trend": "none",
+              "emphasis": "neutral"
+            },
+            {
+              "value": "[REPLACE: Key finding 3]",
+              "label": "[REPLACE: Metric or theme]",
+              "sublabel": "[REPLACE: Context]",
+              "trend": "none",
+              "emphasis": "neutral"
+            }
+          ]
+        },
+        {
+          "id": "s3-prose",
+          "type": "prose",
+          "content": {
+            "type": "doc",
+            "content": [
+              {
+                "type": "paragraph",
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "[REPLACE: 2–3 sentence summary of scope, findings, and principal recommendation.]"
+                  }
+                ]
+              }
+            ]
+          },
+          "align": "left"
+        }
+      ],
+      "notes": "[REPLACE: Talking points for executive summary slide]"
+    },
+    {
+      "id": "s4-methodology",
+      "layout": "title-body",
+      "blocks": [
+        {
+          "id": "s4-heading",
+          "type": "heading",
+          "level": 2,
+          "text": "Methodology",
+          "numbered": false
+        },
+        {
+          "id": "s4-bullets",
+          "type": "bullet-list",
+          "items": [
+            {
+              "text": {
+                "type": "doc",
+                "content": [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Data: ",
+                        "marks": [
+                          {
+                            "type": "strong"
+                          }
+                        ]
+                      },
+                      {
+                        "type": "text",
+                        "text": "[REPLACE: Sources and datasets used]"
+                      }
+                    ]
+                  }
+                ]
+              }
+            },
+            {
+              "text": {
+                "type": "doc",
+                "content": [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Interviews: ",
+                        "marks": [
+                          {
+                            "type": "strong"
+                          }
+                        ]
+                      },
+                      {
+                        "type": "text",
+                        "text": "[REPLACE: N interviews with X roles across Y geographies]"
+                      }
+                    ]
+                  }
+                ]
+              }
+            },
+            {
+              "text": {
+                "type": "doc",
+                "content": [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Period: ",
+                        "marks": [
+                          {
+                            "type": "strong"
+                          }
+                        ]
+                      },
+                      {
+                        "type": "text",
+                        "text": "[REPLACE: Date range of analysis]"
+                      }
+                    ]
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      ],
+      "notes": ""
+    },
+    {
+      "id": "s5-finding-1",
+      "layout": "chart-commentary",
+      "blocks": [
+        {
+          "id": "s5-heading",
+          "type": "heading",
+          "level": 2,
+          "text": "Finding 1: [REPLACE: Title]",
+          "numbered": false
+        },
+        {
+          "id": "s5-chart",
+          "type": "chart",
+          "chartType": "bar",
+          "title": "[REPLACE: Chart title]",
+          "data": {
+            "series": [
+              {
+                "name": "[REPLACE: Series]",
+                "values": [
+                  0,
+                  0,
+                  0
+                ]
+              }
+            ],
+            "xLabels": [
+              "[REPLACE: A]",
+              "[REPLACE: B]",
+              "[REPLACE: C]"
+            ]
+          },
+          "axes": {
+            "xTitle": "[REPLACE: X label]",
+            "yTitle": "[REPLACE: Y label]",
+            "yZeroBased": true
+          },
+          "palette": "qualitative",
+          "showLegend": true,
+          "showDataLabels": false,
+          "legendPosition": "bottom"
+        },
+        {
+          "id": "s5-callout",
+          "type": "callout",
+          "variant": "info",
+          "title": "So what",
+          "body": {
+            "type": "doc",
+            "content": [
+              {
+                "type": "paragraph",
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "[REPLACE: One-line implication of this finding for the client.]"
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      ],
+      "notes": "[REPLACE: Talking points for finding 1]"
+    },
+    {
+      "id": "s6-finding-2",
+      "layout": "title-body",
+      "blocks": [
+        {
+          "id": "s6-heading",
+          "type": "heading",
+          "level": 2,
+          "text": "Finding 2: [REPLACE: Title]",
+          "numbered": false
+        },
+        {
+          "id": "s6-prose",
+          "type": "prose",
+          "content": {
+            "type": "doc",
+            "content": [
+              {
+                "type": "paragraph",
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "[REPLACE: Description of finding 2 with supporting evidence.]"
+                  }
+                ]
+              }
+            ]
+          },
+          "align": "left"
+        }
+      ],
+      "notes": "[REPLACE: Talking points for finding 2]"
+    },
+    {
+      "id": "s7-finding-3",
+      "layout": "title-body",
+      "blocks": [
+        {
+          "id": "s7-heading",
+          "type": "heading",
+          "level": 2,
+          "text": "Finding 3: [REPLACE: Title]",
+          "numbered": false
+        },
+        {
+          "id": "s7-prose",
+          "type": "prose",
+          "content": {
+            "type": "doc",
+            "content": [
+              {
+                "type": "paragraph",
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "[REPLACE: Description of finding 3 with supporting evidence.]"
+                  }
+                ]
+              }
+            ]
+          },
+          "align": "left"
+        }
+      ],
+      "notes": "[REPLACE: Talking points for finding 3]"
+    },
+    {
+      "id": "s8-recommendations",
+      "layout": "title-body",
+      "blocks": [
+        {
+          "id": "s8-heading",
+          "type": "heading",
+          "level": 2,
+          "text": "Recommendations",
+          "numbered": false
+        },
+        {
+          "id": "s8-numbered",
+          "type": "numbered-list",
+          "items": [
+            {
+              "text": {
+                "type": "doc",
+                "content": [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "[REPLACE: Recommendation 1]. ",
+                        "marks": [
+                          {
+                            "type": "strong"
+                          }
+                        ]
+                      },
+                      {
+                        "type": "text",
+                        "text": "[REPLACE: Brief rationale]"
+                      }
+                    ]
+                  }
+                ]
+              }
+            },
+            {
+              "text": {
+                "type": "doc",
+                "content": [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "[REPLACE: Recommendation 2]. ",
+                        "marks": [
+                          {
+                            "type": "strong"
+                          }
+                        ]
+                      },
+                      {
+                        "type": "text",
+                        "text": "[REPLACE: Brief rationale]"
+                      }
+                    ]
+                  }
+                ]
+              }
+            },
+            {
+              "text": {
+                "type": "doc",
+                "content": [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "[REPLACE: Recommendation 3]. ",
+                        "marks": [
+                          {
+                            "type": "strong"
+                          }
+                        ]
+                      },
+                      {
+                        "type": "text",
+                        "text": "[REPLACE: Brief rationale]"
+                      }
+                    ]
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      ],
+      "notes": "[REPLACE: Talking points for recommendations]"
+    },
+    {
+      "id": "s9-risks",
+      "layout": "title-body",
+      "blocks": [
+        {
+          "id": "s9-heading",
+          "type": "heading",
+          "level": 2,
+          "text": "Key risks",
+          "numbered": false
+        },
+        {
+          "id": "s9-risk-matrix",
+          "type": "risk-matrix",
+          "gridSize": "3x3",
+          "xAxisLabel": "Likelihood",
+          "yAxisLabel": "Impact",
+          "risks": [
+            {
+              "label": "[REPLACE: Risk 1 label (max 40 chars)]",
+              "x": 2,
+              "y": 3,
+              "severity": "high"
+            },
+            {
+              "label": "[REPLACE: Risk 2 label (max 40 chars)]",
+              "x": 1,
+              "y": 3,
+              "severity": "medium"
+            }
+          ]
+        }
+      ],
+      "notes": "[REPLACE: Talking points for risks slide]"
+    },
+    {
+      "id": "s10-closing",
+      "layout": "closing",
+      "blocks": [
+        {
+          "id": "s10-prose",
+          "type": "prose",
+          "content": {
+            "type": "doc",
+            "content": [
+              {
+                "type": "paragraph",
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "[REPLACE: Thank the audience, summarise the top recommendation, invite questions.]"
+                  }
+                ]
+              }
+            ]
+          },
+          "align": "left"
+        }
+      ],
+      "notes": "[REPLACE: Closing talking points]"
+    }
+  ],
+  "comments": []
+}

@@ -1,0 +1,731 @@
+{
+  "kind": "deck",
+  "schemaVersion": "1.0.0",
+  "meta": {
+    "client": "[REPLACE: Client name]",
+    "project": "[REPLACE: Project name]",
+    "docKind": "deck",
+    "sector": "[REPLACE: energy | mobility | circular | other]",
+    "tags": [],
+    "language": "en",
+    "status": "draft",
+    "archived": false,
+    "confidentialityLevel": "high",
+    "owner": "replace@example.com",
+    "reviewers": [],
+    "createdAt": "2026-01-01T00:00:00Z",
+    "updatedAt": "2026-01-01T00:00:00Z",
+    "brandRef": "$brand:default"
+  },
+  "slides": [
+    {
+      "id": "s1-cover",
+      "layout": "cover",
+      "blocks": [
+        {
+          "id": "s1-title",
+          "type": "heading",
+          "level": 1,
+          "text": "[REPLACE: Proposal title]",
+          "numbered": false
+        },
+        {
+          "id": "s1-subtitle",
+          "type": "prose",
+          "content": {
+            "type": "doc",
+            "content": [
+              {
+                "type": "paragraph",
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "Prepared for [REPLACE: Client name] · [REPLACE: Month YYYY]"
+                  }
+                ]
+              }
+            ]
+          },
+          "align": "left"
+        }
+      ],
+      "notes": "[REPLACE: Opening notes — pause, acknowledge attendees, set context]"
+    },
+    {
+      "id": "s2-agenda",
+      "layout": "agenda",
+      "blocks": [
+        {
+          "id": "s2-items",
+          "type": "numbered-list",
+          "items": [
+            {
+              "text": {
+                "type": "doc",
+                "content": [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Situation"
+                      }
+                    ]
+                  }
+                ]
+              }
+            },
+            {
+              "text": {
+                "type": "doc",
+                "content": [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Proposed approach"
+                      }
+                    ]
+                  }
+                ]
+              }
+            },
+            {
+              "text": {
+                "type": "doc",
+                "content": [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Deliverables"
+                      }
+                    ]
+                  }
+                ]
+              }
+            },
+            {
+              "text": {
+                "type": "doc",
+                "content": [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Timeline"
+                      }
+                    ]
+                  }
+                ]
+              }
+            },
+            {
+              "text": {
+                "type": "doc",
+                "content": [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Team"
+                      }
+                    ]
+                  }
+                ]
+              }
+            },
+            {
+              "text": {
+                "type": "doc",
+                "content": [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Pricing"
+                      }
+                    ]
+                  }
+                ]
+              }
+            },
+            {
+              "text": {
+                "type": "doc",
+                "content": [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Next steps"
+                      }
+                    ]
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      ],
+      "notes": ""
+    },
+    {
+      "id": "s3-situation",
+      "layout": "title-body",
+      "blocks": [
+        {
+          "id": "s3-heading",
+          "type": "heading",
+          "level": 2,
+          "text": "The challenge",
+          "numbered": false
+        },
+        {
+          "id": "s3-prose",
+          "type": "prose",
+          "content": {
+            "type": "doc",
+            "content": [
+              {
+                "type": "paragraph",
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "[REPLACE: Describe the client's situation and the core problem they face. Be specific. Use data.]"
+                  }
+                ]
+              }
+            ]
+          },
+          "align": "left"
+        },
+        {
+          "id": "s3-callout",
+          "type": "callout",
+          "variant": "warning",
+          "title": "[REPLACE: Why this matters now]",
+          "body": {
+            "type": "doc",
+            "content": [
+              {
+                "type": "paragraph",
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "[REPLACE: One sentence on urgency or consequence of inaction.]"
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      ],
+      "notes": "[REPLACE: Talking points for the situation slide]"
+    },
+    {
+      "id": "s4-approach",
+      "layout": "title-body",
+      "blocks": [
+        {
+          "id": "s4-heading",
+          "type": "heading",
+          "level": 2,
+          "text": "Our approach",
+          "numbered": false
+        },
+        {
+          "id": "s4-bullets",
+          "type": "bullet-list",
+          "items": [
+            {
+              "text": {
+                "type": "doc",
+                "content": [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "[REPLACE: Phase 1]: ",
+                        "marks": [
+                          {
+                            "type": "strong"
+                          }
+                        ]
+                      },
+                      {
+                        "type": "text",
+                        "text": "[REPLACE: What happens in phase 1]"
+                      }
+                    ]
+                  }
+                ]
+              }
+            },
+            {
+              "text": {
+                "type": "doc",
+                "content": [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "[REPLACE: Phase 2]: ",
+                        "marks": [
+                          {
+                            "type": "strong"
+                          }
+                        ]
+                      },
+                      {
+                        "type": "text",
+                        "text": "[REPLACE: What happens in phase 2]"
+                      }
+                    ]
+                  }
+                ]
+              }
+            },
+            {
+              "text": {
+                "type": "doc",
+                "content": [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "[REPLACE: Phase 3]: ",
+                        "marks": [
+                          {
+                            "type": "strong"
+                          }
+                        ]
+                      },
+                      {
+                        "type": "text",
+                        "text": "[REPLACE: What happens in phase 3]"
+                      }
+                    ]
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      ],
+      "notes": "[REPLACE: Talking points for approach slide]"
+    },
+    {
+      "id": "s5-deliverables",
+      "layout": "title-body",
+      "blocks": [
+        {
+          "id": "s5-heading",
+          "type": "heading",
+          "level": 2,
+          "text": "What you will receive",
+          "numbered": false
+        },
+        {
+          "id": "s5-bullets",
+          "type": "bullet-list",
+          "items": [
+            {
+              "text": {
+                "type": "doc",
+                "content": [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "[REPLACE: Deliverable 1 — description and format]"
+                      }
+                    ]
+                  }
+                ]
+              }
+            },
+            {
+              "text": {
+                "type": "doc",
+                "content": [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "[REPLACE: Deliverable 2 — description and format]"
+                      }
+                    ]
+                  }
+                ]
+              }
+            },
+            {
+              "text": {
+                "type": "doc",
+                "content": [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "[REPLACE: Deliverable 3 — description and format]"
+                      }
+                    ]
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      ],
+      "notes": ""
+    },
+    {
+      "id": "s6-timeline",
+      "layout": "process-timeline",
+      "blocks": [
+        {
+          "id": "s6-heading",
+          "type": "heading",
+          "level": 2,
+          "text": "Timeline",
+          "numbered": false
+        },
+        {
+          "id": "s6-tl",
+          "type": "timeline",
+          "orientation": "horizontal",
+          "connector": "arrow",
+          "phases": [
+            {
+              "label": "[REPLACE: Phase 1]",
+              "subtitle": "[REPLACE: Week 1–2]",
+              "body": "[REPLACE: Description]"
+            },
+            {
+              "label": "[REPLACE: Phase 2]",
+              "subtitle": "[REPLACE: Week 3–6]",
+              "body": "[REPLACE: Description]"
+            },
+            {
+              "label": "[REPLACE: Phase 3]",
+              "subtitle": "[REPLACE: Week 7–10]",
+              "body": "[REPLACE: Description]"
+            },
+            {
+              "label": "[REPLACE: Final delivery]",
+              "subtitle": "[REPLACE: Week 11–12]",
+              "body": "[REPLACE: Description]"
+            }
+          ]
+        }
+      ],
+      "notes": "[REPLACE: Talking points for timeline slide]"
+    },
+    {
+      "id": "s7-team",
+      "layout": "team",
+      "blocks": [
+        {
+          "id": "s7-heading",
+          "type": "heading",
+          "level": 2,
+          "text": "Your team",
+          "numbered": false
+        },
+        {
+          "id": "s7-team-grid",
+          "type": "team",
+          "layout": "grid",
+          "members": [
+            {
+              "name": "[REPLACE: Lead name]",
+              "role": "[REPLACE: Engagement Lead]",
+              "bio": "[REPLACE: 1–2 sentences on relevant experience]"
+            },
+            {
+              "name": "[REPLACE: Expert name]",
+              "role": "[REPLACE: Subject-matter expert]",
+              "bio": "[REPLACE: 1–2 sentences on relevant experience]"
+            }
+          ]
+        }
+      ],
+      "notes": ""
+    },
+    {
+      "id": "s8-pricing",
+      "layout": "table",
+      "blocks": [
+        {
+          "id": "s8-heading",
+          "type": "heading",
+          "level": 2,
+          "text": "Investment",
+          "numbered": false
+        },
+        {
+          "id": "s8-table",
+          "type": "table",
+          "columns": [
+            {
+              "header": "Phase",
+              "align": "left"
+            },
+            {
+              "header": "Scope",
+              "align": "left"
+            },
+            {
+              "header": "Fee",
+              "align": "left"
+            }
+          ],
+          "rows": [
+            {
+              "cells": [
+                {
+                  "type": "doc",
+                  "content": [
+                    {
+                      "type": "paragraph",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "[REPLACE: Phase 1]"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "doc",
+                  "content": [
+                    {
+                      "type": "paragraph",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "[REPLACE: Scope]"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "doc",
+                  "content": [
+                    {
+                      "type": "paragraph",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "[REPLACE: €0,000]"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "cells": [
+                {
+                  "type": "doc",
+                  "content": [
+                    {
+                      "type": "paragraph",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "[REPLACE: Phase 2]"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "doc",
+                  "content": [
+                    {
+                      "type": "paragraph",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "[REPLACE: Scope]"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "doc",
+                  "content": [
+                    {
+                      "type": "paragraph",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "[REPLACE: €0,000]"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "cells": [
+                {
+                  "type": "doc",
+                  "content": [
+                    {
+                      "type": "paragraph",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "Total"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "doc",
+                  "content": [
+                    {
+                      "type": "paragraph",
+                      "content": []
+                    }
+                  ]
+                },
+                {
+                  "type": "doc",
+                  "content": [
+                    {
+                      "type": "paragraph",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "[REPLACE: €0,000]"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "notes": "[REPLACE: Talking points — payment terms, flexibility]"
+    },
+    {
+      "id": "s9-next-steps",
+      "layout": "title-body",
+      "blocks": [
+        {
+          "id": "s9-heading",
+          "type": "heading",
+          "level": 2,
+          "text": "Next steps",
+          "numbered": false
+        },
+        {
+          "id": "s9-bullets",
+          "type": "bullet-list",
+          "items": [
+            {
+              "text": {
+                "type": "doc",
+                "content": [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "[REPLACE: Next step 1 with owner and deadline]"
+                      }
+                    ]
+                  }
+                ]
+              }
+            },
+            {
+              "text": {
+                "type": "doc",
+                "content": [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "[REPLACE: Next step 2 with owner and deadline]"
+                      }
+                    ]
+                  }
+                ]
+              }
+            },
+            {
+              "text": {
+                "type": "doc",
+                "content": [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "[REPLACE: Next step 3 with owner and deadline]"
+                      }
+                    ]
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      ],
+      "notes": "[REPLACE: Prompt decision — ask for verbal go-ahead]"
+    },
+    {
+      "id": "s10-closing",
+      "layout": "closing",
+      "blocks": [
+        {
+          "id": "s10-prose",
+          "type": "prose",
+          "content": {
+            "type": "doc",
+            "content": [
+              {
+                "type": "paragraph",
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "[REPLACE: Thank the audience, reiterate the key value proposition, invite questions.]"
+                  }
+                ]
+              }
+            ]
+          },
+          "align": "left"
+        }
+      ],
+      "notes": "[REPLACE: Closing talking points — questions, contact info]"
+    }
+  ],
+  "comments": []
+}

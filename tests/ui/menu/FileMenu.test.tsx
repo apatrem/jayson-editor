@@ -52,14 +52,14 @@ describe("FileMenu", () => {
   });
 
   it("opens a YAML document via dialog path and read_yaml_file", async () => {
-    const readYamlFile = vi.fn(() => Promise.resolve(serializeDocModel(doc)));
+    const readDocumentFile = vi.fn(() => Promise.resolve(serializeDocModel(doc)));
 
     render(
       <App
         bootStrategy={welcomeBootStrategy}
         fileActions={{
           selectOpenPath: () => Promise.resolve("/Users/me/Documents/menu.yaml"),
-          readYamlFile,
+          readDocumentFile,
         }}
       />,
     );
@@ -69,22 +69,22 @@ describe("FileMenu", () => {
     await waitFor(() => {
       expect(screen.getByLabelText("Document shell")).toBeTruthy();
     });
-    expect(readYamlFile).toHaveBeenCalledWith("/Users/me/Documents/menu.yaml");
+    expect(readDocumentFile).toHaveBeenCalledWith("/Users/me/Documents/menu.yaml");
   });
 
   it("saves the active document to its current path", async () => {
-    const writeYamlFile = vi.fn(() => Promise.resolve());
+    const writeDocumentFile = vi.fn(() => Promise.resolve());
     render(
       <App
         initialDocument={{ path: "/Users/me/Documents/menu.yaml", doc }}
-        fileActions={{ writeYamlFile }}
+        fileActions={{ writeDocumentFile }}
       />,
     );
 
     fireEvent.click(screen.getByRole("menuitem", { name: "Save" }));
 
     await waitFor(() => {
-      expect(writeYamlFile).toHaveBeenCalledWith(
+      expect(writeDocumentFile).toHaveBeenCalledWith(
         "/Users/me/Documents/menu.yaml",
         expect.stringContaining("Menu heading"),
       );
@@ -93,12 +93,12 @@ describe("FileMenu", () => {
   });
 
   it("save-as writes to the chosen path and switches the active path", async () => {
-    const writeYamlFile = vi.fn(() => Promise.resolve());
+    const writeDocumentFile = vi.fn(() => Promise.resolve());
     render(
       <App
         initialDocument={{ path: "/Users/me/Documents/menu.yaml", doc }}
         fileActions={{
-          writeYamlFile,
+          writeDocumentFile,
           selectSavePath: () => Promise.resolve("/Users/me/Documents/menu-copy.yaml"),
         }}
       />,
@@ -107,25 +107,25 @@ describe("FileMenu", () => {
     fireEvent.click(screen.getByRole("menuitem", { name: "Save As" }));
 
     await waitFor(() => {
-      expect(writeYamlFile).toHaveBeenCalledWith(
+      expect(writeDocumentFile).toHaveBeenCalledWith(
         "/Users/me/Documents/menu-copy.yaml",
         expect.stringContaining("Menu heading"),
       );
     });
     // findAllByText retries: the header re-render that swaps in the new
-    // filename is a separate state update from the writeYamlFile call gated
+    // filename is a separate state update from the writeDocumentFile call gated
     // above, so a synchronous getAllByText here races it under CI load.
     expect((await screen.findAllByText("menu-copy.yaml")).length).toBeGreaterThan(0);
   });
 
   it("save-as warns when saving outside the configured library folder", async () => {
-    const writeYamlFile = vi.fn(() => Promise.resolve());
+    const writeDocumentFile = vi.fn(() => Promise.resolve());
     render(
       <App
         initialDocument={{ path: "/Users/me/Library/menu.yaml", doc }}
         fileActions={{
           libraryRoot: "/Users/me/Library/",
-          writeYamlFile,
+          writeDocumentFile,
           selectSavePath: () => Promise.resolve("/Users/me/Desktop/menu-copy.yaml"),
         }}
       />,

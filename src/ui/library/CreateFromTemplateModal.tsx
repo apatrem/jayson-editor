@@ -1,14 +1,14 @@
 import { useState, type CSSProperties } from "react";
-import commercialProposalYaml from "../../../templates/commercial-proposal.yaml?raw";
-import commercialProposalDeckYaml from "../../../templates/commercial-proposal-deck.yaml?raw";
-import standardReportYaml from "../../../templates/standard-report.yaml?raw";
-import standardReportDeckYaml from "../../../templates/standard-report-deck.yaml?raw";
+import commercialProposalJson from "../../../templates/commercial-proposal.json?raw";
+import commercialProposalDeckJson from "../../../templates/commercial-proposal-deck.json?raw";
+import standardReportJson from "../../../templates/standard-report.json?raw";
+import standardReportDeckJson from "../../../templates/standard-report-deck.json?raw";
 
 export interface Template {
   id: string;
   name: string;
   description: string;
-  yaml: string;
+  json: string;
 }
 
 const TEMPLATES: Template[] = [
@@ -16,35 +16,35 @@ const TEMPLATES: Template[] = [
     id: "commercial-proposal",
     name: "Commercial Proposal",
     description: "Cover, executive summary, approach, deliverables, team, and pricing.",
-    yaml: commercialProposalYaml,
+    json: commercialProposalJson,
   },
   {
     id: "commercial-proposal-deck",
     name: "Commercial Proposal (Deck)",
     description: "10-slide deck: situation, approach, deliverables, timeline, team, pricing.",
-    yaml: commercialProposalDeckYaml,
+    json: commercialProposalDeckJson,
   },
   {
     id: "standard-report",
     name: "Standard Report",
     description: "Cover, methodology, findings with chart, recommendations, risk matrix.",
-    yaml: standardReportYaml,
+    json: standardReportJson,
   },
   {
     id: "standard-report-deck",
     name: "Standard Report (Deck)",
     description: "10-slide deck: exec summary, methodology, findings, recommendations, risks.",
-    yaml: standardReportDeckYaml,
+    json: standardReportDeckJson,
   },
 ];
 
 export interface CreateFromTemplateModalDeps {
-  writeYamlFile: (path: string, content: string) => Promise<void>;
+  writeDocumentFile: (path: string, content: string) => Promise<void>;
 }
 
 export interface CreateFromTemplateModalProps {
   cloudSyncRoot: string;
-  onConfirm: (yamlPath: string) => Promise<void>;
+  onConfirm: (jsonPath: string) => Promise<void>;
   onCancel: () => void;
   deps?: Partial<CreateFromTemplateModalDeps>;
 }
@@ -67,12 +67,12 @@ export function CreateFromTemplateModal({
     setError(null);
     setBusy(true);
     try {
-      const filename = documentName.trim().endsWith(".yaml")
+      const filename = documentName.trim().endsWith(".json")
         ? documentName.trim()
-        : `${documentName.trim()}.yaml`;
+        : `${documentName.trim()}.json`;
       const filePath = joinPath(cloudSyncRoot, filename);
-      const writeYamlFile = deps.writeYamlFile ?? writeYamlFileDefault;
-      await writeYamlFile(filePath, selectedTemplate.yaml);
+      const writeDocumentFile = deps.writeDocumentFile ?? writeDocumentFileDefault;
+      await writeDocumentFile(filePath, selectedTemplate.json);
       await onConfirm(filePath);
     } catch (e) {
       setError(e instanceof Error ? e.message : String(e));
@@ -153,9 +153,9 @@ export function CreateFromTemplateModal({
   );
 }
 
-async function writeYamlFileDefault(path: string, content: string): Promise<void> {
+async function writeDocumentFileDefault(path: string, content: string): Promise<void> {
   const { invoke } = await import("@tauri-apps/api/core");
-  await invoke("write_yaml_file", { path, content });
+  await invoke("write_document_file", { path, content });
 }
 
 function joinPath(dir: string, name: string): string {

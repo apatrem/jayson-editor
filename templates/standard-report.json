@@ -1,0 +1,579 @@
+{
+  "kind": "document",
+  "schemaVersion": "1.0.0",
+  "meta": {
+    "client": "[REPLACE: Client name]",
+    "project": "[REPLACE: Project name]",
+    "docKind": "report",
+    "sector": "[REPLACE: energy | mobility | circular | other]",
+    "tags": [],
+    "language": "en",
+    "status": "draft",
+    "archived": false,
+    "confidentialityLevel": "high",
+    "owner": "replace@example.com",
+    "reviewers": [],
+    "createdAt": "2026-01-01T00:00:00Z",
+    "updatedAt": "2026-01-01T00:00:00Z",
+    "brandRef": "$brand:default"
+  },
+  "sections": [
+    {
+      "id": "cover",
+      "title": "Cover",
+      "blocks": [
+        {
+          "id": "cover-heading",
+          "type": "heading",
+          "level": 1,
+          "text": "[REPLACE: Report title]",
+          "numbered": false
+        },
+        {
+          "id": "cover-prose",
+          "type": "prose",
+          "content": {
+            "type": "doc",
+            "content": [
+              {
+                "type": "paragraph",
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "Prepared for [REPLACE: Client name] · [REPLACE: Month YYYY]"
+                  }
+                ]
+              }
+            ]
+          },
+          "align": "left"
+        }
+      ]
+    },
+    {
+      "id": "exec-summary",
+      "title": "Executive summary",
+      "blocks": [
+        {
+          "id": "exec-heading",
+          "type": "heading",
+          "level": 2,
+          "text": "Executive summary",
+          "numbered": true
+        },
+        {
+          "id": "exec-kpi",
+          "type": "kpi-cards",
+          "cards": [
+            {
+              "value": "[REPLACE: Key finding 1]",
+              "label": "[REPLACE: Metric or theme]",
+              "sublabel": "[REPLACE: Context]",
+              "trend": "none",
+              "emphasis": "brand"
+            },
+            {
+              "value": "[REPLACE: Key finding 2]",
+              "label": "[REPLACE: Metric or theme]",
+              "sublabel": "[REPLACE: Context]",
+              "trend": "none",
+              "emphasis": "neutral"
+            },
+            {
+              "value": "[REPLACE: Key finding 3]",
+              "label": "[REPLACE: Metric or theme]",
+              "sublabel": "[REPLACE: Context]",
+              "trend": "none",
+              "emphasis": "neutral"
+            }
+          ]
+        },
+        {
+          "id": "exec-prose",
+          "type": "prose",
+          "content": {
+            "type": "doc",
+            "content": [
+              {
+                "type": "paragraph",
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "[REPLACE: 3–5 sentences covering scope, principal findings, and top recommendations.]"
+                  }
+                ]
+              }
+            ]
+          },
+          "align": "left"
+        },
+        {
+          "id": "exec-callout",
+          "type": "callout",
+          "variant": "info",
+          "title": "How to read this report",
+          "body": {
+            "type": "doc",
+            "content": [
+              {
+                "type": "paragraph",
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "[REPLACE: Brief note on report structure, confidentiality level, or intended audience.]"
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "methodology",
+      "title": "Methodology",
+      "blocks": [
+        {
+          "id": "meth-heading",
+          "type": "heading",
+          "level": 2,
+          "text": "Approach and data sources",
+          "numbered": false
+        },
+        {
+          "id": "meth-prose",
+          "type": "prose",
+          "content": {
+            "type": "doc",
+            "content": [
+              {
+                "type": "paragraph",
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "[REPLACE: Describe the analytical framework, data sources, interview scope, and modelling assumptions.]"
+                  }
+                ]
+              }
+            ]
+          },
+          "align": "left"
+        },
+        {
+          "id": "meth-bullets",
+          "type": "bullet-list",
+          "items": [
+            {
+              "text": {
+                "type": "doc",
+                "content": [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Data: ",
+                        "marks": [
+                          {
+                            "type": "strong"
+                          }
+                        ]
+                      },
+                      {
+                        "type": "text",
+                        "text": "[REPLACE: Primary and secondary data sources used]"
+                      }
+                    ]
+                  }
+                ]
+              }
+            },
+            {
+              "text": {
+                "type": "doc",
+                "content": [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Interviews: ",
+                        "marks": [
+                          {
+                            "type": "strong"
+                          }
+                        ]
+                      },
+                      {
+                        "type": "text",
+                        "text": "[REPLACE: Number of interviews, roles, geographies]"
+                      }
+                    ]
+                  }
+                ]
+              }
+            },
+            {
+              "text": {
+                "type": "doc",
+                "content": [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Period: ",
+                        "marks": [
+                          {
+                            "type": "strong"
+                          }
+                        ]
+                      },
+                      {
+                        "type": "text",
+                        "text": "[REPLACE: Date range covered by the analysis]"
+                      }
+                    ]
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "findings",
+      "title": "Key findings",
+      "blocks": [
+        {
+          "id": "find-heading",
+          "type": "heading",
+          "level": 2,
+          "text": "Findings",
+          "numbered": false
+        },
+        {
+          "id": "find-prose-01",
+          "type": "prose",
+          "content": {
+            "type": "doc",
+            "content": [
+              {
+                "type": "paragraph",
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "Finding 1: [REPLACE: Title]. ",
+                    "marks": [
+                      {
+                        "type": "strong"
+                      }
+                    ]
+                  },
+                  {
+                    "type": "text",
+                    "text": "[REPLACE: Explain with supporting evidence. Include quantitative data where available.]"
+                  }
+                ]
+              }
+            ]
+          },
+          "align": "left"
+        },
+        {
+          "id": "find-chart",
+          "type": "chart",
+          "chartType": "bar",
+          "title": "[REPLACE: Chart title]",
+          "data": {
+            "series": [
+              {
+                "name": "[REPLACE: Series 1]",
+                "values": [
+                  0,
+                  0,
+                  0
+                ]
+              }
+            ],
+            "xLabels": [
+              "[REPLACE: A]",
+              "[REPLACE: B]",
+              "[REPLACE: C]"
+            ]
+          },
+          "axes": {
+            "xTitle": "[REPLACE: X-axis label]",
+            "yTitle": "[REPLACE: Y-axis label]",
+            "yZeroBased": true
+          },
+          "palette": "qualitative",
+          "showLegend": true,
+          "showDataLabels": false,
+          "legendPosition": "bottom"
+        },
+        {
+          "id": "find-prose-02",
+          "type": "prose",
+          "content": {
+            "type": "doc",
+            "content": [
+              {
+                "type": "paragraph",
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "Finding 2: [REPLACE: Title]. ",
+                    "marks": [
+                      {
+                        "type": "strong"
+                      }
+                    ]
+                  },
+                  {
+                    "type": "text",
+                    "text": "[REPLACE: Explain with supporting evidence.]"
+                  }
+                ]
+              }
+            ]
+          },
+          "align": "left"
+        },
+        {
+          "id": "find-prose-03",
+          "type": "prose",
+          "content": {
+            "type": "doc",
+            "content": [
+              {
+                "type": "paragraph",
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "Finding 3: [REPLACE: Title]. ",
+                    "marks": [
+                      {
+                        "type": "strong"
+                      }
+                    ]
+                  },
+                  {
+                    "type": "text",
+                    "text": "[REPLACE: Explain with supporting evidence.]"
+                  }
+                ]
+              }
+            ]
+          },
+          "align": "left"
+        }
+      ]
+    },
+    {
+      "id": "recommendations",
+      "title": "Recommendations",
+      "blocks": [
+        {
+          "id": "rec-heading",
+          "type": "heading",
+          "level": 2,
+          "text": "Recommendations",
+          "numbered": false
+        },
+        {
+          "id": "rec-numbered",
+          "type": "numbered-list",
+          "items": [
+            {
+              "text": {
+                "type": "doc",
+                "content": [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "[REPLACE: Recommendation 1 title]. ",
+                        "marks": [
+                          {
+                            "type": "strong"
+                          }
+                        ]
+                      },
+                      {
+                        "type": "text",
+                        "text": "[REPLACE: Description and rationale.]"
+                      }
+                    ]
+                  }
+                ]
+              }
+            },
+            {
+              "text": {
+                "type": "doc",
+                "content": [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "[REPLACE: Recommendation 2 title]. ",
+                        "marks": [
+                          {
+                            "type": "strong"
+                          }
+                        ]
+                      },
+                      {
+                        "type": "text",
+                        "text": "[REPLACE: Description and rationale.]"
+                      }
+                    ]
+                  }
+                ]
+              }
+            },
+            {
+              "text": {
+                "type": "doc",
+                "content": [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "[REPLACE: Recommendation 3 title]. ",
+                        "marks": [
+                          {
+                            "type": "strong"
+                          }
+                        ]
+                      },
+                      {
+                        "type": "text",
+                        "text": "[REPLACE: Description and rationale.]"
+                      }
+                    ]
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "risk-section",
+      "title": "Risk matrix",
+      "blocks": [
+        {
+          "id": "risk-heading",
+          "type": "heading",
+          "level": 2,
+          "text": "Key risks and mitigations",
+          "numbered": false
+        },
+        {
+          "id": "risk-grid",
+          "type": "risk-matrix",
+          "gridSize": "3x3",
+          "xAxisLabel": "Likelihood",
+          "yAxisLabel": "Impact",
+          "risks": [
+            {
+              "label": "[REPLACE: Risk 1 — description]",
+              "x": 2,
+              "y": 3,
+              "severity": "high"
+            },
+            {
+              "label": "[REPLACE: Risk 2 — description]",
+              "x": 1,
+              "y": 3,
+              "severity": "medium"
+            },
+            {
+              "label": "[REPLACE: Risk 3 — description]",
+              "x": 3,
+              "y": 2,
+              "severity": "medium"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "next-steps",
+      "title": "Next steps",
+      "blocks": [
+        {
+          "id": "next-heading",
+          "type": "heading",
+          "level": 2,
+          "text": "Proposed next steps",
+          "numbered": false
+        },
+        {
+          "id": "next-timeline",
+          "type": "timeline",
+          "orientation": "horizontal",
+          "connector": "arrow",
+          "phases": [
+            {
+              "label": "[REPLACE: Next step 1]",
+              "subtitle": "[REPLACE: Q1 YYYY]",
+              "body": "[REPLACE: Description and owner]"
+            },
+            {
+              "label": "[REPLACE: Next step 2]",
+              "subtitle": "[REPLACE: Q2 YYYY]",
+              "body": "[REPLACE: Description and owner]"
+            },
+            {
+              "label": "[REPLACE: Next step 3]",
+              "subtitle": "[REPLACE: Q3 YYYY]",
+              "body": "[REPLACE: Description and owner]"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "appendix",
+      "title": "Appendix",
+      "blocks": [
+        {
+          "id": "app-heading",
+          "type": "heading",
+          "level": 2,
+          "text": "Appendix",
+          "numbered": true,
+          "breakBefore": true
+        },
+        {
+          "id": "app-prose",
+          "type": "prose",
+          "content": {
+            "type": "doc",
+            "content": [
+              {
+                "type": "paragraph",
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "[REPLACE: Supplementary data, detailed tables, source references, or methodology notes go here.]"
+                  }
+                ]
+              }
+            ]
+          },
+          "align": "left"
+        }
+      ]
+    }
+  ],
+  "comments": []
+}

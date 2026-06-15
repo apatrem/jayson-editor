@@ -45,7 +45,7 @@ When AI patches arrive, they apply against the **current** (post-manual-edit) do
 **Implication:** Before each "Process all" batch, the app auto-saves the doc as a clean checkpoint. AI patches are generated against this checkpoint.
 
 ### D-05 — Autosave is mandatory; version history via cloud storage
-Autosave persists the YAML on edit (debounced). Version history relies on the consultant's existing cloud-sync provider (Dropbox/GDrive/OneDrive) — the app does not implement its own VCS.
+Autosave persists the JSON DocModel on edit (debounced). Version history relies on the consultant's existing cloud-sync provider (Dropbox/GDrive/OneDrive) — the app does not implement its own VCS.
 **Why:** Most consultants already have synced cloud folders with file history. Reusing that is free and trustworthy.
 **Implication:** No app-side commit/checkpoint UI. Recovery from corruption = consultant uses cloud-sync history.
 

@@ -5,7 +5,7 @@ working in this repository.
 
 > **Two jobs, two guides.** This file governs **building the app** (editor,
 > Tauri, blocks, schema). To **author a client document** — fill a
-> `templates/*.yaml` into a finished DocModel YAML for a specific engagement —
+> `templates/*.json` into a finished DocModel JSON for a specific engagement —
 > read [AUTHORING.md](AUTHORING.md) instead.
 
 ## Repository layout

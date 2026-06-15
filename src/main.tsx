@@ -9,10 +9,10 @@ async function loadInitialDocumentFromUrl(): Promise<
   const docPath = new URLSearchParams(window.location.search).get("doc");
   if (docPath === null) return undefined;
   const { invoke } = await import("@tauri-apps/api/core");
-  const { parseDocModelYaml } = await import("./docmodel/serialize");
+  const { parseDocModelJson } = await import("./docmodel/serialize");
   const { DocModelSchema } = await import("./schema/docmodel");
-  const yaml = await invoke<string>("read_yaml_file", { path: docPath });
-  const doc = DocModelSchema.parse(parseDocModelYaml(yaml));
+  const raw = await invoke<string>("read_document_file", { path: docPath });
+  const doc = DocModelSchema.parse(parseDocModelJson(raw));
   return { path: docPath, doc };
 }
 

@@ -81,19 +81,19 @@ describe("AppErrorBoundary", () => {
 
   it("reopens the current path from the recovery panel", async () => {
     vi.spyOn(console, "error").mockImplementation(() => {});
-    const readYamlFile = vi.fn(() => Promise.resolve(serializeDocModel(doc)));
+    const readDocumentFile = vi.fn(() => Promise.resolve(serializeDocModel(doc)));
     render(
       <App
         initialDocument={{ path: "/Users/me/Documents/broken.yaml", doc }}
         DocumentViewComponent={ThrowingDocumentView}
-        fileActions={{ readYamlFile }}
+        fileActions={{ readDocumentFile }}
       />,
     );
 
     fireEvent.click(screen.getByRole("button", { name: "Try reopen" }));
 
     await waitFor(() => {
-      expect(readYamlFile).toHaveBeenCalledWith(
+      expect(readDocumentFile).toHaveBeenCalledWith(
         "/Users/me/Documents/broken.yaml",
       );
     });
