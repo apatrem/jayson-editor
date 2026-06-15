@@ -36,7 +36,7 @@ function makeEntry(overrides: Partial<LibraryEntry> = {}): LibraryEntry {
   const meta = overrides.meta ?? makeMeta();
   return {
     path: `/docs/${meta.client.toLowerCase().replace(/\s+/g, "-")}`,
-    yamlFilename: "document.yaml",
+    jsonFilename: "document.yaml",
     meta,
     thumbnailUri: null,
     fileSize: 1024,

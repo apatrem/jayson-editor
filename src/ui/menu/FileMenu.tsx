@@ -1,5 +1,8 @@
 import type { CSSProperties, FC } from "react";
 
+export const DOCUMENT_OPEN_FILTER = { name: "JSON", extensions: ["json"] as string[] };
+export const DOCUMENT_SAVE_FILTER = { name: "JSON", extensions: ["json"] as string[] };
+
 export interface FileMenuProps {
   canSave: boolean;
   canExport: boolean;

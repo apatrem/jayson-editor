@@ -9,15 +9,15 @@ canonical DocModel format. Completes the ADR-0022 clean break at the app
 surface.
 
 ## Acceptance criteria  (must be machine-checkable)
-- [ ] `src/editor/file-open.ts` parses via `parseDocModelJson`; no YAML parse or `.yaml` discovery left in the document open path → `tests/integration/app-on-json-wiring.test.ts`
-- [ ] `file-save.ts` / `autosave.ts` write the JSON projection; `FileMenu.tsx` dialogs filter `.json` → same file
-- [ ] **No document flow invokes YAML document IO** — file-open/save/autosave, `DocumentView.tsx`, `Routes.tsx`, `main.tsx`, `LibraryView.tsx`, `CreateFromTemplateModal.tsx`; `parseDocModelYaml` deleted repo-wide (hard cut). Non-document YAML (config/brand/catalogue, authored manifests) untouched → same file
-- [ ] All four `templates/*.json` exist and validate as DocModels → same file
-- [ ] `src/library/index-builder.ts` indexes `*.json` documents → same file
-- [ ] M7/M8 integration harnesses load JSON fixtures (no `.yaml` fixture paths) → same file
-- [ ] D-05 autosave wording reflects JSON; no live doc claims a canonical YAML format outside allowlisted historical context → `tests/docs/json-canonical-sweep.test.ts`
-- [ ] gate green: `ruby scripts/check-specs && npm run lint && npm test && npm run build`
-- [ ] This task's frozen tests (`tests/integration/app-on-json-wiring.test.ts` + `tests/docs/json-canonical-sweep.test.ts`) removed from `tests/frozen-acceptance.json` — they now run inside `quality`
+- [x] `src/editor/file-open.ts` parses via `parseDocModelJson`; no YAML parse or `.yaml` discovery left in the document open path → `tests/integration/app-on-json-wiring.test.ts`
+- [x] `file-save.ts` / `autosave.ts` write the JSON projection; `FileMenu.tsx` dialogs filter `.json` → same file
+- [x] **No document flow invokes YAML document IO** — file-open/save/autosave, `DocumentView.tsx`, `Routes.tsx`, `main.tsx`, `LibraryView.tsx`, `CreateFromTemplateModal.tsx`; `parseDocModelYaml` deleted repo-wide (hard cut). Non-document YAML (config/brand/catalogue, authored manifests) untouched → same file
+- [x] All four `templates/*.json` exist and validate as DocModels → same file
+- [x] `src/library/index-builder.ts` indexes `*.json` documents → same file
+- [x] M7/M8 integration harnesses load JSON fixtures (no `.yaml` fixture paths) → same file
+- [x] D-05 autosave wording reflects JSON; no live doc claims a canonical YAML format outside allowlisted historical context → `tests/docs/json-canonical-sweep.test.ts`
+- [x] gate green: `ruby scripts/check-specs && npm run lint && npm test && npm run build`
+- [x] This task's frozen tests (`tests/integration/app-on-json-wiring.test.ts` + `tests/docs/json-canonical-sweep.test.ts`) removed from `tests/frozen-acceptance.json` — they now run inside `quality`
 
 ## Files likely involved
 - `src/editor/{file-open,file-save,autosave}.ts`, `src/ui/menu/FileMenu.tsx`

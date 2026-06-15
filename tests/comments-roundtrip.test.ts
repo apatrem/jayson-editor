@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { parseDocModelYaml, serializeDocModel } from "../src/docmodel/serialize";
+import { parseDocModelJson, serializeDocModel } from "../src/docmodel/serialize";
 import { DocModelSchema, type DocModel } from "../src/schema/docmodel";
 
 const docWithComments: DocModel = {
@@ -90,9 +90,9 @@ const docWithComments: DocModel = {
 describe("comments YAML round-trip", () => {
   it("preserves comments and block anchors byte-stably after reload", () => {
     const firstYaml = serializeDocModel(docWithComments);
-    const reloaded = DocModelSchema.parse(parseDocModelYaml(firstYaml));
+    const reloaded = DocModelSchema.parse(parseDocModelJson(firstYaml));
     const secondYaml = serializeDocModel(reloaded);
-    const secondReload = DocModelSchema.parse(parseDocModelYaml(secondYaml));
+    const secondReload = DocModelSchema.parse(parseDocModelJson(secondYaml));
 
     expect(reloaded.comments).toEqual(docWithComments.comments);
     expect(reloaded.comments[0]?.blockId).toBe("block-a");

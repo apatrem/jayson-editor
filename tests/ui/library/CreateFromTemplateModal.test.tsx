@@ -77,16 +77,16 @@ describe("CreateFromTemplateModal — pick + name + confirm", () => {
     expect(confirmBtn.hasAttribute("disabled")).toBe(true);
   });
 
-  it("pick template + enter name → confirm writes YAML to cloud root and calls onConfirm", async () => {
+  it("pick template + enter name → confirm writes JSON to cloud root and calls onConfirm", async () => {
     const onConfirm = makeOnConfirm();
-    const writeYamlFile = vi.fn(() => Promise.resolve());
+    const writeDocumentFile = vi.fn(() => Promise.resolve());
 
     render(
       createElement(CreateFromTemplateModal, {
         cloudSyncRoot: CLOUD_ROOT,
         onConfirm,
         onCancel: makeOnCancel(),
-        deps: { writeYamlFile },
+        deps: { writeDocumentFile },
       }),
     );
 
@@ -99,19 +99,19 @@ describe("CreateFromTemplateModal — pick + name + confirm", () => {
     fireEvent.click(screen.getByRole("button", { name: "Create document" }));
 
     await waitFor(() => {
-      expect(writeYamlFile).toHaveBeenCalledWith(
-        `${CLOUD_ROOT}/Acme Proposal.yaml`,
+      expect(writeDocumentFile).toHaveBeenCalledWith(
+        `${CLOUD_ROOT}/Acme Proposal.json`,
         expect.stringContaining("[REPLACE:"),
       );
     });
 
     await waitFor(() => {
-      expect(onConfirm).toHaveBeenCalledWith(`${CLOUD_ROOT}/Acme Proposal.yaml`);
+      expect(onConfirm).toHaveBeenCalledWith(`${CLOUD_ROOT}/Acme Proposal.json`);
     });
   });
 
-  it("appends .yaml suffix if name already has it", async () => {
-    const writeYamlFile = vi.fn(() => Promise.resolve());
+  it("appends .json suffix if name already has it", async () => {
+    const writeDocumentFile = vi.fn(() => Promise.resolve());
     const onConfirm = makeOnConfirm();
 
     render(
@@ -119,28 +119,28 @@ describe("CreateFromTemplateModal — pick + name + confirm", () => {
         cloudSyncRoot: CLOUD_ROOT,
         onConfirm,
         onCancel: makeOnCancel(),
-        deps: { writeYamlFile },
+        deps: { writeDocumentFile },
       }),
     );
 
     // index 2 = Standard Report (non-deck)
     fireEvent.click(screen.getAllByRole("radio")[2]!);
     fireEvent.change(screen.getByLabelText("Document name"), {
-      target: { value: "My Report.yaml" },
+      target: { value: "My Report.json" },
     });
 
     fireEvent.click(screen.getByRole("button", { name: "Create document" }));
 
     await waitFor(() => {
-      expect(writeYamlFile).toHaveBeenCalledWith(
-        `${CLOUD_ROOT}/My Report.yaml`,
+      expect(writeDocumentFile).toHaveBeenCalledWith(
+        `${CLOUD_ROOT}/My Report.json`,
         expect.stringContaining("[REPLACE:"),
       );
     });
   });
 
-  it("routes to DocumentView after creation — onConfirm receives the yaml path", async () => {
-    const writeYamlFile = vi.fn(() => Promise.resolve());
+  it("routes to DocumentView after creation — onConfirm receives the json path", async () => {
+    const writeDocumentFile = vi.fn(() => Promise.resolve());
     const onConfirm = makeOnConfirm();
 
     render(
@@ -148,7 +148,7 @@ describe("CreateFromTemplateModal — pick + name + confirm", () => {
         cloudSyncRoot: CLOUD_ROOT,
         onConfirm,
         onCancel: makeOnCancel(),
-        deps: { writeYamlFile },
+        deps: { writeDocumentFile },
       }),
     );
 
@@ -161,7 +161,7 @@ describe("CreateFromTemplateModal — pick + name + confirm", () => {
     fireEvent.click(screen.getByRole("button", { name: "Create document" }));
 
     await waitFor(() => {
-      expect(onConfirm).toHaveBeenCalledWith(`${CLOUD_ROOT}/Board Readout.yaml`);
+      expect(onConfirm).toHaveBeenCalledWith(`${CLOUD_ROOT}/Board Readout.json`);
     });
   });
 });

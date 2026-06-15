@@ -14,7 +14,7 @@ import type { Editor as TipTapEditor } from "@tiptap/core";
 import { NodeSelection } from "@tiptap/pm/state";
 import { defaultBrand } from "../../brand/defaultBrand";
 import { BrandProvider } from "../../brand-tokens/BrandProvider";
-import { parseDocModelYaml } from "../../docmodel/serialize";
+import { parseDocModelJson } from "../../docmodel/serialize";
 import { loadAllBlocks } from "../../blocks/runtime-registry";
 import type { InstalledAuthoredBlock } from "../../blocks/runtime-registry";
 import type { BlockRegistryRecord } from "../../blocks/defineBlock";
@@ -106,8 +106,8 @@ export interface EditorSurfaceProps {
 export interface DocumentViewProps {
   path: string;
   initialDoc?: DocumentModel;
-  readYamlFile?: (path: string) => Promise<string>;
-  writeYamlFile?: (path: string, yaml: string) => Promise<void>;
+  readDocumentFile?: (path: string) => Promise<string>;
+  writeDocumentFile?: (path: string, json: string) => Promise<void>;
   autosaveDebounceMs?: number;
   onDocumentChange?: (doc: DocumentModel) => void;
   EditorComponent?: FC<EditorSurfaceProps>;
@@ -203,8 +203,8 @@ function sectionStructureSignature(doc: DocumentModel): string {
 export const DocumentView: FC<DocumentViewProps> = ({
   path,
   initialDoc,
-  readYamlFile = defaultReadYamlFile,
-  writeYamlFile = defaultWriteYamlFile,
+  readDocumentFile = defaultReadDocumentFile,
+  writeDocumentFile = defaultWriteDocumentFile,
   autosaveDebounceMs = DEFAULT_AUTOSAVE_DEBOUNCE_MS,
   onDocumentChange,
   EditorComponent = DefaultEditorSurface,
@@ -394,8 +394,8 @@ export const DocumentView: FC<DocumentViewProps> = ({
     autosave.current?.cancel();
     autosave.current = createAutosaveController({
       debounceMs: autosaveDebounceMs,
-      writeYaml: async (yaml) => {
-        await writeYamlFile(path, yaml);
+      writeJson: async (json) => {
+        await writeDocumentFile(path, json);
         setSaveState("saved");
       },
     });
@@ -403,7 +403,7 @@ export const DocumentView: FC<DocumentViewProps> = ({
       autosave.current?.cancel();
       autosave.current = null;
     };
-  }, [autosaveDebounceMs, path, writeYamlFile]);
+  }, [autosaveDebounceMs, path, writeDocumentFile]);
 
   useEffect(() => {
     let cancelled = false;
@@ -413,8 +413,8 @@ export const DocumentView: FC<DocumentViewProps> = ({
       setDoc(initialDoc);
       return;
     }
-    void readYamlFile(path)
-      .then((yaml) => parseDocumentYaml(yaml))
+    void readDocumentFile(path)
+      .then((raw) => parseDocumentJson(raw))
       .then((loadedDoc) => {
         if (!cancelled) {
           currentDoc.current = loadedDoc;
@@ -429,7 +429,7 @@ export const DocumentView: FC<DocumentViewProps> = ({
     return () => {
       cancelled = true;
     };
-  }, [initialDoc, path, readYamlFile]);
+  }, [initialDoc, path, readDocumentFile]);
 
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent): void => {
@@ -1107,20 +1107,20 @@ function selectionAnchorRect(
   }
 }
 
-async function defaultReadYamlFile(path: string): Promise<string> {
-  return invoke<string>("read_yaml_file", { path });
+async function defaultReadDocumentFile(path: string): Promise<string> {
+  return invoke<string>("read_document_file", { path });
 }
 
 async function defaultLintForPreview(source: string): Promise<AuthoredBlockLintResult> {
   return lintAuthoredBlock(source);
 }
 
-async function defaultWriteYamlFile(path: string, yaml: string): Promise<void> {
-  await invoke("write_yaml_file", { path, content: yaml });
+async function defaultWriteDocumentFile(path: string, json: string): Promise<void> {
+  await invoke("write_document_file", { path, content: json });
 }
 
-function parseDocumentYaml(yaml: string): DocumentModel {
-  const parsed = DocModelSchema.parse(parseDocModelYaml(yaml));
+function parseDocumentJson(raw: string): DocumentModel {
+  const parsed = DocModelSchema.parse(parseDocModelJson(raw));
   if (parsed.kind !== "document") {
     throw new Error("DocumentView only supports kind=document");
   }

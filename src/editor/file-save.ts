@@ -8,13 +8,13 @@ export interface EditorFileSystem {
 
 export interface SavedDocumentRef {
   folderPath: string;
-  yamlPath: string;
+  jsonPath: string;
 }
 
 export interface SaveAsOptions {
   cloudSyncRoot: string;
   folderName: string;
-  yamlFilename?: string;
+  jsonFilename?: string;
 }
 
 export async function saveDocumentAs(
@@ -23,14 +23,14 @@ export async function saveDocumentAs(
   fileSystem: EditorFileSystem,
 ): Promise<SavedDocumentRef> {
   const folderName = normalizeFolderName(options.folderName);
-  const yamlFilename = options.yamlFilename ?? `${folderName}.yaml`;
-  assertYamlFilename(yamlFilename);
+  const jsonFilename = options.jsonFilename ?? `${folderName}.json`;
+  assertJsonFilename(jsonFilename);
 
   const folderPath = joinPath(options.cloudSyncRoot, folderName);
-  const yamlPath = joinPath(folderPath, yamlFilename);
+  const jsonPath = joinPath(folderPath, jsonFilename);
   await fileSystem.createDirectory(folderPath);
-  await fileSystem.writeTextFile(yamlPath, serializeDocModel(doc));
-  return { folderPath, yamlPath };
+  await fileSystem.writeTextFile(jsonPath, serializeDocModel(doc));
+  return { folderPath, jsonPath };
 }
 
 export async function saveExistingDocument(
@@ -38,7 +38,7 @@ export async function saveExistingDocument(
   ref: SavedDocumentRef,
   fileSystem: Pick<EditorFileSystem, "writeTextFile">,
 ): Promise<void> {
-  await fileSystem.writeTextFile(ref.yamlPath, serializeDocModel(doc));
+  await fileSystem.writeTextFile(ref.jsonPath, serializeDocModel(doc));
 }
 
 function normalizeFolderName(folderName: string): string {
@@ -52,9 +52,9 @@ function normalizeFolderName(folderName: string): string {
   return normalized;
 }
 
-function assertYamlFilename(filename: string): void {
-  if (!filename.endsWith(".yaml") || filename.includes("/") || filename.includes("\\")) {
-    throw new Error("YAML filename must be a local .yaml file name");
+function assertJsonFilename(filename: string): void {
+  if (!filename.endsWith(".json") || filename.includes("/") || filename.includes("\\")) {
+    throw new Error("JSON filename must be a local .json file name");
   }
 }
 

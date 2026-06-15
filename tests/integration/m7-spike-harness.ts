@@ -6,7 +6,7 @@ import { render } from "@testing-library/react";
 import { vi } from "vitest";
 import type * as EChartsModule from "echarts";
 import App from "../../src/App";
-import { parseDocModelYaml } from "../../src/docmodel/serialize";
+import { parseDocModelJson } from "../../src/docmodel/serialize";
 import { DocModelSchema } from "../../src/schema/docmodel";
 import type { DocModel } from "../../src/schema/docmodel";
 import type { BootStrategy } from "../../src/ui/router/boot";
@@ -31,20 +31,20 @@ vi.mock("echarts", async () => {
   };
 });
 
-export const sampleProposalPath = "/Users/me/Documents/sample-proposal.yaml";
-export const sampleProposalYaml = readFileSync("examples/sample-proposal.yaml", "utf8");
-export const singleSectionProposalYaml = readFileSync(
-  "tests/fixtures/m7-single-section-proposal.yaml",
+export const sampleProposalPath = "/Users/me/Documents/sample-proposal.json";
+export const sampleProposalJson = readFileSync("examples/sample-proposal.json", "utf8");
+export const singleSectionProposalJson = readFileSync(
+  "tests/fixtures/m7-single-section-proposal.json",
   "utf8",
 );
 export const singleSectionProposalDoc = DocModelSchema.parse(
-  parseDocModelYaml(singleSectionProposalYaml),
+  parseDocModelJson(singleSectionProposalJson),
 ) as Extract<DocModel, { kind: "document" }>;
 
 export interface M7HarnessOptions {
-  initialYaml?: string;
-  readYamlFile?: (path: string) => Promise<string>;
-  writeYamlFile?: (path: string, yaml: string) => Promise<void>;
+  initialJson?: string;
+  readDocumentFile?: (path: string) => Promise<string>;
+  writeDocumentFile?: (path: string, json: string) => Promise<void>;
   initialDocument?: { path: string; doc: DocModel };
   useRealOpenPath?: boolean;
   bootStrategy?: BootStrategy;
@@ -52,7 +52,7 @@ export interface M7HarnessOptions {
 
 export function renderM7SpikeHarness(options: M7HarnessOptions = {}) {
   installSvgLayoutPolyfill();
-  let currentYaml = options.initialYaml ?? singleSectionProposalYaml;
+  let currentJson = options.initialJson ?? singleSectionProposalJson;
   let exportedHtml = "";
   let exportedPath = "";
   const invokeMock = vi.fn((cmd: string) => {
@@ -69,13 +69,13 @@ export function renderM7SpikeHarness(options: M7HarnessOptions = {}) {
     value: { invoke: invokeMock },
   });
 
-  const readYamlFile = vi.fn(
-    options.readYamlFile ?? ((_path: string) => Promise.resolve(currentYaml)),
+  const readDocumentFile = vi.fn(
+    options.readDocumentFile ?? ((_path: string) => Promise.resolve(currentJson)),
   );
-  const writeYamlFile = vi.fn(
-    options.writeYamlFile ??
-      ((_path: string, yaml: string) => {
-        currentYaml = yaml;
+  const writeDocumentFile = vi.fn(
+    options.writeDocumentFile ??
+      ((_path: string, json: string) => {
+        currentJson = json;
         return Promise.resolve();
       }),
   );
@@ -100,8 +100,8 @@ export function renderM7SpikeHarness(options: M7HarnessOptions = {}) {
       documentWatchdogBudgetMs: 1_000,
       fileActions: {
         selectOpenPath: () => Promise.resolve(sampleProposalPath),
-        readYamlFile,
-        writeYamlFile,
+        readDocumentFile,
+        writeDocumentFile,
         exportPdf,
         ...(options.useRealOpenPath ? {} : { openPath }),
         sharedFolderPath: "/Users/me/Consultancy-Shared",
@@ -111,12 +111,12 @@ export function renderM7SpikeHarness(options: M7HarnessOptions = {}) {
 
   return {
     ...rtl,
-    readYamlFile,
-    writeYamlFile,
+    readDocumentFile,
+    writeDocumentFile,
     exportPdf,
     openPath,
     invokeMock,
-    getCurrentYaml: () => currentYaml,
+    getCurrentJson: () => currentJson,
     getExportedHtml: () => exportedHtml,
     getExportedPath: () => exportedPath,
   };

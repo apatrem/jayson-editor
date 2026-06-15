@@ -29,7 +29,7 @@ export const DocList: FC<DocListProps> = ({
     <div style={view === "grid" ? styles.grid : styles.list}>
       {entries.map((entry) => (
         <DocCard
-          key={`${entry.path}/${entry.yamlFilename}`}
+          key={`${entry.path}/${entry.jsonFilename}`}
           entry={entry}
           compact={view === "list"}
           {...actions}

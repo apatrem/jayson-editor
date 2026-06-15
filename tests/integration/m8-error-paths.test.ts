@@ -3,8 +3,8 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import {
   CLOUD_SYNC_ROOT,
   makeM8Harness,
-  sampleProposalYaml,
-  singleSectionYaml,
+  sampleProposalJson,
+  singleSectionJson,
 } from "./m8-harness";
 
 describe("M8 error paths", () => {
@@ -86,7 +86,7 @@ describe("M8 error paths", () => {
   it("Create from Template write failure shows an error in the modal", async () => {
     const harness = makeM8Harness({
       initialFiles: [
-        [`${CLOUD_SYNC_ROOT}/Sample Proposal.yaml`, sampleProposalYaml],
+        [`${CLOUD_SYNC_ROOT}/Sample Proposal.json`, sampleProposalJson],
       ],
     });
 
@@ -94,8 +94,8 @@ describe("M8 error paths", () => {
       expect(screen.getByText("Acme Industrial")).toBeTruthy();
     });
 
-    // Make the next writeYamlFile call fail
-    harness.writeYamlFile.mockRejectedValueOnce(new Error("disk full"));
+    // Make the next writeDocumentFile call fail
+    harness.writeDocumentFile.mockRejectedValueOnce(new Error("disk full"));
 
     fireEvent.click(screen.getByRole("button", { name: "+ New from template" }));
     fireEvent.click(screen.getAllByRole("radio")[0]!);
@@ -118,7 +118,7 @@ describe("M8 error paths", () => {
 
     makeM8Harness({
       initialFiles: [
-        [`${CLOUD_SYNC_ROOT}/Single Section.yaml`, singleSectionYaml],
+        [`${CLOUD_SYNC_ROOT}/Single Section.json`, singleSectionJson],
       ],
       loadGeneratedBlocks: () => Promise.reject(new Error("blocks unavailable")),
     });

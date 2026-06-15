@@ -9,7 +9,7 @@ import type { LibraryEntry } from "../../src/library/filter";
 
 const ENTRY: LibraryEntry = {
   path: "/library/acme-q1",
-  yamlFilename: "doc.yaml",
+  jsonFilename: "doc.yaml",
   meta: {
     client: "Acme",
     project: "Q1",

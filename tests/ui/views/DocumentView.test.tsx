@@ -12,7 +12,7 @@ import { useEffect, type FC } from "react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { defaultBrand } from "../../../src/brand/defaultBrand";
 import { BrandProvider } from "../../../src/brand-tokens/BrandProvider";
-import { parseDocModelYaml, serializeDocModel } from "../../../src/docmodel/serialize";
+import { parseDocModelJson, serializeDocModel } from "../../../src/docmodel/serialize";
 import {
   DocumentView,
   documentToEditorContent,
@@ -129,8 +129,8 @@ const typingDoc: Extract<DocModel, { kind: "document" }> = {
 
 function loadSingleSectionFixture(): Extract<DocModel, { kind: "document" }> {
   return DocModelSchema.parse(
-    parseDocModelYaml(
-      readFileSync("tests/fixtures/m7-single-section-proposal.yaml", "utf8"),
+    parseDocModelJson(
+      readFileSync("tests/fixtures/m7-single-section-proposal.json", "utf8"),
     ),
   ) as Extract<DocModel, { kind: "document" }>;
 }
@@ -180,10 +180,10 @@ describe("DocumentView", () => {
   });
 
   it("loads a document via read_yaml_file and renders it with the default brand", async () => {
-    const readYamlFile = vi.fn(() => Promise.resolve(serializeDocModel(doc)));
+    const readDocumentFile = vi.fn(() => Promise.resolve(serializeDocModel(doc)));
 
     render(
-      <DocumentView path="/Users/me/Documents/proposal.yaml" readYamlFile={readYamlFile} />,
+      <DocumentView path="/Users/me/Documents/proposal.yaml" readDocumentFile={readDocumentFile} />,
     );
 
     await waitFor(() => {
@@ -193,14 +193,14 @@ describe("DocumentView", () => {
         ),
       ).toBeTruthy();
     });
-    expect(readYamlFile).toHaveBeenCalledWith("/Users/me/Documents/proposal.yaml");
+    expect(readDocumentFile).toHaveBeenCalledWith("/Users/me/Documents/proposal.yaml");
     // Single WYSIWYG surface: the editable document is the only rendered view.
     expect(screen.getByLabelText("Editable document")).toBeTruthy();
   });
 
   it("autosaves edited content and reloads the saved YAML", async () => {
     let savedYaml = "";
-    const writeYamlFile = vi.fn((_path: string, yaml: string) => {
+    const writeDocumentFile = vi.fn((_path: string, yaml: string) => {
       savedYaml = yaml;
       return Promise.resolve();
     });
@@ -209,7 +209,7 @@ describe("DocumentView", () => {
       <DocumentView
         path="/Users/me/Documents/proposal.yaml"
         initialDoc={doc}
-        writeYamlFile={writeYamlFile}
+        writeDocumentFile={writeDocumentFile}
         autosaveDebounceMs={1}
         EditorComponent={FakeEditor}
       />,
@@ -218,7 +218,7 @@ describe("DocumentView", () => {
     fireEvent.click(screen.getByRole("button", { name: /Fake edit/u }));
 
     await waitFor(() => {
-      expect(writeYamlFile).toHaveBeenCalledWith(
+      expect(writeDocumentFile).toHaveBeenCalledWith(
         "/Users/me/Documents/proposal.yaml",
         expect.stringContaining("Edited heading"),
       );
@@ -228,7 +228,7 @@ describe("DocumentView", () => {
     render(
       <DocumentView
         path="/Users/me/Documents/proposal.yaml"
-        readYamlFile={() => Promise.resolve(savedYaml)}
+        readDocumentFile={() => Promise.resolve(savedYaml)}
       />,
     );
 

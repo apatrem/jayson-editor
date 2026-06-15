@@ -1,6 +1,6 @@
 import { cleanup, fireEvent, screen, waitFor } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { parseDocModelYaml } from "../../src/docmodel/serialize";
+import { parseDocModelJson } from "../../src/docmodel/serialize";
 import { DocModelSchema, type DocModel } from "../../src/schema/docmodel";
 import { renderM7SpikeHarness, sampleProposalPath } from "./m7-spike-harness";
 
@@ -22,14 +22,14 @@ describe("M7 spike happy path", () => {
 
   it("opens, inserts a block, saves, reopens, and exports through browser handoff", async () => {
     const harness = renderM7SpikeHarness();
-    const baselineCallouts = countCallouts(harness.getCurrentYaml());
+    const baselineCallouts = countCallouts(harness.getCurrentJson());
 
     fireEvent.click(screen.getByRole("menuitem", { name: "Open" }));
 
     await waitFor(() => {
       expect(screen.getByLabelText("Document shell")).toBeTruthy();
     });
-    expect(harness.readYamlFile).toHaveBeenCalledWith(sampleProposalPath);
+    expect(harness.readDocumentFile).toHaveBeenCalledWith(sampleProposalPath);
     // Section title is a nav-only label in the section sidebar (ADR-0018 item
     // 2), matched by its text rather than an input value.
     expect(screen.getAllByText("Executive summary").length).toBeGreaterThan(0);
@@ -47,19 +47,19 @@ describe("M7 spike happy path", () => {
     fireEvent.click(screen.getByRole("menuitem", { name: "Save" }));
     await waitFor(
       () => {
-        expect(countCallouts(harness.getCurrentYaml())).toBeGreaterThan(baselineCallouts);
+        expect(countCallouts(harness.getCurrentJson())).toBeGreaterThan(baselineCallouts);
       },
       { timeout: 4000 },
     );
     await waitFor(() => {
-      expect(harness.writeYamlFile).toHaveBeenCalledWith(
+      expect(harness.writeDocumentFile).toHaveBeenCalledWith(
         sampleProposalPath,
         expect.stringContaining('"type": "callout"'),
       );
     });
 
-    const savedYaml = harness.getCurrentYaml();
-    const parsedSavedDoc = parseDocModelYaml(savedYaml);
+    const savedYaml = harness.getCurrentJson();
+    const parsedSavedDoc = parseDocModelJson(savedYaml);
     expect(() => DocModelSchema.parse(parsedSavedDoc)).not.toThrow();
     const invalidSavedDoc = structuredClone(DocModelSchema.parse(parsedSavedDoc)) as Extract<
       DocModel,
@@ -73,14 +73,14 @@ describe("M7 spike happy path", () => {
     expect(() => DocModelSchema.parse(invalidSavedDoc)).toThrow();
 
     cleanup();
-    const reopened = renderM7SpikeHarness({ initialYaml: savedYaml });
+    const reopened = renderM7SpikeHarness({ initialJson: savedYaml });
     fireEvent.click(screen.getByRole("menuitem", { name: "Open" }));
     await waitFor(() => {
       // Section title is a nav-only label in the section sidebar (ADR-0018
       // item 2), matched by its text rather than an input value.
       expect(screen.getAllByText("Executive summary").length).toBeGreaterThan(0);
     });
-    expect(countCallouts(reopened.getCurrentYaml())).toBeGreaterThan(baselineCallouts);
+    expect(countCallouts(reopened.getCurrentJson())).toBeGreaterThan(baselineCallouts);
 
     fireEvent.click(screen.getByRole("menuitem", { name: "Export PDF" }));
     await waitFor(() => {

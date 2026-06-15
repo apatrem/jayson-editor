@@ -6,8 +6,8 @@ import { LibraryView } from "../../../src/ui/library/LibraryView";
 const CLOUD_ROOT = "/Users/me/Documents";
 
 const sampleEntry = {
-  name: "proposal.yaml",
-  path: `${CLOUD_ROOT}/Acme/proposal.yaml`,
+  name: "proposal.json",
+  path: `${CLOUD_ROOT}/Acme/proposal.json`,
   is_dir: false,
 };
 
@@ -17,28 +17,26 @@ const acmeDir = {
   is_dir: true,
 };
 
-const minimalMeta = `
-kind: document
-schemaVersion: "1.0.0"
-meta:
-  client: Acme Corp
-  project: Cloud Migration
-  docKind: proposal
-  tags: []
-  language: en
-  status: draft
-  archived: false
-  confidentialityLevel: medium
-  owner: test@example.com
-  reviewers: []
-  createdAt: "2026-01-01T00:00:00Z"
-  updatedAt: "2026-01-01T00:00:00Z"
-  brandRef: "$brand:default"
-sections:
-  - id: s1
-    title: Overview
-    blocks: []
-`;
+const minimalMeta = JSON.stringify({
+  kind: "document",
+  schemaVersion: "1.0.0",
+  meta: {
+    client: "Acme Corp",
+    project: "Cloud Migration",
+    docKind: "proposal",
+    tags: [],
+    language: "en",
+    status: "draft",
+    archived: false,
+    confidentialityLevel: "medium",
+    owner: "test@example.com",
+    reviewers: [],
+    createdAt: "2026-01-01T00:00:00Z",
+    updatedAt: "2026-01-01T00:00:00Z",
+    brandRef: "$brand:default",
+  },
+  sections: [{ id: "s1", title: "Overview", blocks: [] }],
+});
 
 function makeOnOpenDoc() {
   return vi.fn((_path: string) => Promise.resolve());
@@ -54,8 +52,8 @@ function makeBaseDeps(overrides: Record<string, unknown> = {}) {
       if (path === acmeDir.path) return Promise.resolve([sampleEntry]);
       return Promise.resolve([]);
     }),
-    readYamlFile: vi.fn(() => Promise.resolve(minimalMeta)),
-    writeYamlFile: vi.fn(() => Promise.resolve()),
+    readDocumentFile: vi.fn(() => Promise.resolve(minimalMeta)),
+    writeDocumentFile: vi.fn(() => Promise.resolve()),
     ...overrides,
   };
 }
@@ -80,10 +78,10 @@ describe("LibraryView — folder scan", () => {
     });
     expect(deps.readAppConfig).toHaveBeenCalled();
     expect(deps.listDirectory).toHaveBeenCalledWith(CLOUD_ROOT);
-    expect(deps.readYamlFile).toHaveBeenCalledWith(sampleEntry.path);
+    expect(deps.readDocumentFile).toHaveBeenCalledWith(sampleEntry.path);
   });
 
-  it("clicking a card calls onOpenDoc with the yaml path", async () => {
+  it("clicking a card calls onOpenDoc with the json path", async () => {
     const onOpenDoc = makeOnOpenDoc();
     const deps = makeBaseDeps();
     render(
@@ -101,7 +99,7 @@ describe("LibraryView — folder scan", () => {
 
     await waitFor(() => {
       expect(onOpenDoc).toHaveBeenCalledWith(
-        `${CLOUD_ROOT}/Acme/proposal.yaml`,
+        `${CLOUD_ROOT}/Acme/proposal.json`,
       );
     });
   });
@@ -125,16 +123,19 @@ describe("LibraryView — empty state", () => {
     expect(screen.getByRole("button", { name: "Use Sample Document" })).toBeTruthy();
   });
 
-  it("Use Sample writes sample yaml then re-scans and shows card", async () => {
+  it("Use Sample writes sample json then re-scans and shows card", async () => {
     let callCount = 0;
     const deps = makeBaseDeps({
       listDirectory: vi.fn((path: string) => {
         callCount++;
-        if (callCount <= 1) return Promise.resolve([]); // first scan: empty
-        // after write: return sample entry
+        if (callCount <= 1) return Promise.resolve([]);
         if (path === CLOUD_ROOT)
           return Promise.resolve([
-            { name: "Sample Proposal.yaml", path: `${CLOUD_ROOT}/Sample Proposal.yaml`, is_dir: false },
+            {
+              name: "Sample Proposal.json",
+              path: `${CLOUD_ROOT}/Sample Proposal.json`,
+              is_dir: false,
+            },
           ]);
         return Promise.resolve([]);
       }),
@@ -153,9 +154,9 @@ describe("LibraryView — empty state", () => {
     fireEvent.click(screen.getByRole("button", { name: "Use Sample Document" }));
 
     await waitFor(() => {
-      expect(deps.writeYamlFile).toHaveBeenCalledWith(
-        `${CLOUD_ROOT}/Sample Proposal.yaml`,
-        expect.stringContaining("kind: document"),
+      expect(deps.writeDocumentFile).toHaveBeenCalledWith(
+        `${CLOUD_ROOT}/Sample Proposal.json`,
+        expect.stringContaining('"kind": "document"'),
       );
     });
     await waitFor(() => {
