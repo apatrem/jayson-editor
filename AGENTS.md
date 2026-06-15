@@ -1,5 +1,9 @@
 # AGENTS.md
 
+<!-- agentic-workflow-baseline: 0011 -->
+<!-- Baseline conventions are adopted BY REFERENCE: cite them `AW-NNNN` (AW-0007); this repo's own
+     docs/adr/ is for domain decisions in its own number space. Never copy a baseline ADR file in. -->
+
 Operational guardrails for any agent (Claude Code, subagents, contributors)
 working in this repository.
 
@@ -157,9 +161,44 @@ shrink (ADR-0023). Run the frozen lane locally with `npm run test:frozen`. Local
   (`/agentic-workflow:review` — GPT-5.5 xhigh + Claude effort-high, synthesized).
 - **`hard`**: competitive best-of-N across lineages + smart-merge, then the
   medium dual review.
+- **`mode` is a floor, not a ceiling** (AW-0004, refinement 3): the declared tier
+  is a minimum the task author sets, never a ceiling. A change touching
+  **protected/destructive surface** is forced to **≥ `medium`** regardless of
+  declared mode — record *"escalated by risk floor"* in the task and PR. Trigger
+  set (surfaces that route to a human or halt the gate):
+  - destructive filesystem ops — `rm -rf`, in-place rewrites, symlink/dir
+    replacement (terminal-safety rules; `.cursor/cli.json` denies)
+  - the gate or CI config itself (`ruby scripts/check-specs`,
+    `.github/workflows/`, `tests/frozen-acceptance.json`)
+  - lockfiles / dependency manifests (`package-lock.json`, `Cargo.lock`, new
+    dependencies without justification)
+  - migrations · schema · data-shape changes (DocModel contract,
+    `docs/JSON_FORMAT.md`, block schema)
+  - auth · secrets · security boundaries (Tauri capabilities, IPC scope)
+  - public API / contract changes (shared types in `docs/TYPES.md`, IPC
+    signatures in `docs/TAURI_IPC.md`)
 
 The engine for spawning workers is external (Superset — see
 `/agentic-workflow:run`); this repo records policy, not engine API.
+
+### Remediation & escalation loop (AW-0010)
+
+After review produces a blockers-only punch-list:
+
+- **Remediator** = the tier's implementer (`low`/`medium` → default implementer;
+  `hard` → winning best-of-N lineage). Fresh spawn on the same branch/worktree,
+  prompt = punch-list, gate-until-green, commit-don't-push.
+- **Default re-check:** targeted re-verify — hand each blocker back to the
+  reviewer that raised it for RESOLVED / NOT-RESOLVED. Uncapped; not counted
+  toward the review-round cap.
+- **Excess findings:** when blocker count exceeds tier threshold, reviewers mark
+  the diff systemically shaky, or remediation touched far beyond the punch-list —
+  escalate one tier (`low→medium→hard`) and run a **full fresh review round**
+  on the remediated diff.
+- **Cap:** at most **3 full review rounds** (round 1 = initial tier review;
+  targeted re-verifies are free). Blockers surviving round 3 → **`needs-human`**
+  — hand the PR to the human merger with open blockers flagged (consistent with
+  humans-merge; ADR-0023).
 
 ### Lessons → guardrails
 
@@ -238,6 +277,16 @@ until the previous one's acceptance criteria pass; encode cross-milestone
 ordering as `depends-on`.
 - Work tasks from [`tasks/`](tasks/) in `depends-on` order. Reference task IDs
 (`T-NNN`) in commit messages and PR titles.
+- **Smallest correct change, via the ladder** (AW-0011): needed at all? →
+  stdlib → platform feature → already-installed dep → one line → minimal code.
+  No unrequested abstractions; no new dependencies without asking.
+- **Minimalism has a floor** (AW-0011) — never cut: input validation at trust
+  boundaries, error handling that prevents data loss, security, accessibility.
+  Reject invalid input; never auto-"fix" it — fail loudly.
+- **Mark deliberate corners** with `// SHORTCUT(<ceiling>): <upgrade path>` —
+  e.g. `// SHORTCUT(O(n²) scan): ok <1k rows; add an index if it grows`. The
+  reviewer enforces this; `grep -rn 'SHORTCUT('` is the running ledger
+  (AW-0011).
 - Prefer editing existing files over creating new ones.
 - Don't add features, abstractions, or error handling beyond what the task
 requires.
@@ -246,6 +295,10 @@ requires.
 Do not invent a new shape.
 
 ## Review playbook (conventions for code-review / security-audit / test-engineer agents)
+
+- **Minimalism (advisory, AW-0011):** over-engineering delete-list; deliberate
+  corners marked `SHORTCUT(…)`. Advisory only — veto stays blockers-only
+  (AW-0004).
 
 When briefing a review agent on Tauri 2.x IPC, capability, or plugin changes,
 include these explicit checks in the prompt:
