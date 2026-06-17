@@ -1,11 +1,13 @@
 # AGENTS.md
 
-<!-- agentic-workflow-baseline: 0011 -->
+<!-- agentic-workflow-baseline: v0.3.7 -->
 <!-- Baseline conventions are adopted BY REFERENCE: cite them `AW-NNNN` (AW-0007); this repo's own
      docs/adr/ is for domain decisions in its own number space. Never copy a baseline ADR file in. -->
 
 Operational guardrails for any agent (Claude Code, subagents, contributors)
 working in this repository.
+
+The agentic-workflow skills referenced here (`/agentic-workflow:architect|init|plan|review|run|setup`, plus `grill-me`/`grill-with-docs`) run **cross-CLI** — under Claude Code, Codex, and Cursor (AW-0007). They are installed globally (symlinked from the canonical pack), never vendored into this repo; cite baseline conventions as `AW-NNNN` rather than copying them in.
 
 > **Two jobs, two guides.** This file governs **building the app** (editor,
 > Tauri, blocks, schema). To **author a client document** — fill a
@@ -177,6 +179,7 @@ shrink (ADR-0023). Run the frozen lane locally with `npm run test:frozen`. Local
   - auth · secrets · security boundaries (Tauri capabilities, IPC scope)
   - public API / contract changes (shared types in `docs/TYPES.md`, IPC
     signatures in `docs/TAURI_IPC.md`)
+  - governance · decision records · architecture/docs — ADRs (`docs/adr/**`), `AGENTS.md`, `CONTEXT.md`, the architecture memo (`docs/DOCUMENT_SYSTEM_ARCHITECTURE.md`), and this baseline-conventions surface. Per AW-0004 (refinement 3), governance/decision-record/docs/architecture changes are forced to ≥ `medium` regardless of declared mode.
 
 The engine for spawning workers is external (Superset — see
 `/agentic-workflow:run`); this repo records policy, not engine API.
