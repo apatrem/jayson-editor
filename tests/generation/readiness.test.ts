@@ -1,5 +1,11 @@
+import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
-import { canExport, collectReadinessBlockers, readinessSnapshot } from "../../src/generation/readiness";
+import {
+  canExport,
+  collectReadinessBlockers,
+  PERF_ENVELOPE_MAX_BLOCKS,
+  readinessSnapshot,
+} from "../../src/generation/readiness";
 import type { DocModel } from "../../src/schema/docmodel";
 import type { Block } from "../../src/schema/blocks";
 
@@ -95,5 +101,43 @@ describe("readinessSnapshot", () => {
     ]);
     const kinds = collectReadinessBlockers(doc).map((b) => b.kind);
     expect(kinds).toContain("missing-source-for-verify");
+  });
+
+  it("flags layout overflow and contradiction without blocking export", () => {
+    const doc = minimalDoc([
+      {
+        id: "p1",
+        type: "prose",
+        align: "left",
+        content: { type: "doc", content: [] },
+        layoutOverflow: true,
+        contradictionFlag: true,
+      } as Block,
+    ]);
+    const kinds = collectReadinessBlockers(doc).map((b) => b.kind);
+    expect(kinds).toContain("layout-overflow");
+    expect(kinds).toContain("contradiction");
+    expect(canExport(doc)).toBe(true);
+  });
+
+  it("flags size-exceeds-envelope without blocking export", () => {
+    const blocks: Block[] = Array.from({ length: PERF_ENVELOPE_MAX_BLOCKS + 1 }, (_, i) => ({
+      id: `p${i}`,
+      type: "prose",
+      align: "left",
+      content: { type: "doc", content: [] },
+    }));
+    const doc = minimalDoc(blocks);
+    const kinds = collectReadinessBlockers(doc).map((b) => b.kind);
+    expect(kinds).toContain("size-exceeds-envelope");
+    expect(canExport(doc)).toBe(true);
+  });
+});
+
+describe("docs/UI_READINESS_GATE.md export popup contract", () => {
+  it("names both popup actions for flagged export", () => {
+    const text = readFileSync("docs/UI_READINESS_GATE.md", "utf8");
+    expect(text).toMatch(/Review items/);
+    expect(text).toMatch(/Export with flagged content/);
   });
 });

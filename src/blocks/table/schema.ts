@@ -11,6 +11,7 @@ import {
   type ProseMirrorFragment,
 } from "../../schema/prosemirror-fragment";
 import { BlockBaseSchema } from "../../schema/blocks/block-base";
+import { GenerationDataFieldsSchema } from "../../schema/generation";
 
 export const TableColumnAlignSchema = z.enum(["left", "center", "right"]);
 export type TableColumnAlign = z.infer<typeof TableColumnAlignSchema>;
@@ -38,7 +39,9 @@ export const TableBlockDataSchema = BlockBaseSchema.extend({
   columns: z.array(TableColumnSchema).min(2).max(8),
   rows: z.array(TableRowSchema).min(1).max(30),
   caption: z.string().optional(),
-}).strict();
+})
+  .merge(GenerationDataFieldsSchema)
+  .strict();
 
 function validateTableRowCellCounts(
   block: z.infer<typeof TableBlockDataSchema>,

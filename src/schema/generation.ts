@@ -21,7 +21,7 @@ export type DataSource = z.infer<typeof DataSourceSchema>;
 /** Optional generation / verification fields on data-bearing blocks. */
 export const GenerationDataFieldsSchema = z
   .object({
-    dataState: DataStateSchema.default("empty"),
+    dataState: DataStateSchema.optional(),
     /** Human-authoritative citation. LLM may fill only for grounded (uploaded) data. */
     source: DataSourceSchema.optional(),
     /** LLM advisory "where to look" — never rendered as a citation. */
