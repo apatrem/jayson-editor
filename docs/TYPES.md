@@ -799,11 +799,11 @@ function zodIssueToValidationError(issue: z.ZodIssue): ValidationError {
 
 ## 12. Generation pipeline types (ADR-0021)
 
-**File:** `src/schema/generation.ts` (draft — extend data-bearing block schemas in T-192)
+**File:** `src/schema/generation.ts`
 
-Cold-start generation and the readiness gate add optional fields to blocks. They
-are **not** yet merged into `BlockBaseSchema`; chart/table/kpi-cards blocks will
-`.merge()` these shapes during T-192.
+Cold-start generation and the readiness gate add optional fields to blocks.
+`GenerationBlockFlagsSchema` is merged into `BlockBaseSchema`; data-bearing
+blocks (`chart`, `table`, `kpi-cards`) also merge `GenerationDataFieldsSchema`.
 
 ```typescript
 import { z } from "zod";
@@ -816,7 +816,7 @@ export const DataSourceSchema = z.object({
 }).strict();
 
 export const GenerationDataFieldsSchema = z.object({
-  dataState: DataStateSchema.default("empty"),
+  dataState: DataStateSchema.optional(),
   source: DataSourceSchema.optional(),       // human-authoritative; LLM fills only for grounded uploads
   sourceHint: z.string().max(300).optional(), // advisory only — never rendered as citation
   verifiedBy: z.string().email().optional(),
