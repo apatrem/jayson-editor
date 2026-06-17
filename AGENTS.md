@@ -179,7 +179,7 @@ shrink (ADR-0023). Run the frozen lane locally with `npm run test:frozen`. Local
   - auth · secrets · security boundaries (Tauri capabilities, IPC scope)
   - public API / contract changes (shared types in `docs/TYPES.md`, IPC
     signatures in `docs/TAURI_IPC.md`)
-  - governance · decision records · architecture/docs — ADRs (`docs/adr/**`), `AGENTS.md`, `CONTEXT.md`, the architecture memo (`docs/DOCUMENT_SYSTEM_ARCHITECTURE.md`), and this baseline-conventions surface. Per AW-0004 (refinement 3), governance/decision-record/docs/architecture changes are forced to ≥ `medium` regardless of declared mode.
+  - governance · decision records · architecture/docs — ADRs (`docs/adr/**`), `AGENTS.md`, `CONTEXT.md`, the architecture memo (`docs/DOCUMENT_SYSTEM_ARCHITECTURE.md`), and this baseline-conventions surface. Per AW-0004 (refinement 3), governance/decision-record/docs/architecture changes are forced to ≥ `medium` regardless of declared mode. Boundary: only changes to decision records, conventions, and binding architecture requirements count as governance; routine prose — typos, examples, comments, non-contract README/docs maintenance — stays `low` (AW-0004).
 
 The engine for spawning workers is external (Superset — see
 `/agentic-workflow:run`); this repo records policy, not engine API.
