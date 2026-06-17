@@ -4,51 +4,57 @@ export interface LayoutFitVerdict {
 }
 
 const LAYOUT_OVERFLOW_FLAG = "layoutOverflow";
-const BLOCK_CAPACITY_KEYS = ["blocks", "totalBlocks", "maxBlocks"] as const;
 
 export function fitCheckSlide(
   slide: unknown,
   catalogue: unknown,
 ): LayoutFitVerdict {
-  const layout = readLayoutId(slide);
-  const blockCount = readBlockCount(slide);
-  const capacity = layout === null ? null : readBlockCapacity(layout, catalogue);
-  const fits = capacity !== null && blockCount <= capacity;
+  const slideRecord = requireRecord(slide, "slide");
+  const layout = readLayoutId(slideRecord);
+  const blockCount = readBlockCount(slideRecord);
+  const capacity = readBlockCapacity(layout, catalogue);
+  const fits = blockCount <= capacity;
 
   return fits
     ? { fits: true, flags: [] }
     : { fits: false, flags: [LAYOUT_OVERFLOW_FLAG] };
 }
 
-function readLayoutId(slide: unknown): string | null {
-  const record = asRecord(slide);
-  const layout = record?.layout;
-  return typeof layout === "string" ? layout : null;
+function readLayoutId(slide: Record<string, unknown>): string {
+  const layout = slide.layout;
+  if (typeof layout !== "string" || layout.length === 0) {
+    throw new Error("fitCheckSlide: slide.layout must be a non-empty string");
+  }
+  return layout;
 }
 
-function readBlockCount(slide: unknown): number {
-  const record = asRecord(slide);
-  const blocks = record?.blocks;
-  return Array.isArray(blocks) ? blocks.length : 0;
+function readBlockCount(slide: Record<string, unknown>): number {
+  const blocks = slide.blocks;
+  if (!Array.isArray(blocks)) {
+    throw new Error("fitCheckSlide: slide.blocks must be an array");
+  }
+  return blocks.length;
 }
 
-function readBlockCapacity(layoutId: string, catalogue: unknown): number | null {
+function readBlockCapacity(layoutId: string, catalogue: unknown): number {
   const layouts = readLayouts(catalogue);
   const layout = asRecord(layouts[layoutId]);
-  const capacity = asRecord(layout?.capacity);
-  if (capacity === null) return readSlotBlockCapacity(layout);
-
-  for (const key of BLOCK_CAPACITY_KEYS) {
-    const value = readNonNegativeNumber(capacity[key]);
-    if (value !== null) return value;
+  if (layout === null) {
+    throw new Error(`fitCheckSlide: unknown slide layout "${layoutId}"`);
   }
 
-  return readSlotBlockCapacity(layout);
+  const capacity = asRecord(layout?.capacity);
+  const directCapacity = readNonNegativeNumber(capacity?.blocks);
+  if (directCapacity !== null) return directCapacity;
+
+  const slotCapacity = readSlotBlockCapacity(layout);
+  if (slotCapacity !== null) return slotCapacity;
+
+  throw new Error(`fitCheckSlide: layout "${layoutId}" is missing numeric block capacity`);
 }
 
 function readLayouts(catalogue: unknown): Record<string, unknown> {
-  const record = asRecord(catalogue);
-  if (record === null) return {};
+  const record = requireRecord(catalogue, "catalogue");
   return asRecord(record.layouts) ?? record;
 }
 
@@ -80,4 +86,12 @@ function asRecord(value: unknown): Record<string, unknown> | null {
   return typeof value === "object" && value !== null && !Array.isArray(value)
     ? (value as Record<string, unknown>)
     : null;
+}
+
+function requireRecord(value: unknown, name: string): Record<string, unknown> {
+  const record = asRecord(value);
+  if (record === null) {
+    throw new Error(`fitCheckSlide: ${name} must be an object`);
+  }
+  return record;
 }

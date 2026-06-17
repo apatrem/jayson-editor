@@ -8,6 +8,7 @@ schemaVersion: "1.0.0"
 lastUpdated: "2026-06-17"
 
 layouts:
+  # 1 hero slot; writer budget keeps the opening message to one short headline.
   cover:
     id: "cover"
     use-when: "Opening slide with a single strong title, image, or hero message."
@@ -15,6 +16,7 @@ layouts:
     slots:
       hero: { accepts: [heading, prose, image, callout], capacity: { blocks: 1 } }
 
+  # 1 title slot; divider slides carry one transition message, not body copy.
   section-divider:
     id: "section-divider"
     use-when: "Chapter break or transition between major sections."
@@ -22,6 +24,7 @@ layouts:
     slots:
       title: { accepts: [heading, prose], capacity: { blocks: 1 } }
 
+  # 1 agenda slot; list budget allows a readable six-part deck roadmap.
   agenda:
     id: "agenda"
     use-when: "Ordered meeting or deck roadmap."
@@ -29,6 +32,7 @@ layouts:
     slots:
       agenda: { accepts: [numbered-list, bullet-list], capacity: { blocks: 1 } }
 
+  # 2 slots: title + one body block; body budget fits a standard message slide.
   title-body:
     id: "title-body"
     use-when: "Standard message slide: title plus one body block."
@@ -37,6 +41,7 @@ layouts:
       title: { accepts: [heading], capacity: { blocks: 1 } }
       body: { accepts: [prose, bullet-list, numbered-list, callout], capacity: { blocks: 1 } }
 
+  # 2 equal slots; each column gets one compact argument or visual block.
   two-column:
     id: "two-column"
     use-when: "Comparison, pros/cons, before/after, or two parallel arguments."
@@ -45,6 +50,7 @@ layouts:
       left: { accepts: [prose, bullet-list, numbered-list, callout, image], capacity: { blocks: 1 } }
       right: { accepts: [prose, bullet-list, numbered-list, callout, image], capacity: { blocks: 1 } }
 
+  # 3 equal slots; each column is intentionally tighter than two-column.
   three-column:
     id: "three-column"
     use-when: "Three options, pillars, workstreams, or sequential takeaways."
@@ -54,6 +60,7 @@ layouts:
       middle: { accepts: [prose, bullet-list, callout, kpi-cards], capacity: { blocks: 1 } }
       right: { accepts: [prose, bullet-list, callout, kpi-cards], capacity: { blocks: 1 } }
 
+  # 1 chart slot; any commentary must live inside the chart takeaway.
   chart-full:
     id: "chart-full"
     use-when: "One chart is the slide; prose belongs in the chart takeaway."
@@ -61,6 +68,7 @@ layouts:
     slots:
       chart: { accepts: [chart], capacity: { blocks: 1 } }
 
+  # 2 slots: chart plus one concise interpretation block.
   chart-commentary:
     id: "chart-commentary"
     use-when: "Chart plus short interpretation or implications."
@@ -69,6 +77,7 @@ layouts:
       chart: { accepts: [chart], capacity: { blocks: 1 } }
       commentary: { accepts: [prose, bullet-list, callout], capacity: { blocks: 1 } }
 
+  # 1 table slot; row/column budgets keep the table readable on a slide.
   table:
     id: "table"
     use-when: "Compact matrix or data table that must be read directly."
@@ -76,6 +85,7 @@ layouts:
     slots:
       table: { accepts: [table], capacity: { blocks: 1 } }
 
+  # 1 quote slot; character budget preserves a single focal sound bite.
   quote:
     id: "quote"
     use-when: "A single quotation, recommendation, or executive sound bite."
@@ -83,6 +93,7 @@ layouts:
     slots:
       quote: { accepts: [prose, callout], capacity: { blocks: 1 } }
 
+  # 1 timeline slot; milestone budget fits a readable horizontal sequence.
   process-timeline:
     id: "process-timeline"
     use-when: "Phased plan, timeline, roadmap, or process sequence."
@@ -90,6 +101,7 @@ layouts:
     slots:
       timeline: { accepts: [timeline, roadmap], capacity: { blocks: 1 } }
 
+  # 1 team slot; people budget fits a compact project or governance roster.
   team:
     id: "team"
     use-when: "Team, governance group, or stakeholder roster."
@@ -97,6 +109,7 @@ layouts:
     slots:
       team: { accepts: [team], capacity: { blocks: 1 } }
 
+  # 1 KPI slot; card budget keeps metric tiles scannable.
   kpis:
     id: "kpis"
     use-when: "Metric-led slide with several headline numbers."
@@ -104,6 +117,7 @@ layouts:
     slots:
       kpis: { accepts: [kpi-cards], capacity: { blocks: 1 } }
 
+  # 2 slots: one visual plus one short caption block.
   image-caption:
     id: "image-caption"
     use-when: "Large image or diagram with one short caption."
@@ -112,6 +126,7 @@ layouts:
       image: { accepts: [image, diagram], capacity: { blocks: 1 } }
       caption: { accepts: [prose, callout], capacity: { blocks: 1 } }
 
+  # 1 closing slot; action budget fits a short decision or next-step list.
   closing:
     id: "closing"
     use-when: "Final recommendation, decision, or next steps."
