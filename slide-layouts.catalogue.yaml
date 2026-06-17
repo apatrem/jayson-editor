@@ -1,0 +1,96 @@
+# Slide Layout Catalogue — closed deck grid (D-30, GENERATION_PIPELINE §5)
+#
+# PURPOSE: single capacity authority for Pass 1 writer budgets, LLM layout
+# proposal, and Pass 2.5 fit-check. Slot ids MUST match LAYOUT_SLOTS in
+# src/editor/SlideLayoutEditor.tsx.
+#
+# capacity: max content units per slot (eyeballed for 16:9 deck slides):
+#   - atomic blocks (chart, table, quote, kpi-cards, …) → 1 unit
+#   - prose → paragraph count (or 1 when body absent)
+#   - bullet-list / numbered-list → item count
+#   - image-caption caption slot → short label units (words/fragments)
+
+schemaVersion: "1.0.0"
+lastUpdated: "2026-06-17"
+
+layouts:
+  cover:
+    use-when: "Opening or closing title slide with hero visual and headline."
+    capacity:
+      hero: 1
+
+  section-divider:
+    use-when: "Chapter break between major deck sections."
+    capacity:
+      title: 1
+
+  agenda:
+    use-when: "Table-of-contents slide listing upcoming sections."
+    capacity:
+      agenda: 12
+
+  title-body:
+    use-when: "Standard narrative slide — headline plus supporting body copy."
+    capacity:
+      title: 1
+      body: 18
+
+  two-column:
+    use-when: "Side-by-side comparison, pros/cons, or dual-track narrative."
+    capacity:
+      left: 10
+      right: 10
+
+  three-column:
+    use-when: "Three parallel pillars, options, or feature columns."
+    capacity:
+      left: 6
+      middle: 6
+      right: 6
+
+  chart-full:
+    use-when: "Single dominant chart with no companion text."
+    capacity:
+      chart: 1
+
+  chart-commentary:
+    use-when: "Chart with interpretive bullets or callouts beside it."
+    capacity:
+      chart: 1
+      commentary: 8
+
+  table:
+    use-when: "Tabular data fills the slide."
+    capacity:
+      table: 1
+
+  quote:
+    use-when: "Pull quote or client testimonial as the focal element."
+    capacity:
+      quote: 1
+
+  process-timeline:
+    use-when: "Sequential steps, roadmap phases, or milestone timeline."
+    capacity:
+      timeline: 1
+
+  team:
+    use-when: "Leadership or project team roster with headshots."
+    capacity:
+      team: 1
+
+  kpis:
+    use-when: "Key metrics dashboard — kpi-cards block."
+    capacity:
+      kpis: 1
+
+  image-caption:
+    use-when: "Full-bleed or large image with a short caption."
+    capacity:
+      image: 1
+      caption: 4
+
+  closing:
+    use-when: "Final next-steps or thank-you slide."
+    capacity:
+      closing: 1
