@@ -25,8 +25,9 @@ and so reviewers can verify the claims against pinned sources.
 fields* — anchors the **generator**, not the **artifact**. It is the design our
 memo §2 and requirement R6 were written to reject as a primary consistency
 mechanism. Two narrower ideas are worth adopting in their stronger form
-(token-source-of-truth, CSS-variable theming); the HTML-in-JSON model itself is
-not adopted.
+(token-source-of-truth, exemplar-driven generation); a third (CSS-variable
+theming) is left open as a separate evaluation, not adopted; the HTML-in-JSON
+model itself is not adopted.
 
 ---
 
