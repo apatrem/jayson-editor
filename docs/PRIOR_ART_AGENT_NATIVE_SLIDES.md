@@ -178,8 +178,9 @@ docs/month):
   to a binding pattern, not a free win, and **not** "compatible with the schema"
   as-is. Whether live CSS-var theming beats the current resolved-value approach
   (e.g. for instant re-theme of existing decks) is a genuine design question.
-  **Action: file a separate task/ADR to evaluate it against the committed
-  renderer architecture before any code changes.** It is recorded here only as a
+  **Action: tracked as [T-216](../tasks/T-216-evaluate-css-variable-theming.md)
+  — evaluate it against the committed renderer architecture and record the
+  decision as an ADR before any code changes.** It is recorded here only as a
   prompt for that evaluation.
 
 ---
