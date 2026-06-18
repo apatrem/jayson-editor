@@ -1,7 +1,10 @@
 # Prior Art — BuilderIO `agent-native` Slides template
 
 **Date:** 2026-06-18
-**Status:** Analysis + decision note (informational; affirms existing architecture)
+**Status:** Analysis note (informational). The *rejection* affirms existing
+architecture; the *adopt* section flags one **open candidate** (CSS-variable
+theming) that would **change** the committed renderer pattern — see Adopt item 2.
+No binding decision is made here.
 **Companion to:** [DOCUMENT_SYSTEM_ARCHITECTURE.md](DOCUMENT_SYSTEM_ARCHITECTURE.md) (memo §2, R6, R13),
 [adr/0004-three-tier-block-library-with-authored-blocks.md](adr/0004-three-tier-block-library-with-authored-blocks.md),
 [adr/0022-json-docmodel-supersedes-yaml.md](adr/0022-json-docmodel-supersedes-yaml.md)
@@ -55,7 +58,12 @@ A deck is one JSON blob in `decks.data` (a `text` column). Each slide's
 fixed canvas size. There is **no typed per-slide schema** — no Zod, no block
 types, no validation of the stored shape. "Layout" (title / section / content /
 two-column / table) is a *naming convention for the agent*, not a structural
-constraint; nothing prevents arbitrary HTML.
+constraint; nothing prevents arbitrary HTML. This is the precise inverse of our
+closed, enforced block library: their "layouts" are informal labels, whereas our
+three-tier library
+([ADR-0004](adr/0004-three-tier-block-library-with-authored-blocks.md)) makes
+each block a typed, schema-gated unit, and Authored blocks pass a lint + runtime
+gate before they can exist. They get flexibility; we get a guarantee.
 
 ### Anchoring: a 3-layer stack, only one layer enforced (S2, S3, S4)
 
@@ -136,18 +144,31 @@ docs/month):
    difference that matters is *where it binds*: we consume tokens **in renderers
    (enforced)**, they substitute **via prompt (advisory)**. Ours strictly
    dominates — no change needed, this validates the existing approach.
-2. **CSS-variable-driven theming** — render block components against CSS custom
-   properties bound to brand tokens, so re-theming is **live and lossless**
-   (better than baking resolved brand values into output). This is the one piece
-   of their runtime model worth importing wholesale, and it is compatible with
-   the schema. *Candidate refinement to the renderer design (memo Layer 5 /
-   [BLOCK_IMPLEMENTATION_GUIDE.md](BLOCK_IMPLEMENTATION_GUIDE.md)); not yet a
-   committed decision — flagged for follow-up.*
+2. **CSS-variable-driven theming — open question, NOT adopted here.** Their
+   "Tweaks" panel applies brand changes live via CSS custom properties (S4),
+   which makes re-theming feel lossless. This is worth *evaluating*, but it
+   **conflicts with our committed renderer pattern** and must not be read as a
+   concluded adoption. Today, block renderers consume brand tokens as **resolved
+   JavaScript values** via `useBrandTokens()` + `resolveBrandToken()`, and the
+   binding copy-pattern explicitly forbids inlining colors/CSS vars
+   ([BLOCK_IMPLEMENTATION_GUIDE.md](BLOCK_IMPLEMENTATION_GUIDE.md) §4;
+   [reference/primitives/README.md](../reference/primitives/README.md) point 2;
+   [reference/callout/Callout.tsx](../reference/callout/Callout.tsx)). Switching
+   to CSS-custom-property theming would touch `BrandProvider`, every block
+   renderer, the PDF SSR render path, and the brand-token schema shape — a
+   non-trivial change to a binding pattern, not a free win, and **not**
+   "compatible with the schema" as-is. Whether live CSS-var theming beats the
+   current resolved-value approach (e.g. for instant re-theme of existing decks)
+   is a genuine design question. **Action: file a separate task/ADR to evaluate
+   it against the committed renderer architecture before any code changes.** It
+   is recorded here only as a prompt for that evaluation.
 3. **Skills-as-generation-exemplars** — their SKILL templates are few-shot
    exemplars that cut drift at write time. This **feeds** our generation pipeline
    (outline → write → structure), it does not replace the schema. We already do
-   this via [examples/](../examples/) valid fixtures; the lesson is to invest in
-   rich, example-heavy generation guidance *on top of* validation.
+   this via the valid fixtures in [examples/](../examples/) (which also carries
+   an `examples/invalid/` negative-fixture set for validation tests); the lesson
+   is to invest in rich, example-heavy generation guidance *on top of*
+   validation.
 
 ---
 
@@ -159,7 +180,8 @@ docs/month):
 
 For brand-critical consulting output we need the artifact anchored — typed
 blocks + Zod + token-driven renderers. We use the exemplar idea to make
-generation land closer to valid on the first try, and we steal CSS-variable
-theming so brand stays a live reference. The HTML-in-JSON-with-soft-guidelines
-model itself trades our structural guarantee for statistical hope, and is not
-adopted.
+generation land closer to valid on the first try, and we treat live CSS-variable
+theming as an open design question to evaluate against the committed renderer
+pattern (Adopt item 2), not a concluded adoption. The
+HTML-in-JSON-with-soft-guidelines model itself trades our structural guarantee
+for statistical hope, and is not adopted.
