@@ -152,8 +152,11 @@ live agent-native path — prior-art note `S8`):
   surrounding wrapper/structure conventions or it renders off. Again: no typed
   insert, just string surgery.
 - **Paste injects stray markup.** Raw `contentEditable` lets pasted spans/inline
-  styles in; no schema *rejects* them. Localized to the edited block, but it
-  persists.
+  styles in. agent-native runs an XSS/safety sanitizer on render (prior-art note
+  `S10`) that strips scripts and dangerous URLs, but it **allows `style`/inline
+  CSS**, so off-brand colors/fonts are not rejected — only scripts are. The
+  stray brand markup persists. (Variants A and B inherit this; only a content
+  schema, as in C, rejects off-brand styling.)
 - **Slow drift.** Repeated edits accrete markup cruft over time — the classic
   reason raw HTML editing ages badly (slower than full-document contenteditable
   because edits are scoped to one block).
@@ -180,7 +183,7 @@ are routine.
 | **Brand consistency** | not guaranteed (LLM-styled) | consistent if renderer is deterministic; not *rejected* | **guaranteed** (schema + token renderers) |
 | **Re-theming existing docs** | no (baked literals) | yes, if deterministic-render path | yes (swap tokens, re-render) |
 | **Output / PDF** | simple (print HTML) | simple (print HTML) | render then print (Playwright) |
-| **Validation / reject off-brand** | none | none (IDs only) | schema-validated |
+| **Validation / reject off-brand** | XSS-sanitized only; brand not rejected | same (IDs only) | schema-validated (brand rejected) |
 | **Longevity / maintainability** | drifts; hand-rolled anchors | moderate | durable; portable, queryable file |
 | **Deployment fit (Tauri local)** | needs rework if forking their SaaS stack | fits | fits (current) |
 

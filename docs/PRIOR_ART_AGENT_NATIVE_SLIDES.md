@@ -53,6 +53,7 @@ against this SHA, since `main` moves.
 | S7 | Web overview: <https://www.agent-native.com/docs/template-slides> | Product framing: open-source Slides/Pitch/PowerPoint replacement, Yjs CRDT, PPTX/DOCX import + export, MCP/A2A |
 | S8 | `app/components/editor/SlideEditor.tsx` | **The live inline editor.** `findSmartBlock` + `enterInlineEdit` set `el.contentEditable="true"` on the **rendered, fully-styled** DOM block; `readCurrentSlideContentHtml` saves the whole `.slide-content` innerHTML (layout/styles intact), minus editor-only attrs stripped by `stripBuilderIds` |
 | S9 | `app/components/editor/SlideInlineEditor.tsx` | A TipTap editor whose `extractEditableContent`/`convertDivsToBlocks` lossy-flatten styled HTML to `<p>/<h1>/<ul>` (headings guessed from `font-size`, lists from the `●` char). **Unwired:** a repo-wide scan at this SHA finds no mount — only the reconcile test imports a helper. Not the live edit path |
+| S10 | `app/lib/sanitize-slide-html.ts` | An **XSS/safety** sanitizer applied on render: tag/attr whitelist, strips `<script>`, blocks `javascript:`/`vbscript:` URLs, scrubs CSS values for script payloads. But it **allows `style` attributes + inline CSS**, so off-brand colors/fonts are *not* rejected — it is a safety gate, not a brand gate |
 
 ---
 
@@ -135,9 +136,12 @@ the canonical artifact, edited directly. That is the memo §2 "editor-state-as-
 canonical" pattern in its purest form, and the low edit-loss is its genuine
 upside. The costs are not fidelity but **capability and safety**:
 
-- **No schema = no rejection.** Raw `contentEditable` means a paste can still
-  inject stray spans / off-brand inline styles — now localized to the edited
-  block, but nothing *rejects* it; it persists.
+- **No *brand* rejection.** There *is* an XSS/safety sanitizer on render
+  (`sanitize-slide-html.ts`, S10) — a tag/attr whitelist that strips `<script>`
+  and `javascript:`/`vbscript:` URLs — but it **allows `style` attributes and
+  inline CSS**, so a paste's off-brand colors/fonts pass straight through. Raw
+  `contentEditable` can still inject stray spans / off-brand inline styles; the
+  sanitizer blocks scripts, not brand violations, so they persist.
 - **No typed structure** to anchor comments, scoped AI patches, or lossless
   re-theming to. The blob edits cleanly but offers no stable IDs or typed fields
   for those features to grip (memo §7 / R13).
