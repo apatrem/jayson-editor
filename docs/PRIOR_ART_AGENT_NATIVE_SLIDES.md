@@ -7,7 +7,10 @@ theming) that would **change** the committed renderer pattern — see "Leave ope
 No binding decision is made here.
 **Companion to:** [DOCUMENT_SYSTEM_ARCHITECTURE.md](DOCUMENT_SYSTEM_ARCHITECTURE.md) (memo §2, R6, R13),
 [adr/0004-three-tier-block-library-with-authored-blocks.md](adr/0004-three-tier-block-library-with-authored-blocks.md),
-[adr/0022-json-docmodel-supersedes-yaml.md](adr/0022-json-docmodel-supersedes-yaml.md)
+[adr/0022-json-docmodel-supersedes-yaml.md](adr/0022-json-docmodel-supersedes-yaml.md).
+For the HTML-canonical fork/redesign options this study raised (pure-blob /
+thin-spine hybrid / typed DocModel, with diagrams and a pros-cons matrix), see
+[ALTERNATIVE_ARCHITECTURES.md](ALTERNATIVE_ARCHITECTURES.md).
 
 ---
 
