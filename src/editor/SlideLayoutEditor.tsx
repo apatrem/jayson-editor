@@ -15,9 +15,9 @@ export interface SlideLayoutEditorProps {
 }
 
 const LAYOUT_SLOTS: Record<SlideLayout, SlideLayoutSlot[]> = {
-  cover: [slot("hero", "Cover", "hero")],
+  "cover": [slot("hero", "Cover", "hero")],
   "section-divider": [slot("title", "Section title", "title")],
-  agenda: [slot("agenda", "Agenda", "agenda")],
+  "agenda": [slot("agenda", "Agenda", "agenda")],
   "title-body": [slot("title", "Title", "title"), slot("body", "Body", "body")],
   "two-column": [slot("left", "Left", "left"), slot("right", "Right", "right")],
   "three-column": [
@@ -30,31 +30,31 @@ const LAYOUT_SLOTS: Record<SlideLayout, SlideLayoutSlot[]> = {
     slot("chart", "Chart", "chart"),
     slot("commentary", "Commentary", "commentary"),
   ],
-  table: [slot("table", "Table", "table")],
-  quote: [slot("quote", "Quote", "quote")],
+  "table": [slot("table", "Table", "table")],
+  "quote": [slot("quote", "Quote", "quote")],
   "process-timeline": [slot("timeline", "Timeline", "timeline")],
-  team: [slot("team", "Team", "team")],
-  kpis: [slot("kpis", "KPIs", "kpis")],
+  "team": [slot("team", "Team", "team")],
+  "kpis": [slot("kpis", "KPIs", "kpis")],
   "image-caption": [slot("image", "Image", "image"), slot("caption", "Caption", "caption")],
-  closing: [slot("closing", "Closing", "closing")],
+  "closing": [slot("closing", "Closing", "closing")],
 };
 
 const LAYOUT_TEMPLATES: Record<SlideLayout, string> = {
-  cover: '"hero"',
+  "cover": '"hero"',
   "section-divider": '"title"',
-  agenda: '"agenda"',
+  "agenda": '"agenda"',
   "title-body": '"title" "body"',
   "two-column": '"left right"',
   "three-column": '"left middle right"',
   "chart-full": '"chart"',
   "chart-commentary": '"chart commentary"',
-  table: '"table"',
-  quote: '"quote"',
+  "table": '"table"',
+  "quote": '"quote"',
   "process-timeline": '"timeline"',
-  team: '"team"',
-  kpis: '"kpis"',
+  "team": '"team"',
+  "kpis": '"kpis"',
   "image-caption": '"image caption"',
-  closing: '"closing"',
+  "closing": '"closing"',
 };
 
 export const SlideLayoutEditor: FC<SlideLayoutEditorProps> = ({
