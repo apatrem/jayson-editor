@@ -22,16 +22,20 @@ rather than from scratch.
 ### Variant A — Pure HTML-blob (agent-native style)
 
 The rendered, styled HTML string **is** the canonical artifact. No schema, no
-typed model. Editing mutates the HTML directly; comments are markers in (or
-text-snapshots against) that HTML.
+typed model. Editing mutates the HTML directly. For comments, agent-native uses a
+**side-table keyed by `slideId` + a `quotedText` snapshot — no stable IDs** (S1
+`slide_comments`; the editor-ephemeral `data-builder-id` is stripped before save,
+S8). A pure-blob fork *could* instead inject marker spans into the HTML, but
+agent-native does not — and both approaches are fragile (snapshots fail when text
+changes/repeats; markers are clobbered by edits and agent regeneration).
 
 ```
  LLM (skills) ─► markdown ─► LLM applies brand ─► styled HTML string ═══► CANONICAL
                                                         │  (stored as opaque text)
                                   user ──► in-place contentEditable
                                                         │
-                                        comment anchors = marker spans in HTML
-                                          (or quotedText snapshot) — fragile
+                                  comment anchors = side-table { slideId, quotedText }
+                                          (no stable IDs) — fragile
                                                         │
                                                   PDF = print the HTML
 ```
