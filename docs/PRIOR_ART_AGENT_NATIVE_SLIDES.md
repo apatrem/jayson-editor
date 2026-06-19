@@ -48,6 +48,8 @@ against this SHA, since `main` moves.
 | S5 | `.agents/skills/actions/SKILL.md` | Zod is used on the **action I/O contract** (`defineAction({ schema })` / `outputSchema`) — the agent-tool boundary, **not** slide/brand content |
 | S6 | `.agents/skills/frontend-design/SKILL.md` | Design quality guidance is advisory prose (vendored from `anthropics/skills`) |
 | S7 | Web overview: <https://www.agent-native.com/docs/template-slides> | Product framing: open-source Slides/Pitch/PowerPoint replacement, Yjs CRDT, PPTX/DOCX import + export, MCP/A2A |
+| S8 | `app/components/editor/SlideEditor.tsx` | **The live inline editor.** `findSmartBlock` + `enterInlineEdit` set `el.contentEditable="true"` on the **rendered, fully-styled** DOM block; `readCurrentSlideContentHtml` saves the whole `.slide-content` innerHTML (layout/styles intact), minus editor-only attrs stripped by `stripBuilderIds` |
+| S9 | `app/components/editor/SlideInlineEditor.tsx` | A TipTap editor whose `extractEditableContent`/`convertDivsToBlocks` lossy-flatten styled HTML to `<p>/<h1>/<ul>` (headings guessed from `font-size`, lists from the `●` char). **Unwired:** a repo-wide scan at this SHA finds no mount — only the reconcile test imports a helper. Not the live edit path |
 
 ---
 
@@ -99,6 +101,61 @@ as an opaque `z.string()` (`create-deck.ts`'s `SlideSchema`, `add-slide.ts`) —
 blob (`decks.data`) has no schema check at all (S1). So the Zod usage *confirms
 the gap* rather than filling it: they validate the shape of the agent's tool
 calls, but not the structure of the artifacts those calls produce.
+
+### Editing: in-place `contentEditable`, not a schema bridge (S8, S9)
+
+It is tempting to assume that storing slides as HTML forces a lossy bridge to
+whatever editor sits on top. The repo contains *both* answers, and only the
+low-loss one is wired up:
+
+- **Live path (S8) — direct in-place editing, ~no visual loss.** Double-clicking
+  a slide runs `findSmartBlock` to locate the nearest "smart block" (a text leaf
+  or a small group such as a stat row), then `enterInlineEdit` sets
+  `contentEditable="true"` **on the actual rendered, fully-styled DOM element**.
+  The user edits in place; on exit `readCurrentSlideContentHtml` re-serializes
+  the **whole `.slide-content` innerHTML** — all layout, flex columns, inline
+  styles, colors, fonts, and images intact — and saves it (after `stripBuilderIds`
+  removes editor-only attributes). There is **no translation to a schema and
+  back**, so there is nothing for a translation layer to lose. For the common
+  case (tweak the text in a block) the design survives essentially untouched.
+- **Unwired path (S9) — the lossy flatten that does *not* run.** A separate
+  TipTap component (`SlideInlineEditor.tsx`) *would* parse the styled HTML into
+  TipTap's schema via `convertDivsToBlocks` — guessing headings from `font-size`
+  thresholds and lists from the `●` character, dropping the rest — and save
+  `editor.getHTML()`. A repo-wide scan at this SHA finds **no mount** for it
+  (only its reconcile test imports a helper). So this flatten is not the live
+  behaviour; treat it as abandoned/WIP.
+
+**So how lossy is their editing, really? For text edits, barely at all** — because
+they sidestep the bridge problem by *not having a model*: the rendered HTML **is**
+the canonical artifact, edited directly. That is the memo §2 "editor-state-as-
+canonical" pattern in its purest form, and the low edit-loss is its genuine
+upside. The costs are not fidelity but **capability and safety**:
+
+- **No schema = no rejection.** Raw `contentEditable` means a paste can still
+  inject stray spans / off-brand inline styles — now localized to the edited
+  block, but nothing *rejects* it; it persists.
+- **No typed structure** to anchor comments, scoped AI patches, or lossless
+  re-theming to. The blob edits cleanly but offers no stable IDs or typed fields
+  for those features to grip (memo §7 / R13).
+- **Slow drift** — repeated `contentEditable` edits accrete markup cruft over
+  time, the classic reason raw editing ages badly (more slowly than full-document
+  contenteditable, since edits are scoped to one smart block).
+
+**The honest tradeoff** (correcting an earlier overstatement that their *editing*
+was lossy): low-loss editing is cheap and they get it; we get it too, but our
+typed DocModel pays more upfront to *also* get schema enforcement, comment
+anchoring, and lossless re-theming — capabilities their direct-DOM model
+structurally cannot offer. Editing fidelity is not the axis that separates the
+two designs; **what you can build on top of the artifact** is.
+
+| | agent-native (live, S8) | Our DocModel design |
+|---|---|---|
+| Canonical | rendered HTML, edited in place | typed DocModel |
+| Edit loss (text tweaks) | very low | very low |
+| Off-brand paste | possible, not rejected | rejected by schema |
+| Comments / scoped AI edits / lossless re-theme | no stable anchors | first-class |
+| Build cost | low | high |
 
 ---
 
